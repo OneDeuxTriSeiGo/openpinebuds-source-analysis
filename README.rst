@@ -13,10 +13,6 @@ project to assist with relicensing the project among other things.
 
 * `Alternate Sources released under an Open Source License <alt-sources.rst>`_
 
-  - List: Complete
-
-  - Diffs: In Progress
-
 * `Contributors Identification <contributors.rst>`_
 
   - List: Not Started
