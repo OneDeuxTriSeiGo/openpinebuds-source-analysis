@@ -1,0 +1,31 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/crash_catcher/CrashCatcherPriv.h
+remote: https://raw.githubusercontent.com/adamgreen/CrashCatcher/c6d463eecd8483eca12c497971a2f1ce207f8151/Core/src/CrashCatcherPriv.h
+diff -sw local remote
+---
+
+28d27
+< #include "CrashCatcherApi.h"
+60a60,78
+> /* This structure is filled in by the Hard Fault exception handler (or unit test) and then passed in as a parameter to
+>    CrashCatcher_Entry(). */
+> typedef struct
+> {
+>     uint32_t msp;
+>     uint32_t psp;
+>     uint32_t exceptionPSR;
+>     uint32_t r4;
+>     uint32_t r5;
+>     uint32_t r6;
+>     uint32_t r7;
+>     uint32_t r8;
+>     uint32_t r9;
+>     uint32_t r10;
+>     uint32_t r11;
+>     uint32_t exceptionLR;
+> } CrashCatcherExceptionRegisters;
+> 
+> 
+65a84,86
+> /* The main entry point into CrashCatcher.  Is called from the HardFault exception handler and unit tests. */
+> void CrashCatcher_Entry(const CrashCatcherExceptionRegisters* pExceptionRegisters);
+> 

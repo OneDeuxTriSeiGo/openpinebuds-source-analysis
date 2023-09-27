@@ -1,0 +1,32 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/libc/inc/stdbool.h
+remote: https://raw.githubusercontent.com/Ai-Thinker-Open/GPRS_C_SDK/15d333ffb00cb343ad05718d259d2615744d2233/include/std_inc/stdbool.h
+diff -sw local remote
+---
+
+1,2c1,2
+< #ifndef STD_BOOL_H
+< #define STD_BOOL_H
+---
+> #ifndef _STDBOOL_H
+> #define _STDBOOL_H
+4,7c4,8
+< #ifdef __cplusplus
+< #else
+< typedef unsigned char               bool;
+< #define true                        1
+---
+> #define __bool_true_false_are_defined	1
+> 
+> #ifndef __cplusplus
+> 
+> #define bool	_Bool
+9c10,12
+< #endif
+---
+> #define true	1
+> 
+> #endif /* __cplusplus */
+11c14
+< #endif
+---
+> #endif /* _STDBOOL_H */

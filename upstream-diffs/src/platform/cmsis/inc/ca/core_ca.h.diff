@@ -1,0 +1,158 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/platform/cmsis/inc/ca/core_ca.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/CMSIS/Core_A/Include/core_ca.h
+diff -sw local remote
+---
+
+38,52d37
+< #ifndef __ASSEMBLER__
+< #define NVIC_SetPriority(irq, prio)         GIC_SetPriority(irq, ((prio) << (8 - __GIC_PRIO_BITS)))
+< #define NVIC_ClearPendingIRQ(irq)           GIC_ClearPendingIRQ(irq)
+< #define NVIC_EnableIRQ(irq)                 GIC_EnableIRQ(irq)
+< #define NVIC_DisableIRQ(irq)                GIC_DisableIRQ(irq)
+< //#define NVIC_GetActive(irq)                 (GIC_GetIRQStatus(irq) & (1 << 1))
+< #define NVIC_GetActive(irq)                 (((GICDistributor->ISACTIVER[(irq) / 32U])  >> ((irq) % 32U)) & 1UL)
+< 
+< #include "ca/irq_ctrl.h"
+< #define NVIC_SetVector(irq, vector)         IRQ_SetHandler(irq, (IRQHandler_t)(vector))
+< 
+< uint32_t __get_SPSR(void);
+< void __set_SPSR(uint32_t spsr);
+< #endif
+< 
+136,138c121
+< #ifndef __ASSEMBLER__
+< #include "ca/cmsis_compiler_ca.h"               /* CMSIS compiler specific defines */
+< #endif
+---
+> #include "cmsis_compiler.h"               /* CMSIS compiler specific defines */
+198,199d180
+< #ifndef __ASSEMBLER__
+< 
+1733,1735d1713
+< #define SECTION_SUPER_MASK      (0xFFF7FFFF)
+< #define SECTION_SUPER_SHIFT     (18)
+< 
+1917,1931d1894
+< //Sect_Normal_RO_NC. Outer & inner non-cacheable, non-shareable, executable, ro, domain 0
+< #define section_normal_ro_nc(descriptor_l1, region) region.rg_t = SECTION; \
+<                                    region.domain = 0x0; \
+<                                    region.e_t = ECC_DISABLED; \
+<                                    region.g_t = GLOBAL; \
+<                                    region.inner_norm_t = NON_CACHEABLE; \
+<                                    region.outer_norm_t = NON_CACHEABLE; \
+<                                    region.mem_t = NORMAL; \
+<                                    region.sec_t = SECURE; \
+<                                    region.xn_t = EXECUTE; \
+<                                    region.priv_t = READ; \
+<                                    region.user_t = READ; \
+<                                    region.sh_t = NON_SHARED; \
+<                                    MMU_GetSectionDescriptor(&descriptor_l1, region);
+< 
+1991d1953
+< #if 0
+2021,2052d1982
+< #else
+< //Sect_Device_RO. Device, non-shareable, non-executable, ro, domain 0, base addr 0
+< #define section_device_ro(descriptor_l1, region) region.rg_t = SECTION; \
+<                                    region.domain = 0x0; \
+<                                    region.e_t = ECC_DISABLED; \
+<                                    region.g_t = GLOBAL; \
+<                                    region.inner_norm_t = NON_CACHEABLE; \
+<                                    region.outer_norm_t = NON_CACHEABLE; \
+<                                    region.mem_t = SHARED_DEVICE; \
+<                                    region.sec_t = SECURE; \
+<                                    region.xn_t = NON_EXECUTE; \
+<                                    region.priv_t = READ; \
+<                                    region.user_t = READ; \
+<                                    region.sh_t = NON_SHARED; \
+<                                    MMU_GetSectionDescriptor(&descriptor_l1, region);
+< 
+< //Sect_Device_RW. Sect_Device_RO, but writeable
+< #define section_device_rw(descriptor_l1, region) region.rg_t = SECTION; \
+<                                    region.domain = 0x0; \
+<                                    region.e_t = ECC_DISABLED; \
+<                                    region.g_t = GLOBAL; \
+<                                    region.inner_norm_t = NON_CACHEABLE; \
+<                                    region.outer_norm_t = NON_CACHEABLE; \
+<                                    region.mem_t = SHARED_DEVICE; \
+<                                    region.sec_t = SECURE; \
+<                                    region.xn_t = NON_EXECUTE; \
+<                                    region.priv_t = RW; \
+<                                    region.user_t = RW; \
+<                                    region.sh_t = NON_SHARED; \
+<                                    MMU_GetSectionDescriptor(&descriptor_l1, region);
+< #endif
+< 
+2068,2082d1997
+< //Page_4k_Normal. Outer & inner wb/wa, non-shareable, executable, rw, domain 0
+< #define page4k_normal(descriptor_l1, descriptor_l2, region) region.rg_t = PAGE_4k; \
+<                                    region.domain = 0x0; \
+<                                    region.e_t = ECC_DISABLED; \
+<                                    region.g_t = GLOBAL; \
+<                                    region.inner_norm_t = WB_WA; \
+<                                    region.outer_norm_t = WB_WA; \
+<                                    region.mem_t = NORMAL; \
+<                                    region.sec_t = SECURE; \
+<                                    region.xn_t = EXECUTE; \
+<                                    region.priv_t = RW; \
+<                                    region.user_t = RW; \
+<                                    region.sh_t = NON_SHARED; \
+<                                    MMU_GetPageDescriptor(&descriptor_l1, &descriptor_l2, region);
+< 
+2204,2210d2118
+< __STATIC_INLINE int MMU_SuperSection(uint32_t *descriptor_l1, mmu_secure_Type s_bit)
+< {
+<   *descriptor_l1 &= SECTION_SUPER_MASK;
+<   *descriptor_l1 |= ((s_bit & 0x1) << SECTION_SUPER_SHIFT);
+<   return 0;
+< }
+< 
+2476c2384
+<           *descriptor_l2 |= (1 << PAGE_4K_TEX0_SHIFT) | (1 << PAGE_4K_TEX1_SHIFT);
+---
+>           *descriptor_l2 |= (1 << PAGE_4K_TEX0_SHIFT) | (1 << PAGE_4K_TEX0_SHIFT);
+2509a2418
+> 
+2586,2606c2495
+<     *(volatile uint32_t *)ttb++ = entry;
+<     entry += OFFSET_1M;
+<   }
+< }
+< 
+< __STATIC_INLINE void MMU_TTSuperSection(uint32_t *ttb, uint32_t base_address, uint32_t count, uint32_t descriptor_l1)
+< {
+<   uint32_t offset;
+<   uint32_t entry;
+<   uint32_t i;
+< 
+<   offset = base_address >> 20;
+<   entry  = (base_address & 0xFF000000) | descriptor_l1 | (1 << SECTION_SUPER_SHIFT);
+< 
+<   //4 bytes aligned
+<   ttb = ttb + offset;
+< 
+<   for (i = 0; i < count; i++ )
+<   {
+<     //4 bytes aligned
+<     *(volatile uint32_t *)ttb++ = entry;
+---
+>     *ttb++ = entry;
+2634c2523
+<   *(volatile uint32_t *)ttb = entry;
+---
+>   *ttb = entry;
+2642c2531
+<     *(volatile uint32_t *)ttb_l2++ = entry2;
+---
+>     *ttb_l2++ = entry2;
+2670c2559
+<   *(volatile uint32_t *)ttb = entry;
+---
+>   *ttb = entry;
+2681c2570
+<       *(volatile uint32_t *)ttb_l2++ = entry2;
+---
+>       *ttb_l2++ = entry2;
+2717,2718d2605
+< 
+< #endif // !__ASSEMBLER__

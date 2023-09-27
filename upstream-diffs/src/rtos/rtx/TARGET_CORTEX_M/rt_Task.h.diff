@@ -1,0 +1,7 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/rtos/rtx/TARGET_CORTEX_M/rt_Task.h
+remote: https://raw.githubusercontent.com/ARM-software/mbed-beetle/45ddf10698e1be3ee922de70d4801b5bd776e0ca/libraries/rtos/rtx/TARGET_CORTEX_M/rt_Task.h
+diff -sw local remote
+---
+
+74d73
+< extern void      rt_tsk_show   (P_TCB tcb);

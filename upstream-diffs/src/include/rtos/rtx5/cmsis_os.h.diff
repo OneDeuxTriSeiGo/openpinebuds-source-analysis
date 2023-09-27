@@ -1,0 +1,26 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/include/rtos/rtx5/cmsis_os.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/CMSIS/RTOS2/Template/cmsis_os.h
+diff -sw local remote
+---
+
+227c227
+< typedef osStatus_t              osStatus;
+---
+> typedef int32_t                  osStatus;
+237d236
+< #define os_status_reserved        osStatusReserved
+467,468c466
+< #define osThreadDef(name, priority, instances, stacksz, task_name) \
+< uint64_t os_thread_def_stack_##name [(8*((stacksz+7)/8)) / sizeof(uint64_t)]; \
+---
+> #define osThreadDef(name, priority, instances, stacksz) \
+471c469
+<   { task_name, osThreadDetached, NULL, 0U, os_thread_def_stack_##name, 8*((stacksz+7)/8), (priority), 0U, 0U } }
+---
+>   { NULL, osThreadDetached, NULL, 0U, NULL, 8*((stacksz+7)/8), (priority), 0U, 0U } }
+843d840
+< uint32_t osMessageGetSpace (osMessageQId queue_id);
+920,922d916
+< #if !(osCMSIS < 0x20000U)
+< const char *osGetThreadName (void);
+< #endif

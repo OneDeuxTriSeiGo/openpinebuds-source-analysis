@@ -1,0 +1,10 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/platform/cmsis/inc/ca/mem_ARMCA.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/Device/ARM/ARMCA7/Config/mem_ARMCA7.h
+diff -sw local remote
+---
+
+38d37
+< #if 0
+100,101d98
+< 
+< #endif

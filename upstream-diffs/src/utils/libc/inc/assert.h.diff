@@ -1,0 +1,37 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/libc/inc/assert.h
+remote: https://raw.githubusercontent.com/Ai-Thinker-Open/GPRS_C_SDK/15d333ffb00cb343ad05718d259d2615744d2233/include/std_inc/assert.h
+diff -sw local remote
+---
+
+0a1
+> 
+4,6c5
+< #ifdef __cplusplus
+< extern "C" {
+< #endif
+---
+> #  include "sdk_init.h"
+8,10d6
+< #ifdef assert
+< #undef assert
+< #endif
+12,15c8
+< #define STRINGIFY_VALUE(s) STRINGIFY(s)
+< #define STRINGIFY(s) #s
+< 
+< void __assert(const char* fmt);
+---
+> #define __assert     CSDK_FUNC(__assert)
+18,21c11
+<     "ASSERTION FAILED in file : " \
+<     __FILE__ \
+<     " at line" \
+<     STRINGIFY_VALUE(__LINE__)); }
+---
+>     "ASSERTION FAILED"); }
+23,24d12
+< #ifdef __cplusplus
+< } // extern C
+26,27d13
+< 
+< #endif /* _ASSERT_H_ */

@@ -1,0 +1,64 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/services/multimedia/audio/process/adp/include/adp_config.h
+remote: https://raw.githubusercontent.com/xiph/speex/1e64d72bbfd86695eb72e2c122506e071894cb1a/win32/config.h
+diff -sw local remote
+---
+
+1,15d0
+< /***************************************************************************
+<  *
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+<  *
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+17,18d1
+< 
+< #ifdef WIN32
+20,24d2
+< #endif
+< 
+< 
+< //#define FIXED_POINT
+< 
+29,35c7,13
+< // #if _M_IX86_FP >= 1 || defined(_M_X64)
+< // #define _USE_SSE
+< // #endif
+< // 
+< // #if _M_IX86_FP >= 2 || defined(_M_X64)
+< // #define _USE_SSE2
+< // #endif
+---
+> #if _M_IX86_FP >= 1 || defined(_M_X64)
+> #define _USE_SSE
+> #endif
+> 
+> #if _M_IX86_FP >= 2 || defined(_M_X64)
+> #define _USE_SSE2
+> #endif
+39a18,23
+> #ifndef _USE_SSE
+> #  define USE_ALLOCA
+> #endif
+> 
+> /* Default to floating point */
+> #ifndef FIXED_POINT
+41a26,28
+> #else
+> #  define USE_KISS_FFT
+> #endif
+45,50d31
+< 
+< #define USE_STATIC_MEMORY
+< 
+< #define ADPFILTER_NUM 400
+< 
+< 

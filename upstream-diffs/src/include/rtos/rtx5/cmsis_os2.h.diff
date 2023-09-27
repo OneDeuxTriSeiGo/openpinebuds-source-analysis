@@ -1,0 +1,10 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/include/rtos/rtx5/cmsis_os2.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/CMSIS/RTOS2/Include/cmsis_os2.h
+diff -sw local remote
+---
+
+475,478d474
+< #if TASK_HUNG_CHECK_ENABLED
+< /// enable/disable the hung check feature of an active thread
+< osStatus_t osThreadSetHungCheck (osThreadId_t thread_id, int32_t enable, uint32_t timeout);
+< #endif

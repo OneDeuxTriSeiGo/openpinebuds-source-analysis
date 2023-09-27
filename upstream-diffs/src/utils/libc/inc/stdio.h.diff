@@ -1,0 +1,22 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/libc/inc/stdio.h
+remote: https://raw.githubusercontent.com/Ai-Thinker-Open/GPRS_C_SDK/15d333ffb00cb343ad05718d259d2615744d2233/include/std_inc/stdio.h
+diff -sw local remote
+---
+
+0a1
+> 
+9,10c10
+< #include "stdint.h"
+< #include "stdarg.h"
+---
+> #include <stdarg.h>
+12d11
+< /* Standard sprintf() function. Work as the libc one. */
+14,16c13
+< /* Standard snprintf() function from BSD, more secure... */
+< int snprintf(char * buf, size_t size, const char *fmt, ...);
+< /* Standard sscanf() function. Work as the libc one. */
+---
+> int snprintf(char * buf, size_t len, const char *fmt, ...);
+18d14
+< /* If you need to code your own printf... */

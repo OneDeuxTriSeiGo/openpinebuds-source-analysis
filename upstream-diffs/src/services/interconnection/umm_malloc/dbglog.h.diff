@@ -1,0 +1,46 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/services/interconnection/umm_malloc/dbglog.h
+remote: https://raw.githubusercontent.com/rhempel/c-helper-macros/abe7f4f8d1f83cb150fd8e3ec9ce73c17193befb/dbglog/dbglog.h
+diff -sw local remote
+---
+
+43,46d42
+< #ifndef __DBGLOG_H__
+< #define __DBGLOG_H__
+< 
+< #include "hal_trace.h"
+56,57d51
+< #define DBGLOG_LEVEL 3
+< 
+63c57
+< #  define DBGLOG_FUNCTION TRACE
+---
+> #  define DBGLOG_FUNCTION printf
+69c63
+< #  define DBGLOG_TRACE(num,format, ...) DBGLOG_FUNCTION(num,format, ## __VA_ARGS__)
+---
+> #  define DBGLOG_TRACE(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+75c69
+< #  define DBGLOG_DEBUG(num,format, ...) DBGLOG_FUNCTION(num,format, ## __VA_ARGS__)
+---
+> #  define DBGLOG_DEBUG(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+81c75
+< #  define DBGLOG_CRITICAL(num,format, ...) DBGLOG_FUNCTION(num,format, ## __VA_ARGS__)
+---
+> #  define DBGLOG_CRITICAL(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+87c81
+< #  define DBGLOG_ERROR(num,format, ...) DBGLOG_FUNCTION(num,format, ## __VA_ARGS__)
+---
+> #  define DBGLOG_ERROR(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+93c87
+< #  define DBGLOG_WARNING(num,format, ...) DBGLOG_FUNCTION(num,format, ## __VA_ARGS__)
+---
+> #  define DBGLOG_WARNING(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+99c93
+< #  define DBGLOG_INFO(num,format, ...) DBGLOG_FUNCTION(num,format, ## __VA_ARGS__)
+---
+> #  define DBGLOG_INFO(format, ...) DBGLOG_FUNCTION(format, ## __VA_ARGS__)
+104c98
+< #endif
+\ No newline at end of file
+---
+> #define DBGLOG_FORCE(force, format, ...) {if(force) {DBGLOG_FUNCTION(format, ## __VA_ARGS__);}}

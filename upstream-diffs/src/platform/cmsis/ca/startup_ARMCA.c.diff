@@ -1,0 +1,55 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/platform/cmsis/ca/startup_ARMCA.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/Device/ARM/ARMCA7/Source/GCC/startup_ARMCA7.c
+diff -sw local remote
+---
+
+28,29c28
+< #include "cmsis.h"
+< #include "plat_addr_map.h"
+---
+> #include <ARMCA7.h>
+45,46c44,45
+< void Vectors       (void) __attribute__ ((naked, target("arm"), section(".vectors")));
+< void Reset_Handler (void) __attribute__ ((naked, section(".boot_loader")));
+---
+> void Vectors       (void) __attribute__ ((naked, section("RESET")));
+> void Reset_Handler (void) __attribute__ ((naked));
+63,79c62,69
+<       "LDR    PC, ResetVectorPtr                        \n"
+<       "LDR    PC, UndefVectorPtr                        \n"
+<       "LDR    PC, SVCVectorPtr                          \n"
+<       "LDR    PC, PAbtVectorPtr                         \n"
+<       "LDR    PC, DAbtVectorPtr                         \n"
+<       "LDR    PC, HypVectorPtr                          \n"
+<       "LDR    PC, IRQVectorPtr                          \n"
+<       "LDR    PC, FIQVectorPtr                          \n"
+<       "ResetVectorPtr:  .LONG   Init_Handler            \n"
+<       "UndefVectorPtr:  .LONG   Init_Handler            \n"
+<       "SVCVectorPtr:    .LONG   Init_Handler            \n"
+<       "PAbtVectorPtr:   .LONG   Init_Handler            \n"
+<       "DAbtVectorPtr:   .LONG   Init_Handler            \n"
+<       "HypVectorPtr:    .LONG   Init_Handler            \n"
+<       "IRQVectorPtr:    .LONG   Init_Handler            \n"
+<       "FIQVectorPtr:    .LONG   Init_Handler            \n"
+<       "Init_Handler:    b       Init_Handler            \n"
+---
+>   "LDR    PC, =Reset_Handler                        \n"
+>   "LDR    PC, =Undef_Handler                        \n"
+>   "LDR    PC, =SVC_Handler                          \n"
+>   "LDR    PC, =PAbt_Handler                         \n"
+>   "LDR    PC, =DAbt_Handler                         \n"
+>   "NOP                                              \n"
+>   "LDR    PC, =IRQ_Handler                          \n"
+>   "LDR    PC, =FIQ_Handler                          \n"
+96d85
+<   "IT      NE                                      \n"
+112,113c101
+<   //"ORR     r0, r0, #(1 <<  1)                      \n"  // Enable L2 prefetch hint (UNK/WI since r4p1)
+<   "ORR     r0, r0, #(1 <<  6)                      \n"  // Enable SMP
+---
+>   "ORR     r0, r0, #(1 <<  1)                      \n"  // Enable L2 prefetch hint (UNK/WI since r4p1)
+117,118c105
+<   //"LDR    R0, =Vectors                             \n"
+<   "LDR    R0, =" _TO_STRING(DSP_BOOT_REG) "        \n"
+---
+>   "LDR    R0, =Vectors                             \n"

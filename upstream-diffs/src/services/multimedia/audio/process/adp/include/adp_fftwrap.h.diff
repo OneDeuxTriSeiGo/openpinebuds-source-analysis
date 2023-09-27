@@ -1,0 +1,33 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/services/multimedia/audio/process/adp/include/adp_fftwrap.h
+remote: https://raw.githubusercontent.com/xiph/speex/1e64d72bbfd86695eb72e2c122506e071894cb1a/libspeex/fftwrap.h
+diff -sw local remote
+---
+
+38c38
+< #include "adp_arch.h"
+---
+> #include "arch.h"
+41c41
+< void *adp_spx_fft_init(int size);
+---
+> void *spx_fft_init(int size);
+44c44
+< void adp_spx_fft_destroy(void *table);
+---
+> void spx_fft_destroy(void *table);
+47c47
+< void adp_spx_fft(void *table, spx_word16_t *in, spx_word16_t *out);
+---
+> void spx_fft(void *table, spx_word16_t *in, spx_word16_t *out);
+50c50
+< void adp_spx_ifft(void *table, spx_word16_t *in, spx_word16_t *out);
+---
+> void spx_ifft(void *table, spx_word16_t *in, spx_word16_t *out);
+53c53
+< void adp_spx_fft_float(void *table, float *in, float *out);
+---
+> void spx_fft_float(void *table, float *in, float *out);
+56c56
+< void adp_spx_ifft_float(void *table, float *in, float *out);
+---
+> void spx_ifft_float(void *table, float *in, float *out);

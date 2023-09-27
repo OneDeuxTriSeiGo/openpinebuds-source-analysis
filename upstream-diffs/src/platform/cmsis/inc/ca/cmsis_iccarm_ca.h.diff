@@ -1,0 +1,23 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/platform/cmsis/inc/ca/cmsis_iccarm_ca.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/CMSIS/Core_A/Include/cmsis_iccarm.h
+diff -sw local remote
+---
+
+27,28c27,28
+< #ifndef __CMSIS_ICCARM_CA_H__
+< #define __CMSIS_ICCARM_CA_H__
+---
+> #ifndef __CMSIS_ICCARM_H__
+> #define __CMSIS_ICCARM_H__
+274c274
+<   #include "ca/cmsis_cp15_ca.h"
+---
+>   #include "cmsis_cp15.h"
+461c461
+<   #include "ca/cmsis_cp15_ca.h"
+---
+>   #include "cmsis_cp15.h"
+571c571
+< #endif /* __CMSIS_ICCARM_CA_H__ */
+---
+> #endif /* __CMSIS_ICCARM_H__ */

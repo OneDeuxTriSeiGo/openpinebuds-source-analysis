@@ -1,0 +1,13 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/services/multimedia/audio/codec/fdkaac_codec/libFDK/include/FDK_trigFcts.h
+remote: https://raw.githubusercontent.com/mstorsjo/fdk-aac/e45ae429b9ca8f234eb861338a75b2d89cde206a/libFDK/include/FDK_trigFcts.h
+diff -sw local remote
+---
+
+3c3
+< Software License for The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android
+---
+> Software License for The Fraunhofer FDK AAC Codec Library for Android
+9c9
+< The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements
+---
+> The Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements

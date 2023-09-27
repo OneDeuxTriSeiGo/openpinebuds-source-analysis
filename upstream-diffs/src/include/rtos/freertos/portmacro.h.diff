@@ -1,0 +1,32 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/include/rtos/freertos/portmacro.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-FreeRTOS/02866de873b41766b1ceccece6fd34f241a87928/Source/portable/GCC/ARM_CM4F/portmacro.h
+diff -sw local remote
+---
+
+76,78d75
+< 
+< /* The max restore time for the hardware jump out from deep sleep */
+< #define portMAX_RESTORE_TIME        6
+106,107d102
+< //#define portDISABLE_INTERRUPTS()				__disable_irq()
+< //#define portENABLE_INTERRUPTS()					__enable_irq()
+125,135d119
+< 
+< #ifndef portTASK_IDLE_INIT
+<     extern void vPortTaskIdleInit(void);
+< #define  portTASK_IDLE_INIT vPortTaskIdleInit
+< #endif
+< 
+< #ifndef portLIGHT_SLEEP
+< extern void vPortLightSleep( TickType_t ulExpectedIdleTime );
+< #define portLIGHT_SLEEP(xExpectedIdleTime) vPortLightSleep(xExpectedIdleTime)
+< #endif
+< 
+208a193
+> uint32_t ulNewBASEPRI;
+211a197
+> 		"	mov %0, %1												\n"	\
+215c201
+< 		: : "r" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
+---
+> 		:"=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"

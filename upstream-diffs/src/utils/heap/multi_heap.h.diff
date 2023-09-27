@@ -1,0 +1,11 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/heap/multi_heap.h
+remote: https://raw.githubusercontent.com/espressif/esp-idf/db243d092c05d89491c1ecefccac74180da00178/components/heap/include/multi_heap.h
+diff -sw local remote
+---
+
+6c6
+< //
+---
+> 
+158d157
+<     size_t total_bytes;

@@ -1,0 +1,21 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/crash_catcher/CrashCatcher_armv7m.S
+remote: https://raw.githubusercontent.com/adamgreen/CrashCatcher/c6d463eecd8483eca12c497971a2f1ce207f8151/Core/src/CrashCatcher_armv7m.S
+diff -sw local remote
+---
+
+19a20
+>     .arch armv7-m
+25,26c26,27
+<     .global gdb_fault_handler
+<     .type gdb_fault_handler, %function
+---
+>     .global HardFault_Handler
+>     .type HardFault_Handler, %function
+28c29
+< gdb_fault_handler:
+---
+> HardFault_Handler:
+63c64
+<     .size   gdb_fault_handler, .-gdb_fault_handler
+---
+>     .size   HardFault_Handler, .-HardFault_Handler

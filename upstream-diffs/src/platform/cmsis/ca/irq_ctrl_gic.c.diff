@@ -1,0 +1,18 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/platform/cmsis/ca/irq_ctrl_gic.c
+remote: https://raw.githubusercontent.com/ARMmbed/mbed-os/9977458393a101cf18f64811a24bd7060c989eac/cmsis/TARGET_CORTEX_A/irq_ctrl_gic.c
+diff -sw local remote
+---
+
+26c26,29
+< #include "cmsis.h"
+---
+> 
+> #include "RTE_Components.h"
+> #include CMSIS_device_header
+> 
+32c35,37
+< #define IRQ_GIC_LINE_COUNT      USER_IRQn_QTY
+---
+> #ifndef IRQ_GIC_LINE_COUNT
+> #define IRQ_GIC_LINE_COUNT      (1020U)
+> #endif

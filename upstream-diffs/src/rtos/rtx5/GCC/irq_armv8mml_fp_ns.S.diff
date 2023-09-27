@@ -1,0 +1,9 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/rtos/rtx5/GCC/irq_armv8mml_fp_ns.S
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/RTX/Source/GCC/irq_armv8mml_fp_ns.S
+diff -sw local remote
+---
+
+3c3
+<         .include "./irq_armv8mml.S"
+---
+>         .include "../Source/GCC/irq_armv8mml.S"

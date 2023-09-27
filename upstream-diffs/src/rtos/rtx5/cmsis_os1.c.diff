@@ -1,0 +1,19 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/rtos/rtx5/cmsis_os1.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/Template/cmsis_os1.c
+diff -sw local remote
+---
+
+29d28
+< #include "rtx_os.h"
+132c131
+<   return osSemaphoreNew(osRtxSemaphoreTokenLimit, (uint32_t)count, semaphore_def);
+---
+>   return osSemaphoreNew((uint32_t)count, (uint32_t)count, semaphore_def);
+235,239d233
+< uint32_t osMessageGetSpace (osMessageQId queue_id)
+< {
+<     return osMessageQueueGetSpace(queue_id);
+< }
+< 
+364a359
+> 

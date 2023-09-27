@@ -1,0 +1,12 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/platform/cmsis/DSP_Lib/TransformFunctions/arm_rfft_fast_init_f32.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-DSP/58cda4700284fdbb26201d960089a6ca4b04523e/Source/TransformFunctions/arm_rfft_fast_init_f32.c
+diff -sw local remote
+---
+
+273d272
+< #ifdef ENABLE_ARM_RFFT_F32_4096
+277,278d275
+< #endif
+< #ifdef ENABLE_ARM_RFFT_F32_4096
+282d278
+< #endif

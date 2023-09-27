@@ -1,0 +1,29 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/platform/cmsis/DSP_Lib/MatrixFunctions/arm_mat_inverse_f64.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-DSP/58cda4700284fdbb26201d960089a6ca4b04523e/Source/MatrixFunctions/arm_mat_inverse_f64.c
+diff -sw local remote
+---
+
+188c188
+<       if (maxC == (float64_t)0.0)
+---
+>       if (maxC == 0.0)
+200c200
+<       if ( (in > (float64_t)0.0 ? in : -in) != maxC)
+---
+>       if ( (in > 0.0 ? in : -in) != maxC)
+213c213
+<           if ((*pInT2 > (float64_t)0.0 ? *pInT2: -*pInT2) == maxC)
+---
+>           if ((*pInT2 > 0.0 ? *pInT2: -*pInT2) == maxC)
+260c260
+<       if ((flag != 1U) && (in == (float64_t)0.0))
+---
+>       if ((flag != 1U) && (in == 0.0))
+653c653
+<     if ((flag != 1U) && (in == (float64_t)0.0))
+---
+>     if ((flag != 1U) && (in == 0.0))
+658c658
+<         if (pIn[i] != (float64_t)0.0)
+---
+>         if (pIn[i] != 0.0)

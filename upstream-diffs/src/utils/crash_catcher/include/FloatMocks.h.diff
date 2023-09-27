@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/crash_catcher/include/FloatMocks.h
+remote: https://raw.githubusercontent.com/adamgreen/CrashCatcher/c6d463eecd8483eca12c497971a2f1ce207f8151/include/FloatMocks.h
+diff -sw local remote
+---
+
+Files local and remote are identical

@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/platform/cmsis/DSP_Lib/ComplexMathFunctions/arm_cmplx_mult_cmplx_f32.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-DSP/58cda4700284fdbb26201d960089a6ca4b04523e/Source/ComplexMathFunctions/arm_cmplx_mult_cmplx_f32.c
+diff -sw local remote
+---
+
+Files local and remote are identical

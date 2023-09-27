@@ -1,0 +1,105 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/include/rtos/freertos/cmsis_os.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-FreeRTOS/03831c5a68892e5b5fa42b1f3b751ea61907e6a6/CMSIS/RTOS2/FreeRTOS/Include1/cmsis_os.h
+diff -sw local remote
+---
+
+132,141c132
+< // The stack space occupied is mainly dependent on the underling C standard library
+< #if defined(__GNUC__) || defined(__CC_ARM) || defined(__ARMCC_VERSION) || defined(__ICCARM__)
+< #    define WORDS_STACK_SIZE   512
+< #elif defined(TOOLCHAIN_ARM_MICRO)
+< #    define WORDS_STACK_SIZE   128
+< #endif
+< 
+< #define DEFAULT_STACK_SIZE         (WORDS_STACK_SIZE*4)
+< 
+< #define osFeature_MainThread  1         ///< main thread      1=main can be thread, 0=not available
+---
+> #define osFeature_MainThread  0         ///< main thread      1=main can be thread, 0=not available
+146c137
+< #define osFeature_Pool        1         ///< Memory Pools:    1=available, 0=not available
+---
+> #define osFeature_Pool        0         ///< Memory Pools:    1=available, 0=not available
+148c139
+< #define osFeature_MailQ       1         ///< Mail Queues:     1=available, 0=not available
+---
+> #define osFeature_MailQ       0         ///< Mail Queues:     1=available, 0=not available
+161,173d151
+< 
+< // OS_API_IN_INTLOCK can be enabled in target.mk by:
+< // export OS_API_IN_INTLOCK ?= 1
+< 
+< #ifdef OS_API_IN_INTLOCK
+< // CAUTION:
+< // It will be treated as in ISR when calling OS APIs in intlock(), but
+< // the stack might still be using PSP instead of MSP.
+< #define IN_ISR()                        (__get_IPSR() != 0 || __get_PRIMASK() != 0)
+< #else
+< #define IN_ISR()                        (__get_IPSR() != 0)
+< #endif
+< 
+248d225
+< #define os_status_reserved        (0x7FFFFFFF)  ///< Prevents enum down-size compiler optimization.
+322,323c299
+< //  uint32_t                     dummy;   ///< dummy value
+<     void                      *mutex;    ///< pointer to internal data
+---
+>   uint32_t                     dummy;   ///< dummy value
+332,333c308
+< //  uint32_t                     dummy;   ///< dummy value
+<     void                  *semaphore;    ///< pointer to internal data
+---
+>   uint32_t                     dummy;   ///< dummy value
+340,341c315
+< //#if (osCMSIS < 0x20000U)
+< #if 1
+---
+> #if (osCMSIS < 0x20000U)
+377,379c351,352
+<  // uint32_t                  queue_sz;   ///< number of elements in the queue
+<  // uint32_t                   item_sz;   ///< size of an item
+<   osPoolDef_t                  mq_pool;   ///< memory pool attributes
+---
+>   uint32_t                  queue_sz;   ///< number of elements in the queue
+>   uint32_t                   item_sz;   ///< size of an item
+381c354
+<   //osMemoryPoolAttr_t         mp_attr;   ///< memory pool attributes
+---
+>   osMemoryPoolAttr_t         mp_attr;   ///< memory pool attributes
+461c434
+< #define osThreadDef(name, priority, instances, stacksz, task_name) \
+---
+> #define osThreadDef(name, priority, instances, stacksz) \
+466c439
+<   { task_name, osThreadDetached, \
+---
+>   { NULL, osThreadDetached, \
+491,494d463
+< //#if (osCMSIS < 0x20000U)
+< int osGetThreadIntId (void);
+< //#endif
+< 
+726d694
+< uint32_t os_pool_m_##name[3+((sizeof(type)+3)/4)*(no)]; \
+728,730c696
+< { (no), sizeof(type), (os_pool_m_##name) }
+< //const osPoolDef_t os_pool_def_##name = 
+< //{ (no), sizeof(type), {NULL} }
+---
+> { (no), sizeof(type), NULL }
+807d772
+< uint32_t osMessageGetSpace (osMessageQId queue_id);
+824,826c789,790
+< static uint32_t os_mailQ_m_##name[3+((sizeof(type)+3)/4)*(queue_sz)]; \
+< osMailQDef_t os_mailQ_def_##name = \
+< { {(queue_sz), sizeof(type), (os_mailQ_m_##name)}, NULL, {NULL} }
+---
+> const osMailQDef_t os_mailQ_def_##name = \
+> { (queue_sz), sizeof(type), NULL }
+838,839c802
+< //osMailQId osMailCreate (const osMailQDef_t *queue_def, osThreadId thread_id);
+< osMailQId osMailCreate (osMailQDef_t *queue_def, osThreadId thread_id);
+---
+> osMailQId osMailCreate (const osMailQDef_t *queue_def, osThreadId thread_id);
+873d835
+< void os_error_str (const char *fmt, ...);

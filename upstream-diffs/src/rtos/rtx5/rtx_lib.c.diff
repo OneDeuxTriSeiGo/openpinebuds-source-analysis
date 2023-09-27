@@ -1,0 +1,71 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/rtos/rtx5/rtx_lib.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/RTX/Source/rtx_lib.c
+diff -sw local remote
+---
+
+27c27
+< #include "rtx_config.h"
+---
+> #include "RTX_Config.h"
+639,670d638
+< osThreadAttr_t os_thread_attr_main = {
+<     "main",
+<     osThreadDetached,
+<     NULL,
+<     0,
+<     NULL,
+<     0,
+<     osPriorityNormal,
+<     0,
+<     0
+< };
+< 
+< #ifndef OS_SCHEDULERSTKSIZE
+< #define OS_SCHEDULERSTKSIZE    512
+< #endif
+< 
+< extern                        uint32_t __StackTop[];
+< #define INITIAL_SP            ((uint32_t)__StackTop)
+< 
+< extern uint32_t               __StackLimit[];
+< #define MAIN_STACK_BUF        (__StackLimit)
+< 
+< #define ROUND_UP(x, align)  (((uint32_t)(x) + (align - 1)) & ~(align - 1))
+< #define ROUND_DOWN(x, align) ((uint32_t)(x) & ~(align - 1))
+< 
+< void set_main_stack(void) {
+<     // That is the bottom of the main stack block: no collision detection
+<     os_thread_attr_main.stack_mem = (uint32_t *)ROUND_UP(MAIN_STACK_BUF, 8);
+< 
+<     // Leave OS_SCHEDULERSTKSIZE words for the scheduler and interrupts
+<     os_thread_attr_main.stack_size = ROUND_DOWN((INITIAL_SP - (unsigned int)ROUND_UP(MAIN_STACK_BUF, 8)) - (OS_SCHEDULERSTKSIZE * 4), 8);
+< }
+674,695c642
+<     __asm (
+<       ".syntax unified\n"
+<       ".thumb\n"
+<       "movs r0,#0\n"
+<       "movs r1,#0\n"
+<       "mov  r4,r0\n"
+<       "mov  r5,r1\n"
+<       "bl   SystemCoreClockUpdate\n"
+<       "bl   osKernelInitialize\n"
+<       "ldr  r0,= __libc_fini_array\n"
+<       "bl   atexit\n"
+<       "bl   __libc_init_array\n"
+<       "mov  r0,r4\n"
+<       "mov  r1,r5\n"
+<       "bl   set_main_stack\n"
+<       "ldr  r0,=main\n"
+<       "movs r1,#0\n"
+<       "ldr r2,=os_thread_attr_main\n"
+<       "bl   osThreadNew\n"
+<       "bl   osKernelStart\n"
+<       "bl   exit\n"
+<     );
+---
+>   (void)osKernelInitialize();
+696a644
+> 
+697a646
+> 

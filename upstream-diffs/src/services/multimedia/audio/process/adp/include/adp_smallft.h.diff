@@ -1,0 +1,15 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/services/multimedia/audio/process/adp/include/adp_smallft.h
+remote: https://raw.githubusercontent.com/xiph/speex/1e64d72bbfd86695eb72e2c122506e071894cb1a/libspeex/smallft.h
+diff -sw local remote
+---
+
+37,40c37,40
+< extern void adp_spx_drft_forward(struct drft_lookup *l,float *data);
+< extern void adp_spx_drft_backward(struct drft_lookup *l,float *data);
+< extern void adp_spx_drft_init(struct drft_lookup *l,int n);
+< extern void adp_spx_drft_clear(struct drft_lookup *l);
+---
+> extern void spx_drft_forward(struct drft_lookup *l,float *data);
+> extern void spx_drft_backward(struct drft_lookup *l,float *data);
+> extern void spx_drft_init(struct drft_lookup *l,int n);
+> extern void spx_drft_clear(struct drft_lookup *l);

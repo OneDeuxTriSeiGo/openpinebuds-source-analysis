@@ -1,0 +1,193 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/services/interconnection/umm_malloc/umm_malloc.c
+remote: https://raw.githubusercontent.com/rhempel/umm_malloc/e7df6ab2f6d27c7a3d8f900d9fb1a50a5ab26a84/src/umm_malloc.c
+diff -sw local remote
+---
+
+0a1,29
+> /* ----------------------------------------------------------------------------
+>  * umm_malloc.c - a memory allocator for embedded systems (microcontrollers)
+>  *
+>  * See LICENSE for copyright notice
+>  * See README.md for acknowledgements and description of internals
+>  * ----------------------------------------------------------------------------
+>  *
+>  * R.Hempel 2007-09-22 - Original
+>  * R.Hempel 2008-12-11 - Added MIT License biolerplate
+>  *                     - realloc() now looks to see if previous block is free
+>  *                     - made common operations functions
+>  * R.Hempel 2009-03-02 - Added macros to disable tasking
+>  *                     - Added function to dump heap and check for valid free
+>  *                        pointer
+>  * R.Hempel 2009-03-09 - Changed name to umm_malloc to avoid conflicts with
+>  *                        the mm_malloc() library functions
+>  *                     - Added some test code to assimilate a free block
+>  *                        with the very block if possible. Complicated and
+>  *                        not worth the grief.
+>  * D.Frank 2014-04-02  - Fixed heap configuration when UMM_TEST_MAIN is NOT set,
+>  *                        added user-dependent configuration file umm_malloc_cfg.h
+>  * R.Hempel 2016-12-04 - Add support for Unity test framework
+>  *                     - Reorganize source files to avoid redundant content
+>  *                     - Move integrity and poison checking to separate file
+>  * R.Hempel 2017-12-29 - Fix bug in realloc when requesting a new block that
+>  *                        results in OOM error - see Issue 11
+>  * ----------------------------------------------------------------------------
+>  */
+> 
+3,5c32
+< #include "stdint.h"
+< #include "cmsis_os.h"
+< #include "dbglog.h"
+---
+> 
+7a35,36
+> #include "umm_malloc_cfg.h"   /* user-dependent */
+> 
+10c39,42
+< unsigned char umm_heap_array[UMM_MALLOC_CFG_HEAP_SIZE];
+---
+> #define DBGLOG_LEVEL 0
+> 
+> #include "dbglog/dbglog.h"
+> 
+49,78c81,87
+< static osMutexId umm_clock_mutex_id = NULL;
+< osMutexDef(umm_clock_mutex);
+< 
+< /* ------------------------------------------------------------------------ */
+< void LOCK_UMM_CLOCK(void)
+< {
+<     if(osMutexWait(umm_clock_mutex_id, osWaitForever) != osOK)
+<         DBGLOG_INFO(1,"%s Error", __func__);
+< }
+< 
+< void UNLOCK_UMM_CLOCK(void)
+< {
+<     if(osMutexRelease(umm_clock_mutex_id) != osOK)
+<         DBGLOG_INFO(1,"%s Error", __func__);
+< }
+< 
+< /* ------------------------------------------------------------------------ */
+< 
+< static void trace_umm_blocks_info( void ) {
+<     unsigned short int blockSize = 0;
+<     unsigned short int cf = 0;
+< 
+<     cf = UMM_NFREE(0);
+<     blockSize = blockSize;
+<     DBGLOG_INFO(1, "fisrt free block %d", cf);
+< 
+<     while( cf ) {
+<         blockSize = (UMM_NBLOCK(cf) & UMM_BLOCKNO_MASK) - cf;
+< 
+<         DBGLOG_INFO(2, "Looking at block %6i size %6i\n", cf, blockSize );
+---
+> /* -------------------------------------------------------------------------
+>  * There are additional files that may be included here - normally it's
+>  * not a good idea to include .c files but in this case it keeps the
+>  * main umm_malloc file clear and prevents issues with exposing internal
+>  * data structures to other programs.
+>  * -------------------------------------------------------------------------
+>  */
+80,82c89,91
+<         cf = UMM_NFREE(cf);
+<     }
+< }
+---
+> #include "umm_integrity.c"
+> #include "umm_poison.c"
+> #include "umm_info.c"
+156c165
+<         DBGLOG_DEBUG(2, "%d Assimilate up to next block %d, which is FREE\n", c, UMM_NBLOCK(c));
+---
+>     DBGLOG_DEBUG( "Assimilate up to next block, which is FREE\n" );
+188,194d196
+<     DBGLOG_DEBUG(3,  "%s umm_heap %p blocks number %d", __func__, umm_heap, umm_numblocks);
+< 
+<     if (umm_clock_mutex_id == NULL)
+<     {
+<         umm_clock_mutex_id = osMutexCreate((osMutex(umm_clock_mutex)));
+<     }
+< 
+256c258
+<         DBGLOG_DEBUG(0, "free a null pointer -> do nothing\n" );
+---
+>     DBGLOG_DEBUG( "free a null pointer -> do nothing\n" );
+277c279
+<     DBGLOG_DEBUG(2, "Freeing block %6i %p\n", c, ptr);
+---
+>   DBGLOG_DEBUG( "Freeing block %6i\n", c );
+287c289
+<         DBGLOG_DEBUG(1, "Assimilate down to next block %d, which is FREE\n", UMM_PBLOCK(c));
+---
+>     DBGLOG_DEBUG( "Assimilate down to next block, which is FREE\n" );
+296c298
+<         DBGLOG_DEBUG(0, "Just add to head of free list\n" );
+---
+>     DBGLOG_DEBUG( "Just add to head of free list\n" );
+333c335
+<         DBGLOG_DEBUG(0, "malloc a block of 0 bytes -> do nothing\n" );
+---
+>     DBGLOG_DEBUG( "malloc a block of 0 bytes -> do nothing\n" );
+359c361
+<         DBGLOG_DEBUG(2, "Looking at block %6i size %6i\n", cf, blockSize );
+---
+>     DBGLOG_TRACE( "Looking at block %6i size %6i\n", cf, blockSize );
+392c394
+<             DBGLOG_DEBUG(2, "Allocating %6i blocks starting at %6i - exact\n", blocks, cf );
+---
+>       DBGLOG_DEBUG( "Allocating %6i blocks starting at %6i - exact\n", blocks, cf );
+400c402
+<             DBGLOG_DEBUG(2, "Allocating %6i blocks starting at %6i - existing\n", blocks, cf );
+---
+>       DBGLOG_DEBUG( "Allocating %6i blocks starting at %6i - existing\n", blocks, cf );
+426,427c428
+<         DBGLOG_DEBUG(1,  "Can't allocate %5i blocks\n", blocks );
+<         trace_umm_blocks_info();
+---
+>     DBGLOG_DEBUG(  "Can't allocate %5i blocks\n", blocks );
+467c468
+<         DBGLOG_DEBUG(0, "realloc the NULL pointer - call malloc()\n" );
+---
+>     DBGLOG_DEBUG( "realloc the NULL pointer - call malloc()\n" );
+479c480
+<         DBGLOG_DEBUG(0, "realloc to 0 size, just free the block\n" );
+---
+>     DBGLOG_DEBUG( "realloc to 0 size, just free the block\n" );
+528c529
+<     DBGLOG_DEBUG(4, "realloc blocks %i blockSize %i nextBlockSize %i prevBlockSize %i\n", blocks, blockSize, nextBlockSize, prevBlockSize );
+---
+>   DBGLOG_DEBUG( "realloc blocks %i blockSize %i nextBlockSize %i prevBlockSize %i\n", blocks, blockSize, nextBlockSize, prevBlockSize );
+555c556
+<         DBGLOG_DEBUG(1, "realloc the same or smaller size block - %i, do nothing\n", blocks );
+---
+>         DBGLOG_DEBUG( "realloc the same or smaller size block - %i, do nothing\n", blocks );
+558c559
+<         DBGLOG_DEBUG(1, "realloc using next block - %i\n", blocks );
+---
+>         DBGLOG_DEBUG( "realloc using next block - %i\n", blocks );
+562c563
+<         DBGLOG_DEBUG(1, "realloc using prev block - %i\n", blocks );
+---
+>         DBGLOG_DEBUG( "realloc using prev block - %i\n", blocks );
+569c570
+<         DBGLOG_DEBUG(1, "realloc using prev and next block - %i\n", blocks );
+---
+>         DBGLOG_DEBUG( "realloc using prev and next block - %i\n", blocks );
+577c578
+<         DBGLOG_DEBUG(1, "realloc a completely new block %i\n", blocks );
+---
+>         DBGLOG_DEBUG( "realloc a completely new block %i\n", blocks );
+580c581
+<             DBGLOG_DEBUG(2, "realloc %i to a bigger block %i, copy, and free the old\n", blockSize, blocks );
+---
+>             DBGLOG_DEBUG( "realloc %i to a bigger block %i, copy, and free the old\n", blockSize, blocks );
+584c585
+<             DBGLOG_DEBUG(2, "realloc %i to a bigger block %i failed - return NULL and leave the old block!\n", blockSize, blocks );
+---
+>             DBGLOG_DEBUG( "realloc %i to a bigger block %i failed - return NULL and leave the old block!\n", blockSize, blocks );
+595c596
+<         DBGLOG_DEBUG(2, "split and free %i blocks from %i\n", blocks, blockSize );
+---
+>         DBGLOG_DEBUG( "split and free %i blocks from %i\n", blocks, blockSize );
+619a621
+> 

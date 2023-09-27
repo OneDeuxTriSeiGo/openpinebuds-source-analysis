@@ -1,0 +1,60 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/include/rtos/freertos/FreeRTOSConfig.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-FreeRTOS/02866de873b41766b1ceccece6fd34f241a87928/CMSIS/RTOS2/FreeRTOS/Config/ARMCM/FreeRTOSConfig.h
+diff -sw local remote
+---
+
+45,48c45,46
+< //#include "RTE_Components.h"
+< //#include CMSIS_device_header
+< #include "cmsis.h"
+< #include "hal_trace.h"
+---
+> #include "RTE_Components.h"
+> #include CMSIS_device_header
+55c53
+< #define configMINIMAL_STACK_SIZE                ((uint16_t)(512))
+---
+> #define configMINIMAL_STACK_SIZE                ((uint16_t)(128))
+60c58
+< #define configTOTAL_HEAP_SIZE                   ((size_t)(8192 * 4))
+---
+> #define configTOTAL_HEAP_SIZE                   ((size_t)8192)
+70c68
+< #define configTIMER_TASK_STACK_DEPTH            512
+---
+> #define configTIMER_TASK_STACK_DEPTH            80
+80c78
+< #define configTIMER_QUEUE_LENGTH                25
+---
+> #define configTIMER_QUEUE_LENGTH                5
+85,86c83
+< //#define configMAX_SYSCALL_INTERRUPT_PRIORITY    16
+< #define configMAX_SYSCALL_INTERRUPT_PRIORITY     64
+---
+> #define configMAX_SYSCALL_INTERRUPT_PRIORITY    16
+98,99d94
+< #define configUSE_TICKLESS_IDLE                 1
+< 
+111c106
+< #define configUSE_IDLE_HOOK                     1
+---
+> #define configUSE_IDLE_HOOK                     0
+129c124
+< #define configUSE_MALLOC_FAILED_HOOK            1
+---
+> #define configUSE_MALLOC_FAILED_HOOK            0
+137,143d131
+< //#define configGENERATE_RUN_TIME_STATS           1
+< #define configUSE_STATS_FORMATTING_FUNCTIONS    1
+< 
+< //   Used for the minist time for enter deep sleep
+< //  <i> Default: 4
+< #define configEXPECTED_IDLE_TIME_BEFORE_SLEEP   5
+< 
+195,196d182
+< #define configASSERT( x )  do {ASSERT( x, "%s %s, %d\n", #x, __func__, __LINE__)} while(0)
+< //------------- <<< end of configuration section >>> ---------------------------
+198c184
+< extern uint32_t SystemCoreClock;
+---
+> //------------- <<< end of configuration section >>> ---------------------------

@@ -1,0 +1,30 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/heap/multi_heap_platform.h
+remote: https://raw.githubusercontent.com/espressif/esp-idf/db243d092c05d89491c1ecefccac74180da00178/components/heap/multi_heap_platform.h
+diff -sw local remote
+---
+
+6c6
+< //
+---
+> 
+77,85d76
+< #include "stdint.h"
+< #include "cmsis.h"
+< #include "assert.h"
+< #include "hal_trace.h"
+< 
+< #define MULTI_HEAP_PRINTF hal_trace_printf
+< #define MULTI_HEAP_STDERR_PRINTF(num,MSG, ...) hal_trace_printf(num,MSG, __VA_ARGS__)
+< #define MULTI_HEAP_LOCK(PLOCK)  do {if((PLOCK) != NULL) { uint32_t lockd = int_lock(); *((uint32_t *)(PLOCK)) = lockd; }} while (0)
+< #define MULTI_HEAP_UNLOCK(PLOCK) do {if((PLOCK) != NULL) { int_unlock(*(((uint32_t *)(PLOCK))));}} while(0)
+87c78,85
+< #define MULTI_HEAP_ASSERT(CONDITION, ADDRESS) do {if (!(CONDITION)) {assert(0 && "Heap corrupt");} } while (0)
+---
+> #include <assert.h>
+> 
+> #define MULTI_HEAP_PRINTF printf
+> #define MULTI_HEAP_STDERR_PRINTF(MSG, ...) fprintf(stderr, MSG, __VA_ARGS__)
+> #define MULTI_HEAP_LOCK(PLOCK)
+> #define MULTI_HEAP_UNLOCK(PLOCK)
+> 
+> #define MULTI_HEAP_ASSERT(CONDITION, ADDRESS) assert((CONDITION) && "Heap corrupt")

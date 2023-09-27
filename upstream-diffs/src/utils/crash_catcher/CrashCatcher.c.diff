@@ -1,0 +1,151 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/crash_catcher/CrashCatcher.c
+remote: https://raw.githubusercontent.com/adamgreen/CrashCatcher/c6d463eecd8483eca12c497971a2f1ce207f8151/Core/src/CrashCatcher.c
+diff -sw local remote
+---
+
+18,19d17
+< //#include "cmsis_os.h"
+< #include "cmsis_nvic.h"
+60c58
+< static void dumpSignature(void);
+---
+> static void dumpSignature(const Object* pObject);
+74d71
+< static void dumpMSPandPSPandExceptionPSRinAssert(const Object* pObject);
+76,167d72
+< struct TaskRegs {
+<     uint32_t r0;
+<     uint32_t r1;
+<     uint32_t r2;
+<     uint32_t r3;
+<     uint32_t r4;
+<     uint32_t r5;
+<     uint32_t r6;
+<     uint32_t r7;
+<     uint32_t r8;
+<     uint32_t r9;
+<     uint32_t r10;
+<     uint32_t r11;
+<     uint32_t r12;
+<     uint32_t sp;
+<     uint32_t lr;
+<     uint32_t pc;
+<     uint32_t psr;
+< };
+< static void dumpTaskRegs(const struct TaskRegs *regs);
+< 
+< void AssertCatcher_Entry(void)
+< {
+<     register uint32_t r0 asm("r0");
+<     register uint32_t r1 asm("r1");
+<     register uint32_t r2 asm("r2");
+<     register uint32_t r3 asm("r3");
+<     register uint32_t r4 asm("r4");
+<     register uint32_t r5 asm("r5");
+<     register uint32_t r6 asm("r6");
+<     register uint32_t r7 asm("r7");
+<     register uint32_t r8 asm("r8");
+<     register uint32_t r9 asm("r9");
+<     register uint32_t r10 asm("r10");
+<     register uint32_t r11 asm("r11");
+<     register uint32_t r12 asm("r12");
+<     register uint32_t sp asm("sp");
+<     register uint32_t lr asm("lr");
+<     uint32_t pc;
+<     struct TaskRegs regs;
+< 
+< #ifdef __ARMCC_VERSION
+<     asm volatile ("" : "=r"(r0), "=r"(r1), "=r"(r2), "=r"(r3), "=r"(r4), "=r"(r5), "=r"(r6), "=r"(r7),
+<         "=r"(r8), "=r"(r9), "=r"(r10), "=r"(r11), "=r"(r12), "=r"(sp), "=r"(lr));
+< #endif
+< 
+<     regs.r0 = r0;
+<     regs.r1 = r1;
+<     regs.r2 = r2;
+<     regs.r3 = r3;
+<     regs.r4 = r4;
+<     regs.r5 = r5;
+<     regs.r6 = r6;
+<     regs.r7 = r7;
+<     regs.r8 = r8;
+<     regs.r9 = r9;
+<     regs.r10 = r10;
+<     regs.r11 = r11;
+<     regs.r12 = r12;
+<     regs.sp = sp;
+<     regs.lr = lr;
+<     __asm volatile ("mov %0, r15" : "=r" (pc));
+<     regs.psr = __get_xPSR();
+<     regs.pc = pc;
+< 
+<     int ret;
+<     Object object;
+<     object.flags = 0;
+< 
+<     do
+<     {
+<         ret = CrashCatcher_DumpStart(NULL);
+<         if (ret)
+<             break;
+< 
+<         dumpSignature();
+<         dumpFlags(&object);
+< 
+<         dumpTaskRegs(&regs);
+< 
+<         dumpMSPandPSPandExceptionPSRinAssert(NULL);
+<         /*
+<         if (object.flags & CRASH_CATCHER_FLAGS_FLOATING_POINT)
+<             dumpFloatingPointRegisters(&object);
+<         */
+<         dumpMemoryRegions(CrashCatcher_GetMemoryRegions());
+<         if (!isARMv6MDevice())
+<             dumpFaultStatusRegisters();
+< 
+<     }
+<     while (CrashCatcher_DumpEnd() == CRASH_CATCHER_TRY_AGAIN);
+< }
+171d75
+<     int ret;
+180,184c84,85
+<         ret = CrashCatcher_DumpStart(&object.info);
+<         if (ret)
+<             break;
+< 
+<         dumpSignature();
+---
+>         CrashCatcher_DumpStart(&object.info);
+>         dumpSignature(&object);
+216,218d116
+<     /*always return psp */
+<     return pExceptionRegisters->psp;
+<     /*
+223d120
+<     */
+247,248c144
+<     //return 0 == (pObject->pExceptionRegisters->exceptionLR & LR_FLOAT);
+<     return 0;
+---
+>     return 0 == (pObject->pExceptionRegisters->exceptionLR & LR_FLOAT);
+282c178
+< static void dumpSignature(void)
+---
+> static void dumpSignature(const Object* pObject)
+302,306d197
+< static void dumpTaskRegs(const struct TaskRegs *regs)
+< {
+<     CrashCatcher_DumpMemory(regs, CRASH_CATCHER_BYTE, sizeof(struct TaskRegs));
+< }
+< 
+332,342d222
+< static void dumpMSPandPSPandExceptionPSRinAssert(const Object* pObject)
+< {
+<     uint32_t msp = __get_MSP();
+<     uint32_t psp = __get_PSP();
+<     uint32_t exceptionPSR = __get_xPSR();
+< 
+<     CrashCatcher_DumpMemory(&msp, CRASH_CATCHER_BYTE, sizeof(uint32_t));
+<     CrashCatcher_DumpMemory(&psp, CRASH_CATCHER_BYTE, sizeof(uint32_t));
+<     CrashCatcher_DumpMemory(&exceptionPSR, CRASH_CATCHER_BYTE, sizeof(uint32_t));
+< }
+< 

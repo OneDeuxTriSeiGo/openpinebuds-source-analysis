@@ -1,0 +1,32 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/include/rtos/rtx/os_tcb.h
+remote: https://raw.githubusercontent.com/ARM-software/mbed-beetle/67fa33af21262f1c8871447f7a928de9ef3d2d44/libraries/rtos/rtx/TARGET_CORTEX_M/os_tcb.h
+diff -sw local remote
+---
+
+1,15d0
+< /***************************************************************************
+<  *
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+<  *
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+61,70d45
+< #if __RTX_CPU_STATISTICS__
+<   U32    swap_in_time;            /* the task schedule in time              */
+<   U32    swap_out_time;           /* the task schedule out time             */
+<   U32    rtime;                   /* the task runing time after startup     */
+<   U8     *name;
+< #if TASK_HUNG_CHECK_ENABLED
+<   U8     hung_check;
+<   U32    hung_check_timeout;
+< #endif
+< #endif /* __RTX_CPU_STATISTICS__*/

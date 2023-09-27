@@ -1,0 +1,83 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/include/rtos/rtx/cmsis_os.h
+remote: https://raw.githubusercontent.com/ARM-software/mbed-beetle/67fa33af21262f1c8871447f7a928de9ef3d2d44/libraries/rtos/rtx/TARGET_CORTEX_M/cmsis_os.h
+diff -sw local remote
+---
+
+118c118
+< #if defined(__GNUC__) || defined(__CC_ARM) || defined(__ARMCC_VERSION) || defined(__ICCARM__)
+---
+> #if defined(TOOLCHAIN_GCC) || defined(TOOLCHAIN_ARM_STD) || defined(TOOLCHAIN_IAR)
+248,250d247
+< #if __RTX_CPU_STATISTICS__
+<   const char *           name_str;
+< #endif
+342,348c339
+< #if __RTX_CPU_STATISTICS__
+< #define osThreadDef(name, priority, instances, stacksz, task_name)  \
+< uint32_t os_thread_def_stack_##name [stacksz / sizeof(uint32_t)]; \
+< osThreadDef_t os_thread_def_##name = \
+< { (name), (priority), (stacksz), (os_thread_def_stack_##name) , {0,}, (task_name)}
+< #else
+< #define osThreadDef(name, priority, instance, stacksz, task_name)  \
+---
+> #define osThreadDef(name, priority, stacksz)  \
+353d343
+< #endif
+374,375d363
+< int osGetThreadIntId (void);
+< 
+400,414d387
+< /// Show a thread.
+< /// \param[in]     thread_id     thread ID obtained by \ref osThreadCreate or \ref osThreadGetId.
+< /// \return status code that indicates the execution status of the function.
+< #if (osCMSIS < 0x20000U)
+< osStatus osThreadShow (osThreadId thread_id);
+< #endif
+< 
+< ///  set the hung check of an active thread.
+< /// \param[in]     thread_id     thread ID obtained by \ref osThreadCreate or \ref osThreadGetId.
+< /// \param[in]     enable        enable/disable the hung check feature of the task
+< /// \param[in]     timeout       hung check  timeout in millisecond
+< /// \return status code that indicates the execution status of the function.
+< #if TASK_HUNG_CHECK_ENABLED
+< osStatus osThreadSetHungCheck (osThreadId thread_id, int32_t enable, uint32_t timeout);
+< #endif
+463c436
+< osTimerId osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void *argument);
+---
+> osTimerId osTimerCreate (osTimerDef_t *timer_def, os_timer_type type, void *argument);
+541c514
+< osMutexId osMutexCreate (const osMutexDef_t *mutex_def);
+---
+> osMutexId osMutexCreate (osMutexDef_t *mutex_def);
+562,568d534
+< /// Get owner thread of a Mutex object.
+< /// \param[in]     mutex_id      mutex ID obtained by \ref osMutexCreate.
+< /// \return thread id or NULL
+< #if (osCMSIS < 0x20000U)
+< osThreadId osMutexGetOwner (osMutexId mutex_id);
+< #endif
+< 
+599c565
+< osSemaphoreId osSemaphoreCreate (const osSemaphoreDef_t *semaphore_def, int32_t count);
+---
+> osSemaphoreId osSemaphoreCreate (osSemaphoreDef_t *semaphore_def, int32_t count);
+654c620
+< osPoolId osPoolCreate (const osPoolDef_t *pool_def);
+---
+> osPoolId osPoolCreate (osPoolDef_t *pool_def);
+710c676
+< osMessageQId osMessageCreate (const osMessageQDef_t *queue_def, osThreadId thread_id);
+---
+> osMessageQId osMessageCreate (osMessageQDef_t *queue_def, osThreadId thread_id);
+727,730d692
+< /// Get space in the Message Queue.
+< /// \param[in]     queue_id      message queue ID obtained with \ref osMessageCreate.
+< /// \return the size of the space.
+< uint32_t osMessageGetSpace (osMessageQId queue_id);
+768c730
+< osMailQId osMailCreate (const osMailQDef_t *queue_def, osThreadId thread_id);
+---
+> osMailQId osMailCreate (osMailQDef_t *queue_def, osThreadId thread_id);
+807d768
+< void os_error_str (const char *fmt, ...);

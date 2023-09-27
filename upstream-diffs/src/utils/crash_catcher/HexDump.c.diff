@@ -1,0 +1,175 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/utils/crash_catcher/HexDump.c
+remote: https://raw.githubusercontent.com/adamgreen/CrashCatcher/c6d463eecd8483eca12c497971a2f1ce207f8151/HexDump/src/HexDump.c
+diff -sw local remote
+---
+
+17,22d16
+< #include "hal_timer.h"
+< #include "hal_trace.h"
+< #include "string.h"
+< //#include "cmsis_os.h"
+< #include "coredump_section.h"
+< #include "xyzmodem.h"
+24c18,21
+< //CRASH_CATCHER_TEST_WRITEABLE CrashCatcherReturnCodes g_crashCatcherDumpEndReturn = CRASH_CATCHER_TRY_AGAIN;
+---
+> 
+> CRASH_CATCHER_TEST_WRITEABLE CrashCatcherReturnCodes g_crashCatcherDumpEndReturn = CRASH_CATCHER_TRY_AGAIN;
+> static                       CrashCatcherInfo        g_info;
+> 
+26c23
+< //static void waitForUserInput(void);
+---
+> static void waitForUserInput(void);
+33,79d29
+< void CrashCatcher_putc(char c)
+< {
+<     hal_trace_output((const unsigned char *)&c,1);
+< }
+< 
+< extern uint32_t __data_start__, __data_end__;
+< extern uint32_t __bss_start__, __bss_end__;
+< extern uint32_t __StackLimit, __StackTop;
+< extern uint32_t __overlay_text_exec_start__;
+< extern uint32_t __fast_sram_end__;
+< 
+< const CrashCatcherMemoryRegion* CrashCatcher_GetMemoryRegions(void)
+< {
+<     static CrashCatcherMemoryRegion regions[4];
+<     int j=0;
+< 
+<     regions[j].startAddress = (uint32_t)&__data_start__;
+<     regions[j].endAddress = (uint32_t)&__data_end__;
+<     regions[j].elementSize = CRASH_CATCHER_BYTE;
+<     j++;
+< 
+<     regions[j].startAddress = (uint32_t)&__bss_start__;
+<     regions[j].endAddress = (uint32_t)&__bss_end__;
+<     regions[j].elementSize = CRASH_CATCHER_BYTE;
+<     j++;
+< 
+<     regions[j].startAddress = (uint32_t)&__StackLimit;
+<     regions[j].endAddress = (uint32_t)&__StackTop;
+<     regions[j].elementSize = CRASH_CATCHER_BYTE;
+<     j++;
+<     /*
+<     regions[j].startAddress = (uint32_t)&__overlay_text_exec_start__;
+<     regions[j].endAddress =   (uint32_t)&__fast_sram_end__;
+<     regions[j].elementSize = CRASH_CATCHER_BYTE;
+<     j++;
+< 
+<     regions[j].startAddress = 0x0c000000;
+<     regions[j].endAddress =   0x0c0c8000;
+<     regions[j].elementSize = CRASH_CATCHER_BYTE;
+<     j++;
+<     */
+< 
+<     regions[j].startAddress = 0xFFFFFFFF;
+<     regions[j].endAddress = 0xFFFFFFFF;
+<     regions[j].elementSize = CRASH_CATCHER_BYTE;
+<     return regions;
+< }
+81,87c31
+< static enum {
+<     DUMP_TERM,
+<     DUMP_XMODEM,
+<     DUMP_FLASH
+< } dump_direction = DUMP_TERM;
+< 
+< int CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
+---
+> void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo)
+89c33
+<     int ret;
+---
+>     g_info = *pInfo;
+92d35
+<     /*
+96d38
+<     */
+99,113c41
+<                  "Enable XMODEM and then press any key to start dump.\r\n");
+<     //waitForUserInput();
+<     hal_trace_flush_buffer();
+< 
+< #ifdef CORE_DUMP_TO_FLASH
+<     core_dump_erase_section();
+<     dump_direction = DUMP_FLASH;
+<     return 0;
+< #endif
+< 
+<     ret = xmodem_start_xfer(120);
+<     if (!ret) {
+<         dump_direction = DUMP_XMODEM;
+<         return 0;
+<     }
+---
+>                  "Enable logging and then press any key to start dump.\r\n");
+115c43,44
+<     return 0;
+---
+>     waitForUserInput();
+>     printString("\r\n");
+124d52
+< #if 0
+129d56
+< #endif
+146,156d72
+< 
+< #ifdef CORE_DUMP_TO_FLASH
+<     if (elementSize * elementCount >= COREDUMP_SECTOR_SIZE)
+<     {
+<         core_dump_write_large(pvMemory, elementSize * elementCount);
+<     }
+<     else
+<     {
+<         core_dump_write(pvMemory, elementSize * elementCount);
+<     }
+< #endif
+162,164c78,79
+< 
+<     if (dump_direction == DUMP_TERM) {
+<         for (i = 0 ; i < elementCount ; i++) {
+---
+>     for (i = 0 ; i < elementCount ; i++)
+>     {
+166c81
+<             if (i != 0 && (i & 0xF) == 0) {
+---
+>         if (i != 0 && (i & 0xF) == 0)
+168,169d82
+<                 hal_trace_flush_buffer();
+<             }
+172,180d84
+<     } else if (dump_direction == DUMP_XMODEM) {
+<         const uint8_t *buf = pMemory;
+<         int len;
+< 
+<         len = xmodem_send_stream(buf, elementCount, 1);
+<         if (len < 0) {
+<             //printString("#####error");
+<         }
+<     }
+217c121
+<         if (i != 0 && (i & 0x3) == 0) {
+---
+>         if (i != 0 && (i & 0x3) == 0)
+219d122
+<         }
+227,238c130
+<     char end_info[] = "\r\nEnd of dump\r\n";
+< 
+<     if (dump_direction == DUMP_XMODEM) {
+<         int len = (strlen(end_info) + 1) / 2 * 2;
+<         xmodem_send_stream((const uint8_t *)end_info, len, 0);
+<         xmodem_stop_xfer();
+<     } else {
+<         printString(end_info);
+<     }
+< 
+<     return CRASH_CATCHER_EXIT;
+<     #if 0
+---
+>     printString("\r\nEnd of dump\r\n");
+243d134
+<     #endif

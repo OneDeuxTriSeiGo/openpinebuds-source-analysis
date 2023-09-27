@@ -1,0 +1,44 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/rtos/rtx/TARGET_CORTEX_M/TARGET_M4/TOOLCHAIN_GCC/HAL_CM4.S
+remote: https://raw.githubusercontent.com/ARM-software/mbed-beetle/fe9720f24b1adc71ab6962506ec51290f6afd270/libraries/rtos/rtx/TARGET_CORTEX_M/TARGET_RTOS_M4_M7/TOOLCHAIN_GCC/HAL_CM4.S
+diff -sw local remote
+---
+
+35,36d34
+<         #include "cmsis.h"
+< 
+213,225c211
+<         CBNZ    R1,SVC_ContextSave      /* Runtask not deleted? */
+< 
+<         #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+<         TST     LR,#0x10                /* is it extended frame? */
+<         BNE     SVC_ContextRestore
+<         LDR     R1,=0xE000EF34
+<         LDR     R0,[R1]                 /* Load FPCCR */
+<         BIC     R0,#1                   /* Clear LSPACT (Lazy state) */
+<         STR     R0,[R1]                 /* Store FPCCR */
+<         #endif
+<         B       SVC_ContextRestore
+< 
+< SVC_ContextSave:
+---
+>         CBZ     R1,SVC_Next             /* Runtask deleted? */
+227c213
+<         #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+---
+>         #ifdef  __FPU_PRESENT
+243c229
+< SVC_ContextRestore:
+---
+> SVC_Next:
+250c236
+<         #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+---
+>         #ifdef  __FPU_PRESENT
+328c314
+<         #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+---
+>         #ifdef  __FPU_PRESENT
+350c336
+<         #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+---
+>         #ifdef  __FPU_PRESENT

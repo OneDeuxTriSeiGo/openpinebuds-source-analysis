@@ -1,0 +1,23 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/services/multimedia/audio/codec/fdkaac_codec/libFDK/include/FDK_archdef.h
+remote: https://raw.githubusercontent.com/mstorsjo/fdk-aac/e45ae429b9ca8f234eb861338a75b2d89cde206a/libFDK/include/FDK_archdef.h
+diff -sw local remote
+---
+
+3c3
+< Software License for The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android
+---
+> Software License for The Fraunhofer FDK AAC Codec Library for Android
+9c9
+< The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements
+---
+> The Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements
+117,118c117
+< #if (__TARGET_ARCH_ARM == 5) || defined(__TARGET_FEATURE_DSPMUL) || (_M_ARM == 5) || defined(__ARM_ARCH_5TEJ__) || defined(__TI_TMS470_V5__) || \
+<         defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_8M_MAIN__)
+---
+> #if (__TARGET_ARCH_ARM == 5) || defined(__TARGET_FEATURE_DSPMUL) || (_M_ARM == 5) || defined(__ARM_ARCH_5TEJ__) || defined(__TI_TMS470_V5__) || defined(__ARM_ARCH_7EM__)
+148,149c147
+< #if defined(__TARGET_ARCH_7E_M) || defined(__ARM_ARCH_7E_M__) || defined(__ARM_ARCH_8M_MAIN__)
+< #undef __ARM_ARCH_7EM__
+---
+> #if defined(__TARGET_ARCH_7E_M) || defined(__ARM_ARCH_7E_M__)

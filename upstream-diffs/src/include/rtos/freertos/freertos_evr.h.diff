@@ -1,0 +1,9 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/include/rtos/freertos/freertos_evr.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-FreeRTOS/02866de873b41766b1ceccece6fd34f241a87928/CMSIS/RTOS2/FreeRTOS/Include/freertos_evr.h
+diff -sw local remote
+---
+
+29c29
+< //#include "RTE_Components.h"
+---
+> #include "RTE_Components.h"

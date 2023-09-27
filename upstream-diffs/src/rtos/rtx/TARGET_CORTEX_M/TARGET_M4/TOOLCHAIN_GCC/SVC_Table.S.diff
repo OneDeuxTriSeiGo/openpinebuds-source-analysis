@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/rtos/rtx/TARGET_CORTEX_M/TARGET_M4/TOOLCHAIN_GCC/SVC_Table.S
+remote: https://raw.githubusercontent.com/ARM-software/mbed-beetle/fe9720f24b1adc71ab6962506ec51290f6afd270/libraries/rtos/rtx/TARGET_CORTEX_M/TARGET_RTOS_M4_M7/TOOLCHAIN_GCC/SVC_Table.S
+diff -sw local remote
+---
+
+Files local and remote are identical

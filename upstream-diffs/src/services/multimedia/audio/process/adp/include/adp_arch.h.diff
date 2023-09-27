@@ -1,0 +1,22 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/29b195e12da6a5c791d1418af8448be80bccf18d/services/multimedia/audio/process/adp/include/adp_arch.h
+remote: https://raw.githubusercontent.com/xiph/speex/1e64d72bbfd86695eb72e2c122506e071894cb1a/libspeex/arch.h
+diff -sw local remote
+---
+
+37a38,45
+> #ifndef SPEEX_VERSION
+> #define SPEEX_MAJOR_VERSION 1         /**< Major Speex version. */
+> #define SPEEX_MINOR_VERSION 1         /**< Minor Speex version. */
+> #define SPEEX_MICRO_VERSION 16        /**< Micro Speex version. */
+> #define SPEEX_EXTRA_VERSION ""        /**< Extra Speex version. */
+> #define SPEEX_VERSION "speex-1.2.0"   /**< Speex version string. */
+> #endif
+> 
+69,71c77
+< #ifndef OUTSIDE_SPEEX
+< //#include "speex/speexdsp_types.h"
+< #endif
+---
+> #include "speex/speex_types.h"
+166d171
+< #define SATURATE32PSHR(x,shift,a) (x)
