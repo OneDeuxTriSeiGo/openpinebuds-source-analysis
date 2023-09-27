@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/encrypt/uECC.h
+remote: https://raw.githubusercontent.com/kmackay/micro-ecc/979d722c99f2eff6dfed756265c0b4689c5bc170/uECC.h
+diff -sw local remote
+---
+
+Files local and remote are identical

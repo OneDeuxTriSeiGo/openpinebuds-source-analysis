@@ -1,0 +1,25 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/multimedia/audio/codec/fdkaac_codec/libAACdec/include/aacdecoder_lib.h
+remote: https://raw.githubusercontent.com/mstorsjo/fdk-aac/e45ae429b9ca8f234eb861338a75b2d89cde206a/libAACdec/include/aacdecoder_lib.h
+diff -sw local remote
+---
+
+3c3
+< Software License for The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android
+---
+> Software License for The Fraunhofer FDK AAC Codec Library for Android
+9c9
+< The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements
+---
+> The Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements
+423,428d422
+< typedef enum {
+<     AAC_DECODER_CHANNEL_SELECT_SELECT_STEREO ,
+<     AAC_DECODER_CHANNEL_SELECT_SELECT_LRMERGE,
+<     AAC_DECODER_CHANNEL_SELECT_LCHNL,
+<     AAC_DECODER_CHANNEL_SELECT_RCHNL,
+< } AAC_DECODER_CHANNEL_SELECT_E;
+746,747d739
+< LINKSPEC_CPP bool is_aacDecoder_Close ( HANDLE_AACDECODER self );
+< 
+764d755
+< LINKSPEC_CPP AAC_DECODER_ERROR aacDecoder_DecodeFrame_Config(UINT chnl_sel);

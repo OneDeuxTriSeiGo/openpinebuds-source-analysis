@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/libc/inc/stdarg.h
+remote: https://raw.githubusercontent.com/gcc-mirror/gcc/1788952fea1a78b11725708811ad1092baf0ce88/gcc/ginclude/stdarg.h
+diff -sw local remote
+---
+
+Files local and remote are identical

@@ -1,0 +1,25 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx5/rtx_config/rtx_config.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/RTX/Config/RTX_Config.h
+diff -sw local remote
+---
+
+47c47
+< #define OS_DYNAMIC_MEM_SIZE         0x3000
+---
+> #define OS_DYNAMIC_MEM_SIZE         4096
+127c127
+< #define OS_STACK_SIZE               0x1000
+---
+> #define OS_STACK_SIZE               256
+182c182
+< #define OS_TIMER_NUM                6
+---
+> #define OS_TIMER_NUM                1
+203c203
+< #define OS_TIMER_THREAD_STACK_SIZE  0x1000
+---
+> #define OS_TIMER_THREAD_STACK_SIZE  256
+219c219
+< #define OS_TIMER_CB_QUEUE           16
+---
+> #define OS_TIMER_CB_QUEUE           4

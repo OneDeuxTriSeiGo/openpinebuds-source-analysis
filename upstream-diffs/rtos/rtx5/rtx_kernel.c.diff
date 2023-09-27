@@ -1,0 +1,72 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx5/rtx_kernel.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/RTX/Source/rtx_kernel.c
+diff -sw local remote
+---
+
+27,29c27
+< #include "os_tick.h"
+< #include "hal_timer.h"
+< #include "hal_trace.h"
+---
+> 
+36,38d33
+< #define OS_BSS_LOC  __attribute__((section(".bss.os")))
+< OS_BSS_LOC static uint32_t systick_lock_val;
+< OS_BSS_LOC static uint32_t systick_lock_ts;
+98c93
+<   memset((uint8_t *)&osRtxInfo + offsetof(osRtxInfo_t, kernel), 0, sizeof(osRtxInfo) - offsetof(osRtxInfo_t, kernel));
+---
+>   memset(&osRtxInfo.kernel, 0, sizeof(osRtxInfo) - offsetof(osRtxInfo_t, kernel));
+367,369d361
+<   systick_lock_val = OS_Tick_GetInterval() - 1 - OS_Tick_GetCount();
+<   systick_lock_ts = hal_sys_timer_get();
+< 
+401,406d392
+<   uint32_t     resume_ts;
+<   uint32_t     tick_interval;
+<   uint32_t     sysclk_remain;
+<   uint32_t     delta_clk;
+<   uint32_t     sleep_clk;
+< 
+413,429d398
+<   tick_interval = OS_Tick_GetInterval();
+<   resume_ts = hal_sys_timer_get();
+<   sleep_clk = (resume_ts - systick_lock_ts) * (OS_CLOCK_NOMINAL / CONFIG_SYSTICK_HZ_NOMINAL);
+<   if (systick_lock_val == 0) {
+<     sleep_ticks = sleep_clk / tick_interval;
+<     sysclk_remain = sleep_clk % tick_interval;
+<   } else if (sleep_clk >= systick_lock_val) {
+<     delta_clk = sleep_clk - systick_lock_val;
+<     sleep_ticks = delta_clk / tick_interval + 1;
+<     sysclk_remain = tick_interval - delta_clk % tick_interval;
+<   } else {
+<     sleep_ticks = 0;
+<     sysclk_remain = systick_lock_val - sleep_clk;
+<   }
+< #if __RTX_CPU_STATISTICS__
+<   osRtxInfo.thread.run.curr->rtime += sleep_ticks;
+< #endif
+470,490d438
+<   if (sysclk_remain == tick_interval) {
+<       sysclk_remain = 0;
+<   }
+<   if (sysclk_remain) {
+<     SysTick->LOAD = sysclk_remain;
+<     SysTick->VAL = 0;
+<     SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+<     while (SysTick->VAL == 0);
+<     SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+<     SysTick->LOAD = tick_interval - 1;
+<   } else
+<     SysTick->VAL = 0;
+< 
+< #if defined(DEBUG_SLEEP) && (DEBUG_SLEEP >= 1)
+<   if (sleep_clk > 0) {
+<     TRACE(7,"[%u/0x%X][%2u/%u] resume: suspend tick:%u, sleep_clk=%u ticks=%u",
+<       TICKS_TO_MS(hal_sys_timer_get()), hal_sys_timer_get(), sysclk_remain, SysTick->VAL, systick_lock_val,
+<       sleep_clk, sleep_ticks);
+<   }
+< #endif
+< 
+494d441
+< 

@@ -1,0 +1,117 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/cmsis_gcc.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/4128fac86684eed487a46ba9a2d4107a595f957e/CMSIS/Core/Include/cmsis_gcc.h
+diff -sw local remote
+---
+
+1890c1890
+< __STATIC_FORCEINLINE int32_t __SXTB16(uint32_t op1)
+---
+> __STATIC_FORCEINLINE uint32_t __SXTB16(uint32_t op1)
+1892c1892
+<   int32_t result;
+---
+>   uint32_t result;
+1898c1898
+< __STATIC_FORCEINLINE int32_t __SXTAB16(uint32_t op1, uint32_t op2)
+---
+> __STATIC_FORCEINLINE uint32_t __SXTAB16(uint32_t op1, uint32_t op2)
+1900c1900
+<   int32_t result;
+---
+>   uint32_t result;
+1906c1906
+< __STATIC_FORCEINLINE int32_t __SMUAD  (uint32_t op1, uint32_t op2)
+---
+> __STATIC_FORCEINLINE uint32_t __SMUAD  (uint32_t op1, uint32_t op2)
+1908c1908
+<   int32_t result;
+---
+>   uint32_t result;
+1914c1914
+< __STATIC_FORCEINLINE int32_t __SMUADX (uint32_t op1, uint32_t op2)
+---
+> __STATIC_FORCEINLINE uint32_t __SMUADX (uint32_t op1, uint32_t op2)
+1916c1916
+<   int32_t result;
+---
+>   uint32_t result;
+1922c1922
+< __STATIC_FORCEINLINE int32_t __SMLAD (uint32_t op1, uint32_t op2, uint32_t op3)
+---
+> __STATIC_FORCEINLINE uint32_t __SMLAD (uint32_t op1, uint32_t op2, uint32_t op3)
+1924c1924
+<   int32_t result;
+---
+>   uint32_t result;
+1930c1930
+< __STATIC_FORCEINLINE int32_t __SMLADX (uint32_t op1, uint32_t op2, uint32_t op3)
+---
+> __STATIC_FORCEINLINE uint32_t __SMLADX (uint32_t op1, uint32_t op2, uint32_t op3)
+1932c1932
+<   int32_t result;
+---
+>   uint32_t result;
+1938c1938
+< __STATIC_FORCEINLINE int64_t __SMLALD (uint32_t op1, uint32_t op2, int64_t acc)
+---
+> __STATIC_FORCEINLINE uint64_t __SMLALD (uint32_t op1, uint32_t op2, uint64_t acc)
+1942c1942
+<     int64_t w64;
+---
+>     uint64_t w64;
+1955c1955
+< __STATIC_FORCEINLINE int64_t __SMLALDX (uint32_t op1, uint32_t op2, uint64_t acc)
+---
+> __STATIC_FORCEINLINE uint64_t __SMLALDX (uint32_t op1, uint32_t op2, uint64_t acc)
+1959c1959
+<     int64_t w64;
+---
+>     uint64_t w64;
+1972c1972
+< __STATIC_FORCEINLINE int32_t __SMUSD  (uint32_t op1, uint32_t op2)
+---
+> __STATIC_FORCEINLINE uint32_t __SMUSD  (uint32_t op1, uint32_t op2)
+1974c1974
+<   int32_t result;
+---
+>   uint32_t result;
+1980c1980
+< __STATIC_FORCEINLINE int32_t __SMUSDX (uint32_t op1, uint32_t op2)
+---
+> __STATIC_FORCEINLINE uint32_t __SMUSDX (uint32_t op1, uint32_t op2)
+1982c1982
+<   int32_t result;
+---
+>   uint32_t result;
+1988c1988
+< __STATIC_FORCEINLINE int32_t __SMLSD (uint32_t op1, uint32_t op2, uint32_t op3)
+---
+> __STATIC_FORCEINLINE uint32_t __SMLSD (uint32_t op1, uint32_t op2, uint32_t op3)
+1990c1990
+<   int32_t result;
+---
+>   uint32_t result;
+1996c1996
+< __STATIC_FORCEINLINE int32_t __SMLSDX (uint32_t op1, uint32_t op2, uint32_t op3)
+---
+> __STATIC_FORCEINLINE uint32_t __SMLSDX (uint32_t op1, uint32_t op2, uint32_t op3)
+1998c1998
+<   int32_t result;
+---
+>   uint32_t result;
+2004c2004
+< __STATIC_FORCEINLINE int64_t __SMLSLD (uint32_t op1, uint32_t op2, uint64_t acc)
+---
+> __STATIC_FORCEINLINE uint64_t __SMLSLD (uint32_t op1, uint32_t op2, uint64_t acc)
+2008c2008
+<     int64_t w64;
+---
+>     uint64_t w64;
+2021c2021
+< __STATIC_FORCEINLINE int64_t __SMLSLDX (uint32_t op1, uint32_t op2, uint64_t acc)
+---
+> __STATIC_FORCEINLINE uint64_t __SMLSLDX (uint32_t op1, uint32_t op2, uint64_t acc)
+2025c2025
+<     int64_t w64;
+---
+>     uint64_t w64;

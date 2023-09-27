@@ -1,0 +1,288 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx/TARGET_CORTEX_M/rt_CMSIS.c
+remote: https://raw.githubusercontent.com/ARM-software/mbed-beetle/67fa33af21262f1c8871447f7a928de9ef3d2d44/libraries/rtos/rtx/TARGET_CORTEX_M/rt_CMSIS.c
+diff -sw local remote
+---
+
+37c37,47
+< #include "cmsis.h"
+---
+> #if defined (__CORTEX_M4) || defined (__CORTEX_M4F)
+>   #include "core_cm4.h"
+> #elif defined (__CORTEX_M3)
+>   #include "core_cm3.h"
+> #elif defined (__CORTEX_M0)
+>   #include "core_cm0.h"
+> #elif defined (__CORTEX_M0PLUS)
+>   #include "core_cm0plus.h"
+> #else
+>   #error "Missing __CORTEX_Mx definition"
+> #endif
+66,76d75
+< // OS_API_IN_INTLOCK can be enabled in target.mk by:
+< // export OS_API_IN_INTLOCK ?= 1
+< 
+< #ifdef OS_API_IN_INTLOCK
+< // CAUTION:
+< // It will be treated as in ISR when calling OS APIs in intlock(), but
+< // the stack might still be using PSP instead of MSP.
+< #define IN_ISR()                        (__get_IPSR() != 0 || __get_PRIMASK() != 0)
+< #else
+< #define IN_ISR()                        (__get_IPSR() != 0)
+< #endif
+141c140
+< //#define __NO_RETURN __attribute__((noreturn))
+---
+> #define __NO_RETURN __attribute__((noreturn))
+153c152
+< #define osEvent_type       __attribute__((pcs("aapcs"))) ret128
+---
+> #define osEvent_type        ret128
+159c158
+< #define osCallback_type    __attribute__((pcs("aapcs"))) ret64
+---
+> #define osCallback_type     ret64
+420c419
+< osMessageQId svcMessageCreate (const osMessageQDef_t *queue_def, osThreadId thread_id);
+---
+> osMessageQId svcMessageCreate (osMessageQDef_t *queue_def, osThreadId thread_id);
+448,450d446
+< #ifdef __ARM_ARCH_8M_MAIN__
+<   __set_PSPLIM((uint32_t)os_tsk.run->stack);
+< #endif
+485,487d480
+< #ifdef __ARM_ARCH_8M_MAIN__
+<       __set_PSPLIM(__get_MSPLIM());
+< #endif
+515c508
+<   if ((IN_ISR()) || ((__get_CONTROL() & 1) == 0)) {
+---
+>   if ((__get_IPSR() != 0) || ((__get_CONTROL() & 1) == 0)) {
+535,536d527
+< SVC_1_1(svcThreadShow,        osStatus,   osThreadId,                  RET_osStatus)
+< SVC_3_1(svcThreadSetHungCheck,osStatus,   osThreadId,      int32_t,    uint32_t, RET_osStatus)
+564,567d554
+<   if (tsk == 0) {
+<     sysThreadError(osErrorResource);
+<     return NULL;
+<   }
+572,574d558
+< #if __RTX_CPU_STATISTICS__
+<   task_context->name = (U8 *)thread_def->name_str;
+< #endif
+651,662d634
+< /// Show a thread
+< osStatus svcThreadShow (osThreadId thread_id) {
+<   P_TCB     ptcb;
+< 
+<   ptcb = rt_tid2ptcb(thread_id);                // Get TCB pointer
+<   if (ptcb == NULL) return osErrorParameter;
+< 
+<   rt_tsk_show(ptcb);
+< 
+<   return osOK;
+< }
+< 
+683,693d654
+< int osGetThreadIntId (void) {
+<     OS_TID tid;
+<     uint32_t lock;
+< 
+<     if (__get_IPSR() != 0) return 0;
+<     lock = int_lock();
+<     tid = rt_tsk_self();
+<     int_unlock(lock);
+<     return tid;
+< }
+< 
+718,723d678
+< /// Dump a thread
+< osStatus osThreadShow (osThreadId thread_id) {
+<   if (__get_IPSR() != 0) return osPriorityError;// Not allowed in ISR
+<   return __svcThreadShow(thread_id);
+< }
+< 
+810c765
+<   const osTimerDef_t *timer;                    // Pointer to Timer definition
+---
+>   osTimerDef_t       *timer;                    // Pointer to Timer definition
+844c799
+< static int32_t rt_timer_remove (os_timer_cb *pt) {
+---
+> static int rt_timer_remove (os_timer_cb *pt) {
+869c824
+< SVC_3_1(svcTimerCreate,           osTimerId,  const osTimerDef_t *, os_timer_type, void *, RET_pointer)
+---
+> SVC_3_1(svcTimerCreate,           osTimerId,  osTimerDef_t *, os_timer_type, void *, RET_pointer)
+878c833
+< osTimerId svcTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void *argument) {
+---
+> osTimerId svcTimerCreate (osTimerDef_t *timer_def, os_timer_type type, void *argument) {
+907d861
+<   pt->next  = NULL;
+1009d962
+<   osStatus     status;
+1019,1023c972,973
+<     status = isrMessagePut(osMessageQId_osTimerMessageQ, (uint32_t)pt, 0U);
+<     if (status != osOK) {
+<       os_error(OS_ERR_TIMER_OVF);
+<     }
+<     if (pt->type == (uint8_t)osTimerPeriodic) {
+---
+>     isrMessagePut(osMessageQId_osTimerMessageQ, (uint32_t)pt, 0);
+>     if (pt->type == osTimerPeriodic) {
+1031,1037d980
+< uint32_t rt_timer_delay_count(void)
+< {
+<     if (os_timer_head) {
+<         return os_timer_head->tcnt;
+<     }
+<     return 0;
+< }
+1042c985
+< osTimerId osTimerCreate (const osTimerDef_t *timer_def, os_timer_type type, void *argument) {
+---
+> osTimerId osTimerCreate (osTimerDef_t *timer_def, os_timer_type type, void *argument) {
+1200c1143
+<   if (IN_ISR()) {                               // in ISR
+---
+>   if (__get_IPSR() != 0) {                      // in ISR
+1234c1177
+< SVC_1_1(svcMutexCreate,  osMutexId, const osMutexDef_t *,           RET_pointer)
+---
+> SVC_1_1(svcMutexCreate,  osMutexId, osMutexDef_t *,           RET_pointer)
+1238d1180
+< SVC_1_1(svcMutexGetOwner,  osThreadId,  osMutexId,                    RET_pointer)
+1243c1185
+< osMutexId svcMutexCreate (const osMutexDef_t *mutex_def) {
+---
+> osMutexId svcMutexCreate (osMutexDef_t *mutex_def) {
+1282,1284d1223
+<   if (res == OS_R_NOK) {
+<     return osErrorResource;
+<   }
+1320,1331d1258
+< /// Get owner thread of a Mutex object.
+< osThreadId svcMutexGetOwner (osMutexId mutex_id) {
+<   OS_ID mut;
+< 
+<   mut = rt_id2obj(mutex_id);
+<   if (mut == NULL) return NULL;
+< 
+<   if (((P_MUCB)mut)->cb_type != MUCB) return NULL;
+< 
+<   return (osThreadId)(((P_MUCB)mut)->owner);
+< }
+< 
+1336c1263
+< osMutexId osMutexCreate (const osMutexDef_t *mutex_def) {
+---
+> osMutexId osMutexCreate (osMutexDef_t *mutex_def) {
+1364,1369d1290
+< /// Get owner thread of a Mutex object.
+< osThreadId osMutexGetOwner (osMutexId mutex_id) {
+<   if (__get_IPSR() != 0) return NULL;     // Not allowed in ISR
+<   return __svcMutexGetOwner(mutex_id);
+< }
+< 
+1481c1402
+< osSemaphoreId osSemaphoreCreate (const osSemaphoreDef_t *semaphore_def, int32_t count) {
+---
+> osSemaphoreId osSemaphoreCreate (osSemaphoreDef_t *semaphore_def, int32_t count) {
+1499c1420
+<   if (IN_ISR()) {                               // in ISR
+---
+>   if (__get_IPSR() != 0) {                      // in ISR
+1521c1442
+<   if ((box_mem != NULL) && (box != NULL)) {
+---
+>   if (box) {
+1585c1506
+< osPoolId osPoolCreate (const osPoolDef_t *pool_def) {
+---
+> osPoolId osPoolCreate (osPoolDef_t *pool_def) {
+1606c1527
+<   if ((IN_ISR()) || ((__get_CONTROL() & 1) == 0)) {    // in ISR or Privileged
+---
+>   if ((__get_IPSR() != 0) || ((__get_CONTROL() & 1) == 0)) {    // in ISR or Privileged
+1615c1536
+<   if ((IN_ISR()) || ((__get_CONTROL() & 1) == 0)) {    // in ISR or Privileged
+---
+>   if ((__get_IPSR() != 0) || ((__get_CONTROL() & 1) == 0)) {    // in ISR or Privileged
+1626c1547
+< SVC_2_1(svcMessageCreate,        osMessageQId,    const osMessageQDef_t *, osThreadId,           RET_pointer)
+---
+> SVC_2_1(svcMessageCreate,        osMessageQId,    osMessageQDef_t *, osThreadId,           RET_pointer)
+1633c1554
+< osMessageQId svcMessageCreate (const osMessageQDef_t *queue_def, osThreadId thread_id) {
+---
+> osMessageQId svcMessageCreate (osMessageQDef_t *queue_def, osThreadId thread_id) {
+1748c1669
+< osMessageQId osMessageCreate (const osMessageQDef_t *queue_def, osThreadId thread_id) {
+---
+> osMessageQId osMessageCreate (osMessageQDef_t *queue_def, osThreadId thread_id) {
+1760c1681
+<   if (IN_ISR()) {                               // in ISR
+---
+>   if (__get_IPSR() != 0) {                      // in ISR
+1769c1690
+<   if (IN_ISR()) {                               // in ISR
+---
+>   if (__get_IPSR() != 0) {                      // in ISR
+1777,1781d1697
+< uint32_t osMessageGetSpace (osMessageQId queue_id)
+< {
+<     return rt_mbx_check(queue_id);
+< }
+< 
+1785c1701
+< SVC_2_1(svcMailCreate, osMailQId, const osMailQDef_t *, osThreadId,                     RET_pointer)
+---
+> SVC_2_1(svcMailCreate, osMailQId, osMailQDef_t *, osThreadId,                   RET_pointer)
+1792c1708
+< osMailQId svcMailCreate (const osMailQDef_t *queue_def, osThreadId thread_id) {
+---
+> osMailQId svcMailCreate (osMailQDef_t *queue_def, osThreadId thread_id) {
+1879c1795
+<   if ((pmcb->p_lnk != NULL) && (pmcb->state == 3U)) {
+---
+>   if (pmcb->state == 3) {
+1887a1804,1806
+>         if (pmcb->p_lnk == NULL) {
+>           pmcb->state = 0;
+>         }
+1902c1821
+< osMailQId osMailCreate (const osMailQDef_t *queue_def, osThreadId thread_id) {
+---
+> osMailQId osMailCreate (osMailQDef_t *queue_def, osThreadId thread_id) {
+1914c1833
+<   if (IN_ISR()) {                               // in ISR
+---
+>   if (__get_IPSR() != 0) {                      // in ISR
+1923c1842
+<   if (IN_ISR()) {                               // in ISR
+---
+>   if (__get_IPSR() != 0) {                      // in ISR
+1932c1851
+<   if (IN_ISR()) {                               // in ISR
+---
+>   if (__get_IPSR() != 0) {                      // in ISR
+1945,1963d1863
+< 
+< #if TASK_HUNG_CHECK_ENABLED
+< osStatus svcThreadSetHungCheck (osThreadId thread_id, int32_t enable, uint32_t timeout) {
+<   P_TCB     ptcb;
+< 
+<   ptcb = rt_tid2ptcb(thread_id);                // Get TCB pointer
+<   if (ptcb == NULL) return osErrorParameter;
+< 
+<   ptcb->hung_check = !!enable;
+<   ptcb->hung_check_timeout = timeout;
+<   return osOK;
+< }
+< 
+< /// enable/disable the hung check feature of an active thread
+< osStatus osThreadSetHungCheck (osThreadId thread_id, int32_t enable, uint32_t timeout) {
+<   if (__get_IPSR() != 0) return osErrorISR;     // Not allowed in ISR
+<   return __svcThreadSetHungCheck(thread_id, enable, timeout);
+< }
+< #endif

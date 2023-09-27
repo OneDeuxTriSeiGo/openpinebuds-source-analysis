@@ -1,0 +1,31 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx5/os_systick.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/Source/os_systick.c
+diff -sw local remote
+---
+
+24d23
+< #include "hal_timer.h"
+38,52d36
+< #ifdef CALIB_SLOW_TIMER
+< #define OS_CLOCK            (CONFIG_SYSTICK_HZ * (OS_CLOCK_NOMINAL / CONFIG_SYSTICK_HZ_NOMINAL))
+< #else
+< #define OS_CLOCK            OS_CLOCK_NOMINAL
+< #endif
+< 
+< uint32_t SystemCoreClock;
+< 
+< #define SYSTICK_EXTERNAL_CLOCK          1
+< 
+< void SystemCoreClockUpdate()
+< {
+<     SystemCoreClock = OS_CLOCK;
+< }
+< 
+53a38
+> 
+85,87d69
+< #if (SYSTICK_EXTERNAL_CLOCK)
+<   SysTick->CTRL =  SysTick_CTRL_TICKINT_Msk;
+< #else
+89d70
+< #endif

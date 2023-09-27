@@ -1,0 +1,140 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/multimedia/audio/codec/fdkaac_codec/libSYS/include/genericStds.h
+remote: https://raw.githubusercontent.com/mstorsjo/fdk-aac/e45ae429b9ca8f234eb861338a75b2d89cde206a/libSYS/include/genericStds.h
+diff -sw local remote
+---
+
+3c3
+< Software License for The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android
+---
+> Software License for The Fraunhofer FDK AAC Codec Library for Android
+9c9
+< The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements
+---
+> The Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements
+237,244d236
+< #define USE_BUILTIN_STRING_FUNCTIONS
+< #include "hal_trace.h"
+< 
+< #define FDKprintf(num,fmt, ...) hal_trace_printf(num,fmt,##__VA_ARGS__)
+< #define FDKprintfErr(num,fmt,...) hal_trace_printf(num,fmt,##__VA_ARGS__)
+< #define FDKfprintf(stream, fmt, ...) hal_trace_printf(0,fmt, ##__VA_ARGS__)
+< #define FDKsprintf(str, fmt, ...) hal_trace_printf(0,fmt, ##__VA_ARGS__)
+< #if 0
+256c248
+< #endif
+---
+> 
+320,341d311
+< #include <math.h>
+< #include <stdlib.h>
+< #include <stdio.h>
+< #include <string.h>
+< #include <stdarg.h>
+< 
+< /*---------------------------------------------------------------------------------------
+<  * FUNCTION:    FDKmemcpy
+<  * DESCRIPTION: - copies memory from "src" to "dst" with length "size" bytes
+<  *              - compiled with FDK_DEBUG will give you warnings
+<  *---------------------------------------------------------------------------------------*/
+< inline void FDKmemcpy(void *dst, const void *src, const UINT size)
+< {
+< 
+<   /* do the copy */
+<   memcpy(dst, src, size);
+< }
+< 
+< inline void FDKmemmove(void *dst, const void *src, const UINT size)     { memmove(dst, src, size); }
+< inline void FDKmemset(void *memPtr, const INT value, const UINT size)   { memset(memPtr, value, size); }
+< inline void FDKmemclear(void *memPtr, const UINT size)                  { FDKmemset(memPtr,0,size); }
+< inline UINT FDKstrlen(const char *s)                                    { return (UINT)strlen(s); }
+343,346c313,331
+< /* Compare function wrappers */
+< inline INT FDKmemcmp(const void *s1, const void *s2, const UINT size)  { return memcmp(s1, s2, size); }
+< inline INT FDKstrcmp(const char *s1, const char *s2)                   { return strcmp(s1, s2); }
+< inline INT FDKstrncmp(const char *s1, const char *s2, const UINT size) { return strncmp(s1, s2, size); }
+---
+> /**
+>  * Copy memory. Source and destination memory must not overlap.
+>  * Either use implementation from a Standard Library, or, if no Standard Library
+>  * is available, a generic implementation.
+>  * The define ::USE_BUILTIN_MEM_FUNCTIONS in genericStds.cpp controls what to use.
+>  * The function arguments correspond to the standard memcpy(). Please see MSDN
+>  * documentation for details on how to use it.
+>  */
+> void FDKmemcpy(void *dst, const void *src, const UINT size);
+> 
+> /**
+>  * Copy memory. Source and destination memory are allowed to overlap.
+>  * Either use implementation from a Standard Library, or, if no Standard Library
+>  * is available, a generic implementation.
+>  * The define ::USE_BUILTIN_MEM_FUNCTIONS in genericStds.cpp controls what to use.
+>  * The function arguments correspond to the standard memmove(). Please see MSDN
+>  * documentation for details on how to use it.
+> */
+> void FDKmemmove(void *dst, const void *src, const UINT size);
+347a333,341
+> /**
+>  * Clear memory.
+>  * Either use implementation from a Standard Library, or, if no Standard Library
+>  * is available, a generic implementation.
+>  * The define ::USE_BUILTIN_MEM_FUNCTIONS in genericStds.cpp controls what to use.
+>  * The function arguments correspond to the standard memclear(). Please see MSDN
+>  * documentation for details on how to use it.
+> */
+> void FDKmemclear(void *memPtr, const UINT size);
+349c343,348
+< /* Math function wrappers. Only intended for compatibility, not to be highly optimized. */
+---
+> /**
+>  * Fill memory with values.
+>  * The function arguments correspond to the standard memset(). Please see MSDN
+>  * documentation for details on how to use it.
+>  */
+> void FDKmemset(void *memPtr, const INT value, const UINT size);
+351,368c350,353
+< inline INT FDKabs(INT j) { return abs(j); }
+< inline double FDKfabs(double x) { return fabs(x); }
+< inline double FDKpow(double x, double y) { return pow(x,y); }
+< inline double FDKsqrt(double x) { return sqrt(x); }
+< inline double FDKatan(double x) { return atan(x); }
+< inline double FDKlog(double x) { return log(x); }
+< inline double FDKsin(double x) { return sin(x); }
+< inline double FDKcos(double x) { return cos(x); }
+< inline double FDKexp(double x) { return exp(x); }
+< inline double FDKatan2(double y, double x) { return atan2(y, x); }
+< inline double FDKacos(double x) { return acos(x); }
+< inline double FDKtan(double x) { return tan(x); }
+< inline double FDKfloor(double x) { return floor(x); }
+< inline double FDKceil(double x) { return ceil(x); }
+< 
+< inline INT   FDKatoi(const char *nptr) { return atoi(nptr); }
+< inline long  FDKatol(const char *nptr) { return atol(nptr); }
+< inline float FDKatof(const char *nptr) { return (float)atof(nptr); }
+---
+> /* Compare function wrappers */
+> INT   FDKmemcmp(const void *s1, const void *s2, const UINT size);
+> INT   FDKstrcmp(const char *s1, const char *s2);
+> INT   FDKstrncmp(const char *s1, const char *s2, const UINT size);
+369a355
+> UINT  FDKstrlen(const char *s);
+379a366,374
+> INT FDKabs(INT j);
+> double FDKfabs(double x);
+> double FDKpow(double x, double y);
+> double FDKsqrt(double x);
+> double FDKatan(double x);
+> double FDKlog(double x);
+> double FDKsin(double x);
+> double FDKcos(double x);
+> double FDKexp(double x);
+381a377,384
+> double FDKatan2(double y, double x);
+> double FDKacos(double x);
+> double FDKtan(double x);
+> double FDKfloor(double x);
+> double FDKceil(double x);
+> INT   FDKatoi(const char *nptr);
+> long  FDKatol(const char *nptr);
+> float FDKatof(const char *nptr);
+384d386
+< 

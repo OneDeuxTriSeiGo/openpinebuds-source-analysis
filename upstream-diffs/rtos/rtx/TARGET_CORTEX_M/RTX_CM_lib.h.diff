@@ -1,0 +1,189 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx/TARGET_CORTEX_M/RTX_CM_lib.h
+remote: https://raw.githubusercontent.com/ARM-software/mbed-beetle/67fa33af21262f1c8871447f7a928de9ef3d2d44/libraries/rtos/rtx/TARGET_CORTEX_M/RTX_CM_lib.h
+diff -sw local remote
+---
+
+34c34
+< #include "cmsis_os.h"
+---
+> #include "mbed_error.h"
+53,55c53
+< #if __RTX_CPU_STATISTICS__
+< #define OS_TCB_SIZE     64
+< #else
+---
+> 
+57d54
+< #endif
+97a95
+> uint32_t const os_trv        = OS_TRV;
+106c104
+< unsigned short const idle_task_stack_size = sizeof(idle_task_stack); //OS_IDLESTKSIZE;
+---
+> unsigned short const idle_task_stack_size = OS_IDLESTKSIZE;
+119,120d116
+< uint32_t task_rtime[OS_TASK_CNT];
+< 
+124c120
+< osThreadDef(osTimerThread, (osPriority)(OS_TIMERPRIO-3), 1, 4*OS_TIMERSTKSZ, "os_timer");
+---
+> osThreadDef(osTimerThread, (osPriority)(OS_TIMERPRIO-3), 4*OS_TIMERSTKSZ);
+165c161
+<     os_error_str("Not enough stdlib mutexes\n");
+---
+>     error("Not enough stdlib mutexes\n");
+206,207c202,322
+< extern                        uint32_t __StackTop[];
+< #define INITIAL_SP            ((unsigned int)__StackTop)
+---
+> #if   defined(TARGET_LPC1768)
+> #define INITIAL_SP            (0x10008000UL)
+> 
+> #elif defined(TARGET_LPC11U24)
+> #define INITIAL_SP            (0x10002000UL)
+> 
+> #elif defined(TARGET_LPC11U35_401) || defined(TARGET_LPC11U35_501) || defined(TARGET_LPCCAPPUCCINO)
+> #define INITIAL_SP            (0x10002000UL)
+> 
+> #elif defined(TARGET_LPC1114)
+> #define INITIAL_SP            (0x10001000UL)
+> 
+> #elif defined(TARGET_LPC812)
+> #define INITIAL_SP            (0x10001000UL)
+> 
+> #elif defined(TARGET_LPC824)
+> #define INITIAL_SP            (0x10002000UL)
+> 
+> #elif defined(TARGET_KL25Z)
+> #define INITIAL_SP            (0x20003000UL)
+> 
+> #elif defined(TARGET_K64F)
+> #define INITIAL_SP            (0x20030000UL)
+> 
+> #elif defined(TARGET_K22F)
+> #define INITIAL_SP            (0x20010000UL)
+> 
+> #elif defined(TARGET_KL46Z)
+> #define INITIAL_SP            (0x20006000UL)
+> 
+> #elif defined(TARGET_KL43Z)
+> #define INITIAL_SP            (0x20006000UL)
+> 
+> #elif defined(TARGET_KL05Z)
+> #define INITIAL_SP            (0x20000C00UL)
+> 
+> #elif defined(TARGET_LPC4088) || defined(TARGET_LPC4088_DM)
+> #define INITIAL_SP            (0x10010000UL)
+> 
+> #elif defined(TARGET_LPC4330)
+> #define INITIAL_SP            (0x10008000UL)
+> 
+> #elif defined(TARGET_LPC4337)
+> #define INITIAL_SP            (0x10008000UL)
+> 
+> #elif defined(TARGET_LPC1347)
+> #define INITIAL_SP            (0x10002000UL)
+> 
+> #elif defined(TARGET_STM32F100RB) || defined(TARGET_STM32F051R8)
+> #define INITIAL_SP            (0x20002000UL)
+> 
+> #elif defined(TARGET_DISCO_F303VC)
+> #define INITIAL_SP            (0x2000A000UL)
+> 
+> #elif defined(TARGET_STM32F407) || defined(TARGET_F407VG)
+> #define INITIAL_SP            (0x20020000UL)
+> 
+> #elif defined(TARGET_STM32F401RE)
+> #define INITIAL_SP            (0x20018000UL)
+> 
+> #elif defined(TARGET_LPC1549)
+> #define INITIAL_SP            (0x02009000UL)
+> 
+> #elif defined(TARGET_LPC11U68)
+> #define INITIAL_SP            (0x10004000UL)
+> 
+> #elif defined(TARGET_STM32F411RE)
+> #define INITIAL_SP            (0x20020000UL)
+> 
+> #elif defined(TARGET_STM32F103RB)
+> #define INITIAL_SP            (0x20005000UL)
+> 
+> #elif defined(TARGET_STM32F302R8)
+> #define INITIAL_SP            (0x20004000UL)
+> 
+> #elif  defined(TARGET_STM32F334R8)
+> #define INITIAL_SP            (0x20003000UL)
+> 
+> #elif  defined(TARGET_STM32F334C8)
+> #define INITIAL_SP            (0x20003000UL)
+> 
+> #elif  defined(TARGET_STM32F405RG)
+> #define INITIAL_SP            (0x20020000UL)
+> 
+> #elif defined(TARGET_STM32F429ZI)
+> #define INITIAL_SP            (0x20030000UL)
+> 
+> #elif defined(TARGET_STM32L053R8) || defined(TARGET_STM32L053C8)
+> #define INITIAL_SP            (0x20002000UL)
+> 
+> #elif defined(TARGET_STM32F072RB)
+> #define INITIAL_SP            (0x20004000UL)
+> 
+> #elif defined(TARGET_STM32F091RC)
+> #define INITIAL_SP            (0x20008000UL)
+> 
+> #elif defined(TARGET_STM32F401VC)
+> #define INITIAL_SP            (0x20010000UL)
+> 
+> #elif defined(TARGET_STM32F303RE)
+> #define INITIAL_SP            (0x20010000UL)
+> 
+> #elif defined(TARGET_MAX32610) || defined(TARGET_MAX32600)
+> #define INITIAL_SP            (0x20008000UL)
+> 
+> #elif defined(TARGET_TEENSY3_1)
+> #define INITIAL_SP            (0x20008000UL)
+> 
+> #elif defined(TARGET_STM32L152RE)
+> #define INITIAL_SP            (0x20014000UL)
+> 
+> #elif defined(TARGET_NZ32ST1L)
+> #define INITIAL_SP            (0x20008000UL)
+> 
+> #elif defined(TARGET_STM32F446RE)
+> #define INITIAL_SP            (0x20020000UL)
+> 
+> #else
+> #error "no target defined"
+> 
+> #endif
+211c326
+< #define MAIN_STACK_BUF        (Image$$RW_IRAM1$$ZI$$Limit)
+---
+> #define HEAP_START      (Image$$RW_IRAM1$$ZI$$Limit)
+213,214c328,329
+< extern uint32_t               __StackLimit[];
+< #define MAIN_STACK_BUF        (__StackLimit)
+---
+> extern uint32_t          __end__[];
+> #define HEAP_START      (__end__)
+217c332
+< #define MAIN_STACK_BUF        (void *)__section_begin("HEAP")
+---
+> #define HEAP_START     (void *)__section_begin("HEAP")
+222c337
+<     os_thread_def_main.stack_pointer = MAIN_STACK_BUF;
+---
+>     os_thread_def_main.stack_pointer = HEAP_START;
+225c340
+<     os_thread_def_main.stacksize = (INITIAL_SP - (unsigned int)MAIN_STACK_BUF) - (OS_SCHEDULERSTKSIZE * 4);
+---
+>     os_thread_def_main.stacksize = (INITIAL_SP - (unsigned int)HEAP_START) - (OS_SCHEDULERSTKSIZE * 4);
+363c478
+< //extern void mbed_sdk_init(void);
+---
+> extern void mbed_sdk_init(void);
+376c491
+<     //mbed_sdk_init();
+---
+>     mbed_sdk_init();

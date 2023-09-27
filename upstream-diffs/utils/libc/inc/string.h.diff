@@ -1,0 +1,14 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/libc/inc/string.h
+remote: https://raw.githubusercontent.com/Ai-Thinker-Open/GPRS_C_SDK/15d333ffb00cb343ad05718d259d2615744d2233/include/std_inc/string.h
+diff -sw local remote
+---
+
+0a1
+> 
+3d3
+< 
+7d6
+< 
+9,10d7
+< #include "stdint.h"
+< #include "plat_types.h"

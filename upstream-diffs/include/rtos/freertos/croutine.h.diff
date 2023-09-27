@@ -1,0 +1,11 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/include/rtos/freertos/croutine.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-FreeRTOS/d9d2e739ec3541d999e002588a0d035e1f33efde/Source/include/croutine.h
+diff -sw local remote
+---
+
+26a27
+> 
+34c35
+< #include "freertos_list.h"
+---
+> #include "list.h"

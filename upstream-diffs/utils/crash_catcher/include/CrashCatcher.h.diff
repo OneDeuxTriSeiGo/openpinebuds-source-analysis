@@ -1,0 +1,13 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/crash_catcher/include/CrashCatcher.h
+remote: https://raw.githubusercontent.com/adamgreen/CrashCatcher/c6d463eecd8483eca12c497971a2f1ce207f8151/include/CrashCatcher.h
+diff -sw local remote
+---
+
+106c106
+< int CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo);
+---
+> void CrashCatcher_DumpStart(const CrashCatcherInfo* pInfo);
+135c135
+< void CrashCatcher_putc(char c);
+---
+> void CrashCatcher_putc(int c);

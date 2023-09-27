@@ -1,0 +1,18 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/core_cm33.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/4128fac86684eed487a46ba9a2d4107a595f957e/CMSIS/Core/Include/core_cm33.h
+diff -sw local remote
+---
+
+34d33
+< #ifndef __ASSEMBLER__
+36d34
+< #endif
+208d205
+< #ifndef __ASSEMBLER__
+210d206
+< #endif
+291,292d286
+< #ifndef __ASSEMBLER__
+< 
+2906d2899
+< #endif // !__ASSEMBLER__

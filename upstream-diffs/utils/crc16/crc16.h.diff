@@ -1,0 +1,27 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/crc16/crc16.h
+remote: https://raw.githubusercontent.com/torvalds/linux/2f72100c01dd31d769097c58874e8ab1e70b2518/include/linux/crc16.h
+diff -sw local remote
+---
+
+18c18
+< extern unsigned short const crc16_table[256];
+---
+> #include <linux/types.h>
+20,22c20
+< #ifdef __cplusplus
+< extern "C" {
+< #endif
+---
+> extern u16 const crc16_table[256];
+24c22
+< unsigned short _crc16(unsigned short crc, const unsigned char *buffer, unsigned int len);
+---
+> extern u16 crc16(u16 crc, const u8 *buffer, size_t len);
+26,30c24
+< #ifdef __cplusplus
+< }
+< #endif
+< 
+< static inline unsigned short crc16_byte(unsigned short crc, const unsigned char data)
+---
+> static inline u16 crc16_byte(u16 crc, const u8 data)

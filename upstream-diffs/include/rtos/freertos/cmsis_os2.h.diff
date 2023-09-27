@@ -1,0 +1,9 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/include/rtos/freertos/cmsis_os2.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/CMSIS/RTOS2/Include/cmsis_os2.h
+diff -sw local remote
+---
+
+274d273
+<   void                      *mutex;    ///< pointer to internal data
+283d281
+<   void                  *semaphore;    ///< pointer to internal data

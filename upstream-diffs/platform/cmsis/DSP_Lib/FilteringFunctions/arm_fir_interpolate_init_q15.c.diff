@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/DSP_Lib/FilteringFunctions/arm_fir_interpolate_init_q15.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS-DSP/a8cf6e9bb1f6ba6b6ee8d296f81b18447aaf080d/Source/FilteringFunctions/arm_fir_interpolate_init_q15.c
+diff -sw local remote
+---
+
+Files local and remote are identical

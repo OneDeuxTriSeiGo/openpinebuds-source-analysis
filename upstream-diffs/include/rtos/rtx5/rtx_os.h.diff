@@ -1,0 +1,16 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/include/rtos/rtx5/rtx_os.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/CMSIS/RTOS2/RTX/Include/rtx_os.h
+diff -sw local remote
+---
+
+129,138d128
+< #if __RTX_CPU_STATISTICS__
+<   uint32_t               swap_in_time;  ///< the task schedule in time
+<   uint32_t              swap_out_time;  ///< the task schedule out time
+<   uint32_t                      rtime;  ///< the task runing time after startup
+<   uint32_t                 step_rtime;  ///< the task runing time tile last show
+< #if TASK_HUNG_CHECK_ENABLED
+<   uint32_t                 hung_check;
+<   uint32_t         hung_check_timeout;
+< #endif
+< #endif /* __RTX_CPU_STATISTICS__*/

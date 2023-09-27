@@ -1,0 +1,21 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/mpu_armv8.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/4128fac86684eed487a46ba9a2d4107a595f957e/CMSIS/Core/Include/mpu_armv8.h
+diff -sw local remote
+---
+
+134c134
+<   //SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+---
+>   SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+146c146
+<   //SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
+---
+>   SCB->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
+159c159
+<   //SCB_NS->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+---
+>   SCB_NS->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
+171c171
+<   //SCB_NS->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;
+---
+>   SCB_NS->SHCSR &= ~SCB_SHCSR_MEMFAULTENA_Msk;

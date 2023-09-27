@@ -1,0 +1,10 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx5/rtx_system.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/RTX/Source/rtx_system.c
+diff -sw local remote
+---
+
+124,127d123
+< 
+< #if __RTX_CPU_STATISTICS__
+<   osRtxInfo.thread.run.curr->rtime += 1;
+< #endif

@@ -1,0 +1,22 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/drivers/usb/usb_host/inc/USBHost.h
+remote: https://os.mbed.com/users/peterbarrett1967/code/USBHostShell//raw-file/5ad808014a49/USBHost.h
+diff -sw local remote
+---
+
+27c27,35
+< #include "plat_types.h"
+---
+> #ifndef u8
+> typedef unsigned char u8;
+> typedef unsigned short u16;
+> typedef unsigned long u32;
+> 
+> typedef char s8;
+> typedef short s16;
+> typedef char s32;
+> #endif
+190,191c198
+< void OnLoadDevice(int device, DeviceDescriptor* deviceDesc, InterfaceDescriptor* interfaceDesc, u8 *itfDescEnd);
+< void OnUnloadDevice(int device);
+---
+> void OnLoadDevice(int device, DeviceDescriptor* deviceDesc, InterfaceDescriptor* interfaceDesc);

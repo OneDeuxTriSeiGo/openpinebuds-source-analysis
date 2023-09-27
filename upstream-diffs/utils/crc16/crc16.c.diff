@@ -1,0 +1,42 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/crc16/crc16.c
+remote: https://raw.githubusercontent.com/torvalds/linux/2f72100c01dd31d769097c58874e8ab1e70b2518/lib/crc16.c
+diff -sw local remote
+---
+
+1,15d0
+< /***************************************************************************
+<  *
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+<  *
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+23c8,10
+<  #include "crc16.h"
+---
+> #include <linux/types.h>
+> #include <linux/module.h>
+> #include <linux/crc16.h>
+26c13
+< unsigned short const crc16_table[256] = {
+---
+> u16 const crc16_table[256] = {
+59a47
+> EXPORT_SYMBOL(crc16_table);
+69c57
+< unsigned short _crc16(unsigned short crc, unsigned char const *buffer, unsigned int len)
+---
+> u16 crc16(u16 crc, u8 const *buffer, size_t len)
+74a63,66
+> EXPORT_SYMBOL(crc16);
+> 
+> MODULE_DESCRIPTION("CRC16 calculations");
+> MODULE_LICENSE("GPL");

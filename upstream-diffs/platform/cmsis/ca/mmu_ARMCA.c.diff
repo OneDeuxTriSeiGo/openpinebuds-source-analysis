@@ -1,0 +1,173 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/ca/mmu_ARMCA.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/Device/ARM/ARMCA7/Source/mmu_ARMCA7.c
+diff -sw local remote
+---
+
+102,119c102,103
+< #include "cmsis.h"
+< #include "mem_ARMCA.h"
+< #include "plat_types.h"
+< 
+< extern uint32_t __sync_flags_start[];
+< extern uint32_t __sync_flags_end[];
+< 
+< #define SECTION_SIZE                    0x00100000
+< #define SECTION_ADDR(n)                 ((n) & 0xFFF00000)
+< #define SECTION_CNT(n)                  (((n) + SECTION_SIZE - 1) / SECTION_SIZE)
+< 
+< #define PAGE16K_SIZE                    0x00004000
+< #define PAGE16K_ADDR(n)                 ((n) & 0xFFFFC000)
+< #define PAGE16K_CNT(n)                  (((n) + PAGE16K_SIZE - 1) / PAGE16K_SIZE)
+< 
+< #define PAGE4K_SIZE                     0x00001000
+< #define PAGE4K_ADDR(n)                  ((n) & 0xFFFFF000)
+< #define PAGE4K_CNT(n)                   (((n) + PAGE4K_SIZE - 1) / PAGE4K_SIZE)
+---
+> #include "ARMCA7.h"
+> #include "mem_ARMCA7.h"
+122c106
+< #define TTB_BASE                        (l1)
+---
+> #define TTB_BASE ((uint32_t*)__TTB_BASE)
+130,138c114,117
+< #define PRIVATE_TABLE_L2_4K_SIZE        (0x400)
+< #define PERIPHERAL_A_TABLE_L2_4K_SIZE   (0x400)
+< #define PERIPHERAL_B_TABLE_L2_64K_SIZE  (0x400)
+< #define SYNC_FLAGS_TABLE_L2_4K_SIZE     (0x400)
+< 
+< #define PRIVATE_TABLE_L2_BASE_4k        (l2.pri)            // Map 4k Private Address space
+< #define PERIPHERAL_A_TABLE_L2_BASE_4k   (l2.periph_a)       // Map 64k Peripheral #1 0x1C000000 - 0x1C00FFFFF
+< #define PERIPHERAL_B_TABLE_L2_BASE_64k  (l2.periph_b)       // Map 64k Peripheral #2 0x1C100000 - 0x1C1FFFFFF
+< #define SYNC_FLAGS_TABLE_L2_BASE_4k     (l2.sync)           // Map 4k Flag synchronization
+---
+> #define PRIVATE_TABLE_L2_BASE_4k       (__TTB_BASE + TTB_L1_SIZE)          // Map 4k Private Address space
+> #define PERIPHERAL_A_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0x400)  // Map 64k Peripheral #1 0x1C000000 - 0x1C00FFFFF
+> #define PERIPHERAL_B_TABLE_L2_BASE_64k (__TTB_BASE + TTB_L1_SIZE + 0x800)  // Map 64k Peripheral #2 0x1C100000 - 0x1C1FFFFFF
+> #define SYNC_FLAGS_TABLE_L2_BASE_4k    (__TTB_BASE + TTB_L1_SIZE + 0xC00)  // Map 4k Flag synchronization
+141,142c120,121
+< //#define PERIPHERAL_A_FAULT (0x00000000 + 0x1c000000) //0x1C000000-0x1C00FFFF (1M)
+< //#define PERIPHERAL_B_FAULT (0x00100000 + 0x1c000000) //0x1C100000-0x1C10FFFF (1M)
+---
+> #define PERIPHERAL_A_FAULT (0x00000000 + 0x1c000000) //0x1C000000-0x1C00FFFF (1M)
+> #define PERIPHERAL_B_FAULT (0x00100000 + 0x1c000000) //0x1C100000-0x1C10FFFF (1M)
+145,148c124,125
+< //#define FLAG_SYNC     0xFFFFF000
+< //#define F_SYNC_BASE   0xFFF00000  //1M aligned
+< #define SYNC_FLAG_SIZE                  ((uint32_t)__sync_flags_end - (uint32_t)__sync_flags_start)
+< #define FLAG_SYNC                       ((uint32_t)__sync_flags_start)
+---
+> #define FLAG_SYNC     0xFFFFF000
+> #define F_SYNC_BASE   0xFFF00000  //1M aligned
+157,159d133
+< static uint32_t Sect_Normal_NC;  //outer & inner uncached, non-shareable, executable, rw, domain 0, base addr 0
+< static uint32_t Sect_Normal_RO_NC; //outer & inner uncached, non-shareable, executable, ro, domain 0, base addr 0
+< 
+166,179d139
+< static uint32_t Page_4k_Normal;     //outer & inner wb/wa, non-shareable, executable, rw, domain 0
+< 
+< struct TTB_L2_T {
+<     uint32_t pri[PRIVATE_TABLE_L2_4K_SIZE / 4];
+<     uint32_t periph_a[PERIPHERAL_A_TABLE_L2_4K_SIZE / 4];
+<     uint32_t periph_b[PERIPHERAL_B_TABLE_L2_64K_SIZE / 4];
+<     uint32_t sync[SYNC_FLAGS_TABLE_L2_4K_SIZE / 4];
+< };
+< 
+< __attribute__((section(".ttb_l1"), aligned(0x4000)))
+< static uint32_t l1[TTB_L1_SIZE / 4];
+< __attribute__((section(".ttb_l2"), aligned(0x400)))
+< static struct TTB_L2_T l2;
+< 
+203d162
+<     page4k_normal(Page_L1_4k, Page_4k_Normal, region);
+205,206d163
+<     section_normal_nc(Sect_Normal_NC, region);
+<     section_normal_ro_nc(Sect_Normal_RO_NC, region);
+214,230c171,172
+<     MMU_TTSection (TTB_BASE, FLASH_BASE             , SECTION_CNT(FLASH_SIZE)       , Sect_Normal_Cod); // multiple of 1MB sections
+<     MMU_TTSection (TTB_BASE, FLASH_NC_BASE          , SECTION_CNT(FLASH_SIZE)       , Sect_Normal_RO_NC); // multiple of 1MB sections
+< #ifdef PSRAM_SIZE
+<     MMU_TTSection (TTB_BASE, PSRAM_BASE             , SECTION_CNT(PSRAM_SIZE)       , Sect_Normal);     // multiple of 1MB sections
+<     MMU_TTSection (TTB_BASE, PSRAM_NC_BASE          , SECTION_CNT(PSRAM_SIZE)       , Sect_Normal_NC);  // multiple of 1MB sections
+< #endif
+< #ifdef PSRAMUHS_SIZE
+<     MMU_TTSection (TTB_BASE, PSRAMUHS_BASE          , SECTION_CNT(PSRAMUHS_SIZE)    , Sect_Normal);     // multiple of 1MB sections
+<     MMU_TTSection (TTB_BASE, PSRAMUHS_NC_BASE       , SECTION_CNT(PSRAMUHS_SIZE)    , Sect_Normal_NC);  // multiple of 1MB sections
+<     MMU_TTSection (TTB_BASE, PSRAMUHSX_BASE         , SECTION_CNT(PSRAMUHS_SIZE)    , Sect_Normal_Cod);  // multiple of 1MB sections
+< #endif
+< 
+<     MMU_TTSection (TTB_BASE, DSP_RAM_BASE           , SECTION_CNT(MAX_DSP_RAM_SIZE) , Sect_Normal);     // multiple of 1MB sections
+< 
+<     MMU_TTSection (TTB_BASE, ROMD_BASE              , 1                             , Sect_Normal_Cod); // multiple of 1MB sections
+<     MMU_TTSection (TTB_BASE, RAM_BASE               , SECTION_CNT(MAX_RAM_SIZE)     , Sect_Normal_NC);  // multiple of 1MB sections
+< 
+---
+>     MMU_TTSection (TTB_BASE, __ROM_BASE, __ROM_SIZE/0x100000, Sect_Normal_Cod); // multiple of 1MB sections
+>     MMU_TTSection (TTB_BASE, __RAM_BASE, __RAM_SIZE/0x100000, Sect_Normal_RW);  // multiple of 1MB sections
+233,256d174
+<     // Create (256 * 4k)=1MB faulting entries to cover peripheral range A
+<     MMU_TTPage4k(TTB_BASE, SECTION_ADDR(DSP_BOOT_REG),256, Page_L1_4k,  (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, DESCRIPTOR_FAULT);
+<     // Define peripheral range A
+<     MMU_TTPage4k(TTB_BASE, DSP_BOOT_REG             ,  1, Page_L1_4k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_4k_Normal);
+<     MMU_TTPage4k(TTB_BASE, DSP_TRANSQM_BASE         ,  1, Page_L1_4k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+<     MMU_TTPage4k(TTB_BASE, DSP_TIMER0_BASE          ,  1, Page_L1_4k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+<     MMU_TTPage4k(TTB_BASE, DSP_TIMER1_BASE          ,  1, Page_L1_4k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+<     MMU_TTPage4k(TTB_BASE, DSP_WDT_BASE             ,  1, Page_L1_4k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+<     MMU_TTPage4k(TTB_BASE, DSP_DEBUGSYS_APB_BASE    ,  1, Page_L1_4k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+< 
+<     MMU_TTSection (TTB_BASE, DSP_XDMA_BASE          ,  1, Sect_Device_RW); // multiple of 1MB sections
+< 
+<     MMU_TTSection (TTB_BASE, CMU_BASE               ,  1, Sect_Device_RW); // AHB0/APB0
+<     MMU_TTSection (TTB_BASE, CHECKSUM_BASE          ,  1, Sect_Device_RW); // AHB1
+<     MMU_TTSection (TTB_BASE, CODEC_BASE             ,  1, Sect_Device_RW); // CODEC
+< 
+<     MMU_TTSection (TTB_BASE, BT_RAM_BASE            ,  1, Sect_Device_RW);
+<     MMU_TTSection (TTB_BASE, BT_CMU_BASE            ,  1, Sect_Device_RW);
+< 
+<     MMU_TTSection (TTB_BASE, WIFI_RAM_BASE          ,  1, Sect_Device_RW);
+<     MMU_TTSection (TTB_BASE, WIFI_PAS_BASE          ,  1, Sect_Device_RW);
+<     MMU_TTSection (TTB_BASE, WIFI_TRANSQM_BASE      ,  1, Sect_Device_RW);
+< 
+< #if 0
+265c183
+<     MMU_TTPage64k(TTB_BASE, PERIPHERAL_A_FAULT      , 16, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, DESCRIPTOR_FAULT);
+---
+>     MMU_TTPage64k(TTB_BASE, PERIPHERAL_A_FAULT      , 16, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, DESCRIPTOR_FAULT);
+267,274c185,192
+<     MMU_TTPage64k(TTB_BASE, VE_A7_MP_DAP_BASE       ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_64k_Device_RW);
+<     MMU_TTPage64k(TTB_BASE, VE_A7_MP_SYSTEM_REG_BASE,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_64k_Device_RW);
+<     MMU_TTPage64k(TTB_BASE, VE_A7_MP_SERIAL_BASE    ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_64k_Device_RW);
+<     MMU_TTPage64k(TTB_BASE, VE_A7_MP_AACI_BASE      ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_64k_Device_RW);
+<     MMU_TTPage64k(TTB_BASE, VE_A7_MP_MMCI_BASE      ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_64k_Device_RW);
+<     MMU_TTPage64k(TTB_BASE, VE_A7_MP_KMI0_BASE      ,  2, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_64k_Device_RW);
+<     MMU_TTPage64k(TTB_BASE, VE_A7_MP_UART_BASE      ,  4, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_64k_Device_RW);
+<     MMU_TTPage64k(TTB_BASE, VE_A7_MP_WDT_BASE       ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_4k, Page_64k_Device_RW);
+---
+>     MMU_TTPage64k(TTB_BASE, VE_A7_MP_DAP_BASE       ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, Page_64k_Device_RW);
+>     MMU_TTPage64k(TTB_BASE, VE_A7_MP_SYSTEM_REG_BASE,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, Page_64k_Device_RW);
+>     MMU_TTPage64k(TTB_BASE, VE_A7_MP_SERIAL_BASE    ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, Page_64k_Device_RW);
+>     MMU_TTPage64k(TTB_BASE, VE_A7_MP_AACI_BASE      ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, Page_64k_Device_RW);
+>     MMU_TTPage64k(TTB_BASE, VE_A7_MP_MMCI_BASE      ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, Page_64k_Device_RW);
+>     MMU_TTPage64k(TTB_BASE, VE_A7_MP_KMI0_BASE      ,  2, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, Page_64k_Device_RW);
+>     MMU_TTPage64k(TTB_BASE, VE_A7_MP_UART_BASE      ,  4, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, Page_64k_Device_RW);
+>     MMU_TTPage64k(TTB_BASE, VE_A7_MP_WDT_BASE       ,  1, Page_L1_64k, (uint32_t *)PERIPHERAL_A_TABLE_L2_BASE_64k, Page_64k_Device_RW);
+284d201
+< #endif
+290d206
+< #if 0 //defined(__L2C_PRESENT) && (__L2C_PRESENT)
+292,293c208
+<     MMU_TTPage4k (TTB_BASE, VE_A5_MP_PL310_BASE     ,  1,  Page_L1_4k, (uint32_t *)PRIVATE_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+< #endif
+---
+>     //    MMU_TTPage4k (TTB_BASE, VE_A5_MP_PL310_BASE     ,  1,  Page_L1_4k, (uint32_t *)PRIVATE_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+295d209
+< #if 0
+300,304d213
+< #endif
+<     // Define synchronization space entry.
+<     MMU_TTPage4k (TTB_BASE, SECTION_ADDR(FLAG_SYNC) , 256, Page_L1_4k, (uint32_t *)SYNC_FLAGS_TABLE_L2_BASE_4k, Page_4k_Normal);
+<     // Define synchronization space entry.
+<     MMU_TTPage4k (TTB_BASE, FLAG_SYNC               , PAGE4K_CNT(SYNC_FLAG_SIZE), Page_L1_4k, (uint32_t *)SYNC_FLAGS_TABLE_L2_BASE_4k, Page_4k_Device_RW);
+315c224
+<     __set_TTBR0((uint32_t)TTB_BASE | 0x48);
+---
+>     __set_TTBR0(__TTB_BASE | 0x48);

@@ -1,0 +1,13 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/multimedia/audio/codec/fdkaac_codec/libPCMutils/include/limiter.h
+remote: https://raw.githubusercontent.com/mstorsjo/fdk-aac/e45ae429b9ca8f234eb861338a75b2d89cde206a/libPCMutils/include/limiter.h
+diff -sw local remote
+---
+
+3c3
+< Software License for The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android
+---
+> Software License for The Fraunhofer FDK AAC Codec Library for Android
+9c9
+< The Third-Party Modified Version of the Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements
+---
+> The Fraunhofer FDK AAC Codec Library for Android ("FDK AAC Codec") is software that implements

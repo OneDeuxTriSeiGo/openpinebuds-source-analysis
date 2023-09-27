@@ -1,0 +1,14 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx5/rtx_evr.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/RTX/Source/rtx_evr.c
+diff -sw local remote
+---
+
+29,30d28
+< #include "rtx_lib.h"
+< #include "hal_trace.h"
+544,545c542,543
+<   os_thread_t *thread = osRtxThreadId(thread_id);
+<   TRACE(2,"EvrRtxThreadError, thread name:%s, status:%d", thread ? thread->name : "NULL", status);
+---
+>   (void)thread_id;
+>   (void)status;

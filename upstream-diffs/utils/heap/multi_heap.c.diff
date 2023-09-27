@@ -1,0 +1,120 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/heap/multi_heap.c
+remote: https://raw.githubusercontent.com/espressif/esp-idf/db243d092c05d89491c1ecefccac74180da00178/components/heap/multi_heap.c
+diff -sw local remote
+---
+
+6c6
+< //
+---
+> 
+23d22
+< #include "hal_trace.h"
+28a28,30
+> /* Defines compile-time configuration macros */
+> #include "multi_heap_config.h"
+> 
+65,66c67,68
+< #define HEAP_ALIGN(X) ((X) & ~(sizeof(void *)-1))
+< #define HEAP_ALIGN_UP(X) HEAP_ALIGN((X)+sizeof(void *)-1)
+---
+> #define ALIGN(X) ((X) & ~(sizeof(void *)-1))
+> #define ALIGN_UP(X) ALIGN((X)+sizeof(void *)-1)
+100d101
+<     size_t total_bytes;
+105,107d105
+< #if defined(MULTI_HEAP_DEFAULT_INT_LOCK)
+<     size_t int_lock;
+< #endif
+272c270
+<     size = HEAP_ALIGN_UP(size);
+---
+>     size = ALIGN_UP(size);
+333,335c331,332
+<     TRACE(2,"multi_heap_register_impl start=%p,size=%d",start,size);
+<     heap_t *heap = (heap_t *)HEAP_ALIGN_UP((intptr_t)start);
+<     uintptr_t end = HEAP_ALIGN((uintptr_t)start + size);
+---
+>     heap_t *heap = (heap_t *)ALIGN_UP((intptr_t)start);
+>     uintptr_t end = ALIGN((uintptr_t)start + size);
+339,341d335
+< #if defined(MULTI_HEAP_DEFAULT_INT_LOCK)
+<     heap->lock = (void *)(&heap->int_lock);
+< #else
+343d336
+< #endif
+366c359
+<     heap->free_bytes = HEAP_ALIGN(size) - sizeof(heap_t) - sizeof(first_free_block->header) - sizeof(heap_block_t);
+---
+>     heap->free_bytes = ALIGN(size) - sizeof(heap_t) - sizeof(first_free_block->header) - sizeof(heap_block_t);
+368c361
+<     heap->total_bytes = HEAP_ALIGN(size);
+---
+> 
+414c407
+<     size = HEAP_ALIGN_UP(size);
+---
+>     size = ALIGN_UP(size);
+429d421
+<         ASSERT(0, "[%s] need size = %d, heap->free_bytes = %d", __func__, size, heap->free_bytes);
+518c510
+<     size = HEAP_ALIGN_UP(size);
+---
+>     size = ALIGN_UP(size);
+606c598
+< #define FAIL_PRINT(num,MSG, ...) do {                                       \
+---
+> #define FAIL_PRINT(MSG, ...) do {                                       \
+608c600
+<             MULTI_HEAP_STDERR_PRINTF(num,MSG, __VA_ARGS__);                 \
+---
+>             MULTI_HEAP_STDERR_PRINTF(MSG, __VA_ARGS__);                 \
+629c621
+<             FAIL_PRINT(1,"CORRUPT HEAP: Block %p points to itself\n", b);
+---
+>             FAIL_PRINT("CORRUPT HEAP: Block %p points to itself\n", b);
+633c625
+<             FAIL_PRINT(2,"CORRUPT HEAP: Block %p is before prev block %p\n", b, prev);
+---
+>             FAIL_PRINT("CORRUPT HEAP: Block %p is before prev block %p\n", b, prev);
+637c629
+<             FAIL_PRINT(2,"CORRUPT HEAP: Block %p is outside heap (last valid block %p)\n", b, prev);
+---
+>             FAIL_PRINT("CORRUPT HEAP: Block %p is outside heap (last valid block %p)\n", b, prev);
+642c634
+<                 FAIL_PRINT(2,"CORRUPT HEAP: Two adjacent free blocks found, %p and %p\n", prev, b);
+---
+>                 FAIL_PRINT("CORRUPT HEAP: Two adjacent free blocks found, %p and %p\n", prev, b);
+645c637
+<                 FAIL_PRINT(3,"CORRUPT HEAP: Prev free block %p pointed to next free %p but this free block is %p\n",
+---
+>                 FAIL_PRINT("CORRUPT HEAP: Prev free block %p pointed to next free %p but this free block is %p\n",
+674c666
+<         FAIL_PRINT(2,"CORRUPT HEAP: Last block %p not %p\n", prev, heap->last_block);
+---
+>         FAIL_PRINT("CORRUPT HEAP: Last block %p not %p\n", prev, heap->last_block);
+677c669
+<         FAIL_PRINT(1,"CORRUPT HEAP: Expected prev block %p to be free\n", heap->last_block);
+---
+>         FAIL_PRINT("CORRUPT HEAP: Expected prev block %p to be free\n", heap->last_block);
+681c673
+<         FAIL_PRINT(2,"CORRUPT HEAP: Expected %u free bytes counted %u\n", (unsigned)heap->free_bytes, (unsigned)total_free_bytes);
+---
+>         FAIL_PRINT("CORRUPT HEAP: Expected %u free bytes counted %u\n", (unsigned)heap->free_bytes, (unsigned)total_free_bytes);
+695c687
+<     MULTI_HEAP_STDERR_PRINTF(3,"Heap start %p end %p\nFirst free block %p\n", &heap->first_block, heap->last_block, heap->first_block.next_free);
+---
+>     MULTI_HEAP_STDERR_PRINTF("Heap start %p end %p\nFirst free block %p\n", &heap->first_block, heap->last_block, heap->first_block.next_free);
+697c689
+<         MULTI_HEAP_STDERR_PRINTF(3,"Block %p data size 0x%08x bytes next block %p", b, block_data_size(b), get_next_block(b));
+---
+>         MULTI_HEAP_STDERR_PRINTF("Block %p data size 0x%08x bytes next block %p", b, block_data_size(b), get_next_block(b));
+699c691
+<             MULTI_HEAP_STDERR_PRINTF(1," FREE. Next free %p\n", b->next_free);
+---
+>             MULTI_HEAP_STDERR_PRINTF(" FREE. Next free %p\n", b->next_free);
+701c693
+<             MULTI_HEAP_STDERR_PRINTF(1,"%s", "\n"); /* C macros & optional __VA_ARGS__ */
+---
+>             MULTI_HEAP_STDERR_PRINTF("%s", "\n"); /* C macros & optional __VA_ARGS__ */
+748d739
+<     info->total_bytes = heap->total_bytes;

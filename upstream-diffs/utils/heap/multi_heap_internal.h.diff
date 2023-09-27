@@ -1,0 +1,12 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/heap/multi_heap_internal.h
+remote: https://raw.githubusercontent.com/espressif/esp-idf/db243d092c05d89491c1ecefccac74180da00178/components/heap/multi_heap_internal.h
+diff -sw local remote
+---
+
+6c6
+< //
+---
+> 
+15,16d14
+< 
+< #define MULTI_HEAP_DEFAULT_INT_LOCK (1)

@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx/TARGET_ARM7/rt_MemBox.h
+remote: https://raw.githubusercontent.com/ARM-software/mbed-beetle/67fa33af21262f1c8871447f7a928de9ef3d2d44/libraries/rtos/rtx/TARGET_ARM7/rt_MemBox.h
+diff -sw local remote
+---
+
+Files local and remote are identical

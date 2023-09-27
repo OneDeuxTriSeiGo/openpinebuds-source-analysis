@@ -1,0 +1,48 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/libc/inc/stdlib.h
+remote: https://raw.githubusercontent.com/Ai-Thinker-Open/GPRS_C_SDK/15d333ffb00cb343ad05718d259d2615744d2233/include/std_inc/stdlib.h
+diff -sw local remote
+---
+
+0a1
+> 
+3d3
+< 
+7a8
+> #include "cs_types.h"
+9d9
+< #include "stdint.h"
+13c13,19
+< #define atol(str) ((long) atoi((str)))
+---
+> long         atol(const char *s);
+> long long    atoll(const char *s);
+> int          atox(const char *s, int len);
+> double       atof(const char *s);
+> 
+> unsigned char* itoa(int value, char *str, int radix);
+> char*          gcvt(double value, int ndigit, char *buf);
+24d29
+< void qsort(void *baseP, size_t nElem, size_t width, int (*compar)(const void *, const void *));
+26,27c31,45
+< void *bsearch(const void *key, const void *base, size_t nmemb, size_t size,
+<      int (*compar)(const void *, const void *));
+---
+> typedef INT STD_COMPAR_FUNC_T (const VOID*, const VOID*);
+> 
+> PUBLIC VOID  qsort (VOID *baseP, INT32 nElem, INT32 width, STD_COMPAR_FUNC_T *compar);
+> 
+> 
+> void *
+> bsearch (const void *key, const void *base, size_t nmemb, size_t size,
+>          int (*compar) __P ((const void *, const void *)));
+> 
+> 
+> 
+> #include "api_os.h"
+> #define malloc  OS_Malloc
+> #define free    OS_Free
+> #define realloc OS_Realloc
+33c51
+< #endif
+---
+> #endif /* STDLIB_H */

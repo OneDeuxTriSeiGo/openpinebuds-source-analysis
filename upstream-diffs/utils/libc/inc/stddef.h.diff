@@ -1,0 +1,25 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/libc/inc/stddef.h
+remote: https://raw.githubusercontent.com/Ai-Thinker-Open/GPRS_C_SDK/15d333ffb00cb343ad05718d259d2615744d2233/include/std_inc/stddef.h
+diff -sw local remote
+---
+
+0a1
+> 
+3,10c4,8
+< 
+< #undef                              NULL
+< #ifndef __cplusplus
+< #define NULL                        ((void *)0)
+< #else   /* C++ */
+< #define NULL                        0
+< #endif  /* C++ */
+< 
+---
+> #include "cs_types.h"
+> #ifndef _PTRDIFF_T_DEFINED
+> typedef int ptrdiff_t;
+> #define PTRDIFF(p1, p2, type)   ((p1) - (p2))
+> #define _PTRDIFF_T_DEFINED
+11a10,11
+> 
+> #endif    /* STDDEF_H */

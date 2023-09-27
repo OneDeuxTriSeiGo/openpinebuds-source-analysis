@@ -1,0 +1,26 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/ca/cmsis_armclang_ca.h
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/122be858fd7178f2d6e4670bc7dc02588a254dca/CMSIS/Core_A/Include/cmsis_armclang.h
+diff -sw local remote
+---
+
+25,26c25,26
+< #ifndef __CMSIS_ARMCLANG_CA_H
+< #define __CMSIS_ARMCLANG_CA_H
+---
+> #ifndef __CMSIS_ARMCLANG_H
+> #define __CMSIS_ARMCLANG_H
+30c30
+< #ifndef __ARM_COMPAT_CA_H
+---
+> #ifndef __ARM_COMPAT_H
+324a325,326
+> #define     __SADD8                 __builtin_arm_sadd8
+> #define     __SADD16                __builtin_arm_sadd16
+513c515
+< #include "ca/cmsis_cp15_ca.h"
+---
+> #include "cmsis_cp15.h"
+585c587
+< #endif /* __CMSIS_ARMCLANG_CA_H */
+---
+> #endif /* __CMSIS_ARMCLANG_H */

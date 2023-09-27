@@ -1,0 +1,70 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/rtx5/rtx_thread.c
+remote: https://raw.githubusercontent.com/ARM-software/CMSIS_5/95ad2aa1a7cab351a0a246263ccb9d6921586df2/CMSIS/RTOS2/RTX/Source/rtx_thread.c
+diff -sw local remote
+---
+
+27c27
+< #include "hal_timer.h"
+---
+> 
+36,41d35
+< #if __RTX_CPU_STATISTICS__
+< uint32_t rtx_get_hwticks(void)
+< {
+<     return hal_sys_timer_get();
+< }
+< #endif
+430,436d423
+< #if __RTX_CPU_STATISTICS__
+<   if (osRtxInfo.thread.run.curr != thread) {
+<     if (osRtxInfo.thread.run.curr)
+<       osRtxInfo.thread.run.curr->swap_out_time = HWTICKS_TO_MS(rtx_get_hwticks());
+<     thread->swap_in_time = HWTICKS_TO_MS(rtx_get_hwticks());
+<   }
+< #endif
+790,793c777
+< #if __RTX_CPU_STATISTICS__
+<   thread->rtime           = 0;
+<   thread->step_rtime      = 0;
+< #endif
+---
+> 
+1552,1568d1535
+< #if TASK_HUNG_CHECK_ENABLED
+< osStatus_t svcRtxThreadSetHungCheck (osThreadId_t thread_id, int32_t enable, uint32_t timeout) {
+<   os_thread_t *thread = osRtxThreadId(thread_id);
+< 
+<   if (thread == NULL)
+<     return osErrorParameter;
+< 
+<   thread->hung_check = !!enable;
+<   thread->hung_check_timeout = timeout;
+<   return osOK;
+< }
+< #endif
+< 
+< int rtx_task_idle_health_check(void)
+< {
+<     return 0;
+< }
+1593,1595d1559
+< #if TASK_HUNG_CHECK_ENABLED
+< SVC0_3 (ThreadSetHungCheck,  osStatus_t,      osThreadId_t, int32_t, uint32_t)
+< #endif
+1702,1706d1665
+< const char *osGetThreadName (void) {
+<     os_thread_t *thread = osRtxThreadId(osThreadGetId());
+<     return thread->name;
+< }
+< 
+1733d1691
+< 
+1945,1952d1902
+< #if TASK_HUNG_CHECK_ENABLED
+< /// enable/disable the hung check feature of an active thread
+< osStatus_t osThreadSetHungCheck (osThreadId_t thread_id, int32_t enable, uint32_t timeout) {
+<   if (IsIrqMode() || IsIrqMasked())
+<     return osErrorISR;     // Not allowed in ISR
+<   return __svcThreadSetHungCheck(thread_id, enable, timeout);
+< }
+< #endif
