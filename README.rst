@@ -27,6 +27,10 @@ project to assist with relicensing the project among other things.
 
   - Lists: Not Started
 
+* `Bluetooth Alternate Sources and Reverse Engineering Attempts <bluetooth-sources.rst>`_
+
+  - Lists: In Progress
+
 Licenses
 --------
 
