@@ -11,10 +11,6 @@ project to assist with relicensing the project among other things.
 
 * `Upstream Identification <upstreams.rst>`_
 
-  - List: Complete
-
-  - Diffs: Complete
-
 * `Alternate Sources released under an Open Source License <alt-sources.rst>`_
 
   - List: Not Started
