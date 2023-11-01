@@ -5,6 +5,8 @@ Source Analysis for the OpenPineBuds Project
 Source code analysis for the `pine64/OpenPineBuds <https://github.com/pine64/OpenPineBuds>`_ 
 project to assist with relicensing the project among other things.
 
+* `Original OpenPineBuds Sources <original-sources.rst>`_
+
 * `Upstream Identification <upstreams.rst>`_
 
   - List: Not Started
