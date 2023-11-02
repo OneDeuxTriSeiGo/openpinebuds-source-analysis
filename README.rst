@@ -7,6 +7,8 @@ project to assist with relicensing the project among other things.
 
 * `Original OpenPineBuds Sources <original-sources.rst>`_
 
+* `Moved or Relocated Sources <moved-sources.rst>`_
+
 * `Upstream Identification <upstreams.rst>`_
 
   - List: Not Started
