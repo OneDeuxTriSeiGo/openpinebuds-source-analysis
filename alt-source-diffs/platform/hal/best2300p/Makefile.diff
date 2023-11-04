@@ -1,0 +1,102 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/best2300p/Makefile
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/best2003/Makefile
+diff -sw local remote
+---
+
+0a1,12
+> # Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+> # Licensed under the Apache License, Version 2.0 (the "License");
+> # you may not use this file except in compliance with the License.
+> # You may obtain a copy of the License at
+> #
+> #     http://www.apache.org/licenses/LICENSE-2.0
+> #
+> # Unless required by applicable law or agreed to in writing, software
+> # distributed under the License is distributed on an "AS IS" BASIS,
+> # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+> # See the License for the specific language governing permissions and
+> # limitations under the License.
+9c21
+< $(error FLASH_LOW_SPEED should be used with MCU_HIGH_PERFORMANCE_MODE when OSC_26M_X4_AUD2BB is NOT enabled on $(CHIP))
+---
+> #$(error FLASH_LOW_SPEED should be used with MCU_HIGH_PERFORMANCE_MODE when OSC_26M_X4_AUD2BB is NOT enabled on $(CHIP))
+13a26,37
+> ifeq ($(DSP_ENABLE),1)
+> CMU_CFG_FLAGS += -DDSP_ENABLE
+> endif
+> 
+> ifeq ($(PMU_IRQ_UNIFIED),1)
+> CMU_CFG_FLAGS += -DPMU_IRQ_UNIFIED
+> endif
+> 
+> ifneq ($(MCU_HIGH_PERFORMANCE_MODE), 0)
+> CMU_CFG_FLAGS += -DMCU_HIGH_PERFORMANCE_MODE_$(MCU_HIGH_PERFORMANCE_MODE)
+> endif
+> 
+18,28c42,43
+< ifeq ($(USB_CLK_SRC_24M_X2),1)
+< CMU_CFG_FLAGS += -DUSB_CLK_SRC_24M_X2
+< else
+< ifeq ($(USB_CLK_SRC_48M),1)
+< CMU_CFG_FLAGS += -DUSB_CLK_SRC_48M
+< else
+< ifeq ($(USB_CLK_SRC_26M_X4),1)
+< CMU_CFG_FLAGS += -DUSB_CLK_SRC_26M_X4
+< else
+< ifeq ($(USB_CLK_SRC_26M_X2),1)
+< CMU_CFG_FLAGS += -DUSB_CLK_SRC_26M_X2
+---
+> ifeq ($(AUDIO_USE_BBPLL),1)
+> CMU_CFG_FLAGS += -DAUDIO_USE_BBPLL
+29a45,47
+> 
+> ifeq ($(SYS_USE_BB_PSRAMPLL),1)
+> CMU_CFG_FLAGS += -DSYS_USE_BB_PSRAMPLL
+30a49,50
+> ifeq ($(SYS_USE_DSPPLL),1)
+> CMU_CFG_FLAGS += -DSYS_USE_DSPPLL
+31a52,53
+> ifeq ($(SYS_USE_USBPLL),1)
+> CMU_CFG_FLAGS += -DSYS_USE_USBPLL
+34,35c56,60
+< ifeq ($(RESAMPLE_CODEC_CLK_ANA),1)
+< CMU_CFG_FLAGS += -DRESAMPLE_CODEC_CLK_ANA
+---
+> ifeq ($(BBPLL_USE_DSI_MCUPLL),1)
+> CMU_CFG_FLAGS += -DBBPLL_USE_DSI_MCUPLL
+> endif
+> ifeq ($(BB_PSRAMPLL_USE_DSI_PSRAMPLL),1)
+> CMU_CFG_FLAGS += -DBB_PSRAMPLL_USE_DSI_PSRAMPLL
+38,40c63,64
+< ifeq ($(LOW_SYS_FREQ),1)
+< ifneq ($(FLASH_LOW_SPEED),1)
+< $(error FLASH_LOW_SPEED should be enabled along with LOW_SYS_FREQ)
+---
+> ifeq ($(DSP_USE_BBPLL),1)
+> CMU_CFG_FLAGS += -DDSP_USE_BBPLL
+41a66,67
+> ifeq ($(DSP_USE_USBPLL),1)
+> CMU_CFG_FLAGS += -DDSP_USE_USBPLL
+43a70,71
+> CMU_CFG_FLAGS +=-DA7_DSP_SPEED=$(A7_DSP_SPEED)
+> 
+54d81
+< JTAG_TDI_TDO_PIN ?= 1
+64a92,93
+> IOMUX_CFG_FLAGS += -Iplatform/drivers/wifi/best2003
+> 
+68a98,103
+> ifeq ($(REUSE_WIFI_CALI_RESULT),1)
+> CMU_CFG_FLAGS += -DREUSE_WIFI_CALI_RESULT
+> endif
+> 
+> CMU_CFG_FLAGS += -Iplatform/drivers/ana/best2003
+> 
+77a113,119
+> 
+> ifeq ($(FLASH_SUSPEND),1)
+> CFLAGS_hal_cmu_$(CHIP).o += -DFLASH_SUSPEND -Iservices/norflash_api
+> endif
+> ifeq ($(FLASH_API_GUARD_THREAD),1)
+> CFLAGS_hal_cmu_$(CHIP).o += -DFLASH_API_GUARD_THREAD
+> endif

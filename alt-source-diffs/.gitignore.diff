@@ -1,0 +1,37 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/.gitignore
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/.gitignore
+diff -sw local remote
+---
+
+34a35,39
+> # gnu global files
+> GPATH
+> GRTAGS
+> GSYMS
+> GTAGS
+91,92c96,97
+< # Library dir
+< #lib/
+---
+> Library dir
+> lib/
+94c99
+< # Build dir
+---
+> Build dir
+96a102,109
+> *.bin
+> *.yaml
+> 
+> *.tar.gz
+> write_flash_gui*
+> *.lds
+> */liteos_m/sdk/bsp/out/log
+> *.mri
+100c113,116
+< log.txt
+---
+> 
+> # Except these files
+> !bes2600/liteos_m/sdk/bsp/out/**/*.bin
+> !bes2600/liteos_m/sdk/bsp/out/**/*.a

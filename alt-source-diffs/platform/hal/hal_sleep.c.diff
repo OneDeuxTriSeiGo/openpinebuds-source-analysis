@@ -1,0 +1,619 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_sleep.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_sleep.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,16c9,17
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+< #include "hal_sleep.h"
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+> #include "analog.h"
+> #include "cmsis.h"
+> #include "hal_cache.h"
+17a19,20
+> #include "hal_dma.h"
+> #include "hal_gpadc.h"
+18a22,27
+> #include "hal_norflash.h"
+> #include "hal_psram.h"
+> #include "hal_psramuhs.h"
+> #include "hal_sleep.h"
+> #include "hal_spi.h"
+> #include "hal_sysfreq.h"
+21,25c30
+< #include "hal_sysfreq.h"
+< #include "hal_dma.h"
+< #include "hal_norflash.h"
+< #include "hal_gpadc.h"
+< #include "analog.h"
+---
+> #include "hal_uart.h"
+27c32,42
+< #include "cmsis.h"
+---
+> 
+> #if !(defined(CHIP_SUBSYS_SENS) || \
+>         (defined(CHIP_SUBSYS_BTH) && !defined(BTH_AS_MAIN_MCU)))
+> #define CHIP_SLEEP_CTRL_ENABLE
+> #endif
+> 
+> #ifdef CORE_SLEEP_POWER_DOWN
+> #define PM_NOTIF_HDLR_CNT                   10
+> #else
+> #define PM_NOTIF_HDLR_CNT                   3
+> #endif
+36a52,59
+> #ifdef CORE_SLEEP_POWER_DOWN
+> static bool skip_power_down;
+> #endif
+> 
+> static uint8_t pm_user_cnt;
+> STATIC_ASSERT((1 << (sizeof(pm_user_cnt) * 8)) > PM_NOTIF_HDLR_CNT, "pm_user_cnt to small to hold PM_NOTIF_HDLR_CNT");
+> static enum HAL_PM_USER_TYPE_T pm_user[PM_NOTIF_HDLR_CNT];
+> static HAL_PM_NOTIF_HANDLER pm_notif[PM_NOTIF_HDLR_CNT];
+40a64,69
+> #ifdef WAKEUP_SRC_STATS
+> static uint32_t wakeup_start_time;
+> static uint32_t wakeup_src_map[(USER_IRQn_QTY + 31) / 32];
+> static uint32_t wakeup_multi_src_map[(USER_IRQn_QTY + 31) / 32];
+> static uint32_t wakeup_total_interval[USER_IRQn_QTY];
+> #endif
+73a103
+>         stats_trace_time = stats_start_time;
+76a107,121
+> #ifdef WAKEUP_SRC_STATS
+>     int i;
+> 
+>     for (i = 0; i < ARRAY_SIZE(wakeup_src_map); i++) {
+>         wakeup_src_map[i] = 0;
+>         wakeup_multi_src_map[i] = 0;
+>     }
+>     for (i = 0; i < ARRAY_SIZE(wakeup_total_interval); i++) {
+>         wakeup_total_interval[i] = 0;
+>     }
+> #endif
+> #ifdef CACHE_STATS
+>     hal_cache_monitor_enable(HAL_CACHE_ID_I_CACHE);
+>     hal_cache_monitor_enable(HAL_CACHE_ID_D_CACHE);
+> #endif
+84a130,133
+>     if (!usage) {
+>         return -1;
+>     }
+> 
+100c149,150
+< static int hal_sleep_cpu_busy(void)
+---
+> #if defined(SLEEP_STATS_TRACE) && defined(WAKEUP_SRC_STATS)
+> static void SRAM_TEXT_LOC hal_sleep_calc_wakeup_interval(uint32_t cur_time)
+102,105c152,168
+<     if (cpu_wake_lock_map || hal_cmu_lpu_busy()) {
+<         return 1;
+<     } else {
+<         return 0;
+---
+>     uint32_t interval;
+>     int i;
+>     int j;
+>     int index;
+>     uint32_t src_cnt = 0;
+> 
+>     interval = cur_time - wakeup_start_time;
+> 
+>     for (i = 0; i < ARRAY_SIZE(wakeup_src_map); i++) {
+>         for (j = 0; j < 32; j++) {
+>             if (wakeup_src_map[i] & (1 << j)) {
+>                 index = i * 32 + j;
+>                 if (index < ARRAY_SIZE(wakeup_total_interval)) {
+>                     wakeup_total_interval[index] += interval;
+>                     src_cnt++;
+>                 }
+>             }
+109c172,179
+< static int hal_sleep_sys_busy(void)
+---
+>     if (src_cnt >= 2) {
+>         for (i = 0; i < ARRAY_SIZE(wakeup_src_map); i++) {
+>             wakeup_multi_src_map[i] |= wakeup_src_map[i];
+>         }
+>     }
+> }
+> 
+> static void SRAM_TEXT_LOC hal_sleep_save_wakeup_src(void)
+111,114c181,186
+<     if (sys_wake_lock_map || hal_sysfreq_busy() || hal_dma_busy()) {
+<         return 1;
+<     } else {
+<         return 0;
+---
+>     int i;
+> 
+>     wakeup_start_time = hal_sys_timer_get();
+> 
+>     for (i = 0; i < ARRAY_SIZE(wakeup_src_map); i++) {
+>         wakeup_src_map[i] = (NVIC->ICPR[i] & NVIC->ISER[i]);
+117a190,216
+> static void hal_sleep_print_wakeup_src(void)
+> {
+>     int i;
+>     uint32_t cur_time;
+> 
+>     cur_time = hal_sys_timer_get();
+> 
+>     hal_sleep_calc_wakeup_interval(cur_time);
+> 
+>     // Set wakeup start time to current time
+>     wakeup_start_time = cur_time;
+> 
+>     TRACE(0, "DEEP SLEEP WAKEUP SRC STATS:");
+>     for (i = 0; i < ARRAY_SIZE(wakeup_total_interval); i++) {
+>         if (wakeup_total_interval[i]) {
+>             TRACE(TR_ATTR_NO_TS, "\t[%2u]: %5u ms", i, TICKS_TO_MS(wakeup_total_interval[i]));
+>             // Reset the total interval
+>             wakeup_total_interval[i] = 0;
+>         }
+>     }
+>     // Reset the multi src map but keep current wakeup src map
+>     for (i = 0; i < ARRAY_SIZE(wakeup_src_map); i++) {
+>         wakeup_multi_src_map[i] = 0;
+>     }
+> }
+> #endif
+> 
+190a290
+>     // SCB_ICSR_VECTPENDING is not banked between security states
+220a321,325
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>         if (NVIC_NS->ICPR[i] & NVIC_NS->ISER[i] & irq[i]) {
+>             return 1;
+>         }
+> #endif
+227c332
+< void WEAK bt_drv_sleep(void)
+---
+> static int pm_notif_sleep(enum HAL_CMU_LPU_SLEEP_MODE_T mode)
+228a334,338
+>     enum HAL_PM_STATE_T state;
+>     int i;
+> 
+>     if (pm_user_cnt == 0) {
+>         return 0;
+231c341,359
+< void WEAK bt_drv_wakeup(void)
+---
+>     if (0) {
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     } else if (mode == HAL_CMU_LPU_SLEEP_MODE_POWER_DOWN) {
+>         state = HAL_PM_STATE_POWER_DOWN_SLEEP;
+> #endif
+>     } else {
+>         state = HAL_PM_STATE_NORMAL_SLEEP;
+>     }
+> 
+>     for (i = pm_user_cnt - 1; i >= 0; i--) {
+>         if (pm_notif[i]) {
+>             pm_notif[i](state);
+>         }
+>     }
+> 
+>     return 0;
+> }
+> 
+> static int pm_notif_wakeup(enum HAL_CMU_LPU_SLEEP_MODE_T mode)
+232a361,383
+>     enum HAL_PM_STATE_T state;
+>     int i;
+> 
+>     if (pm_user_cnt == 0) {
+>         return 0;
+>     }
+> 
+>     if (0) {
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     } else if (mode == HAL_CMU_LPU_SLEEP_MODE_POWER_DOWN) {
+>         state = HAL_PM_STATE_POWER_DOWN_WAKEUP;
+> #endif
+>     } else {
+>         state = HAL_PM_STATE_NORMAL_WAKEUP;
+>     }
+> 
+>     for (i = 0; i < pm_user_cnt; i++) {
+>         if (pm_notif[i]) {
+>             pm_notif[i](state);
+>         }
+>     }
+> 
+>     return 0;
+239c390,392
+<     uint32_t time = 0;
+---
+>     uint32_t prev_time = 0;
+>     uint32_t cur_time;
+>     uint32_t interval;
+248,249c401,408
+<     if (stats_started) {
+<         time = hal_sys_timer_get();
+---
+>     if (chip_wake_lock_map) {
+>         mode = HAL_CMU_LPU_SLEEP_MODE_SYS;
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     } else if (!skip_power_down) {
+>         mode = HAL_CMU_LPU_SLEEP_MODE_POWER_DOWN;
+> #endif
+>     } else {
+>         mode = HAL_CMU_LPU_SLEEP_MODE_CHIP;
+252c411,418
+<     // Modules (except for psram and flash) sleep
+---
+>     // Stop modules (except for psram and flash, spi)
+>     pm_notif_sleep(mode);
+> 
+> #ifdef FAST_TIMER_COMPENSATE
+>     hal_fast_timer_sleep();
+> #endif
+> 
+> #ifdef CHIP_SLEEP_CTRL_ENABLE
+258c424,425
+<     bt_drv_sleep();
+---
+> #endif
+>     // End of stopping modules
+260c427,431
+<     // End of sleep
+---
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     // Save uart trace related cfg
+>     hal_dma_sleep();
+>     hal_uart_sleep();
+> #endif
+262,263c433,447
+<     //psram_sleep();
+<     hal_norflash_sleep(HAL_NORFLASH_ID_0);
+---
+> #ifdef CHIP_SLEEP_CTRL_ENABLE
+>     // Stop psram and then flash
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     hal_cache_sleep();
+> #endif
+> #ifdef PSRAM_ENABLE
+>     hal_psram_sleep();
+> #endif
+> #ifdef PSRAMUHS_ENABLE
+>     hal_psramuhs_sleep();
+> #endif
+> #ifndef __MCU_FW_2002__
+>     hal_norflash_sleep(HAL_FLASH_ID_0);
+> #endif
+> #endif
+265c449,452
+<     // Now neither psram nor flash are usable
+---
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     // Save ispi cfg
+>     hal_spi_sleep();
+> #endif
+267a455,471
+>         if (stats_started) {
+>             prev_time = hal_sys_timer_get();
+> #ifdef SLEEP_STATS_TRACE
+> #ifdef WAKEUP_SRC_STATS
+>             hal_sleep_calc_wakeup_interval(prev_time);
+> #endif
+> #ifdef SYSFREQ_STATS
+>             hal_sysfreq_add_freq_time(false, prev_time);
+> #endif
+> #endif
+>         }
+> 
+>         hal_cmu_lpu_sleep(mode);
+> 
+>         if (stats_started) {
+>             cur_time = hal_sys_timer_get();
+>             interval = cur_time - prev_time;
+269c473
+<             mode = HAL_CMU_LPU_SLEEP_MODE_SYS;
+---
+>                 sys_deep_sleep_time += interval;
+271c475
+<             mode = HAL_CMU_LPU_SLEEP_MODE_CHIP;
+---
+>                 chip_deep_sleep_time += interval;
+273c477,486
+<         hal_cmu_lpu_sleep(mode);
+---
+> #ifdef SLEEP_STATS_TRACE
+> #ifdef WAKEUP_SRC_STATS
+>             hal_sleep_save_wakeup_src();
+> #endif
+> #ifdef SYSFREQ_STATS
+>             hal_sysfreq_add_freq_time(true, cur_time);
+> #endif
+> #endif
+>         }
+> 
+277,278c490,493
+<     hal_norflash_wakeup(HAL_NORFLASH_ID_0);
+<     //psram_wakeup();
+---
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     // Restore ispi cfg
+>     hal_spi_wakeup();
+> #endif
+280c495,515
+<     // Now both psram and flash are usable
+---
+> #ifdef CHIP_SLEEP_CTRL_ENABLE
+> #ifndef __MCU_FW_2002__
+>     // Restore flash and then psram
+>     hal_norflash_wakeup(HAL_FLASH_ID_0);
+> #endif
+> #ifdef PSRAMUHS_ENABLE
+>     hal_psramuhs_wakeup();
+> #endif
+> #ifdef PSRAM_ENABLE
+>     hal_psram_wakeup();
+> #endif
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     hal_cache_wakeup();
+> #endif
+> #endif
+> 
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     // Restore uart trace related cfg
+>     hal_uart_wakeup();
+>     hal_dma_wakeup();
+> #endif
+281a517,518
+>     // Restore modules (except for psram and flash)
+> #ifdef CHIP_SLEEP_CTRL_ENABLE
+286d522
+<     bt_drv_wakeup();
+289c525
+<     // Modules (except for psram and flash) wakeup
+---
+> #endif
+291c527,529
+<     // End of wakeup
+---
+> #ifdef FAST_TIMER_COMPENSATE
+>     hal_fast_timer_wakeup();
+> #endif
+293,300c531,532
+<     if (stats_started) {
+<         time = hal_sys_timer_get() - time;
+<         if (chip_wake_lock_map) {
+<             sys_deep_sleep_time += time;
+<         } else {
+<             chip_deep_sleep_time += time;
+<         }
+<     }
+---
+>     pm_notif_wakeup(mode);
+>     // End of restoring modules
+311c543,544
+<     uint32_t time = 0;
+---
+>     uint32_t prev_time = 0;
+>     uint32_t cur_time;
+312a546,548
+>     bool lpu_busy = false;
+>     bool dma_busy = false;
+>     POSSIBLY_UNUSED bool trace_busy = false;
+317c553
+<     if (hal_sleep_cpu_busy()) {
+---
+>     if (cpu_wake_lock_map || (lpu_busy = hal_cmu_lpu_busy())) {
+325c561
+<         if (hal_sleep_sys_busy()) {
+---
+>         if (sys_wake_lock_map || hal_sysfreq_busy() || (dma_busy = hal_dma_busy())) {
+329c565,568
+<                 time = hal_sys_timer_get();
+---
+>                 prev_time = hal_sys_timer_get();
+> #ifdef SYSFREQ_STATS
+>                 hal_sysfreq_add_freq_time(false, prev_time);
+> #endif
+344c583,587
+<                 light_sleep_time += hal_sys_timer_get() - time;
+---
+>                 cur_time = hal_sys_timer_get();
+>                 light_sleep_time += cur_time - prev_time;
+> #ifdef SYSFREQ_STATS
+>                 hal_sysfreq_add_freq_time(true, cur_time);
+> #endif
+347c590
+<         } else if (hal_trace_busy()) {
+---
+>         } else if ((trace_busy = hal_trace_busy())) {
+351c594,597
+<                 time = hal_sys_timer_get();
+---
+>                 prev_time = hal_sys_timer_get();
+> #ifdef SYSFREQ_STATS
+>                 hal_sysfreq_add_freq_time(false, prev_time);
+> #endif
+359c605,609
+<                 light_sleep_time += hal_sys_timer_get() - time;
+---
+>                 cur_time = hal_sys_timer_get();
+>                 light_sleep_time += cur_time - prev_time;
+> #ifdef SYSFREQ_STATS
+>                 hal_sysfreq_add_freq_time(true, cur_time);
+> #endif
+381,382c631,632
+<         time = hal_sys_timer_get();
+<         interval = time - stats_start_time;
+---
+>         cur_time = hal_sys_timer_get();
+>         interval = cur_time - stats_start_time;
+403c653
+<             stats_start_time = time;
+---
+>             stats_start_time = cur_time;
+407,409c657,661
+<             uint32_t time = hal_sys_timer_get();
+<             if (time - stats_trace_time >= stats_trace_interval) {
+<                 TRACE(4,"CPU USAGE: busy=%d light=%d sys_deep=%d chip_deep=%d",
+---
+>             if (cur_time - stats_trace_time >= stats_trace_interval) {
+> #ifdef DEBUG_SLEEP_USER
+>                 hal_dma_record_busy_chan();
+> #endif
+>                 TRACE(0, "CPU USAGE: busy=%d light=%d sys_deep=%d chip_deep=%d",
+412c664
+<                 stats_trace_time = time;
+---
+>                 stats_trace_time = cur_time;
+414,416c666,680
+<                 TRACE(4,"SLEEP_USER: cpulock=0x%X syslock=0x%X irq=0x%08X_%08X",
+<                     cpu_wake_lock_map, sys_wake_lock_map, (NVIC->ICPR[1] & NVIC->ISER[1]), (NVIC->ICPR[0] & NVIC->ISER[0]));
+<                 hal_sysfreq_print();
+---
+>                 TRACE(0, "SLEEP USER: cpu=0x%X sys=0x%X chip=0x%X irq=0x%08X_%08X",
+>                     cpu_wake_lock_map, sys_wake_lock_map, chip_wake_lock_map,
+>                     (NVIC->ICPR[1] & NVIC->ISER[1]), (NVIC->ICPR[0] & NVIC->ISER[0]));
+>                 TRACE(0, "BUSY: LPU=%d DMA=%d TRACE=%d", lpu_busy, dma_busy, trace_busy);
+>                 hal_sysfreq_print_user_freq();
+>                 hal_dma_print_busy_chan();
+> #endif
+> #ifdef WAKEUP_SRC_STATS
+>                 hal_sleep_print_wakeup_src();
+> #endif
+> #ifdef CACHE_STATS
+>                 hal_cache_print_stats();
+> #endif
+> #ifdef SYSFREQ_STATS
+>                 hal_sysfreq_print_freq_stats();
+585a850,952
+> }
+> 
+> void hal_sleep_power_down_enable(void)
+> {
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     skip_power_down = false;
+> #endif
+> }
+> 
+> void hal_sleep_power_down_disable(void)
+> {
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     skip_power_down = true;
+> #endif
+> }
+> 
+> int hal_pm_notif_register(enum HAL_PM_USER_TYPE_T user, HAL_PM_NOTIF_HANDLER handler)
+> {
+>     int i;
+>     uint32_t lock;
+>     int ret;
+> 
+>     if (handler == NULL) {
+>         ASSERT(false, "%s: handler cannot be NULL: user=%d", __func__, user);
+>         return 1;
+>     }
+> 
+>     ret = 0;
+> 
+>     lock = int_lock();
+> 
+>     if (pm_user_cnt >= PM_NOTIF_HDLR_CNT) {
+>         ASSERT(false, "%s: handler list full: user=%d handler=%p curCnt=%u", __func__, user, handler, pm_user_cnt);
+>         ret = 2;
+>         goto _exit;
+>     }
+> 
+>     for (i = 0; i < pm_user_cnt; i++) {
+>         if (pm_notif[i] == handler) {
+>             ASSERT(false, "%s: handler already registered: user=%d handler=%p existedUser=%d", __func__, user, handler, pm_user[i]);
+>             ret = 3;
+>             goto _exit;
+>         }
+>     }
+> 
+>     if (pm_user_cnt == 0) {
+>         pm_user[i] = user;
+>         pm_notif[i] = handler;
+>     } else {
+>         for (i = pm_user_cnt; i >= 0; i--) {
+>             if (i == 0 || pm_user[i - 1] > user) {
+>                 pm_user[i] = user;
+>                 pm_notif[i] = handler;
+>                 break;
+>             } else {
+>                 pm_user[i] = pm_user[i - 1];
+>                 pm_notif[i] = pm_notif[i - 1];
+>             }
+>         }
+>     }
+>     pm_user_cnt++;
+> 
+> _exit:
+>     int_unlock(lock);
+> 
+>     return ret;
+> }
+> 
+> int hal_pm_notif_deregister(enum HAL_PM_USER_TYPE_T user, HAL_PM_NOTIF_HANDLER handler)
+> {
+>     int i;
+>     uint32_t lock;
+>     int ret;
+> 
+>     if (handler == NULL) {
+>         return 1;
+>     }
+> 
+>     ret = 0;
+> 
+>     lock = int_lock();
+> 
+>     for (i = 0; i < pm_user_cnt; i++) {
+>         if (pm_notif[i] == handler) {
+>             break;
+>         }
+>     }
+> 
+>     if (i >= pm_user_cnt) {
+>         ret = 2;
+>         goto _exit;
+>     }
+> 
+>     for (; (i + 1) < pm_user_cnt; i++) {
+>         pm_user[i] = pm_user[i + 1];
+>         pm_notif[i] = pm_notif[i + 1];
+>     }
+>     pm_user_cnt--;
+> 
+> _exit:
+>     int_unlock(lock);
+> 
+>     return ret;

@@ -1,0 +1,343 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_trace.h
+remote: https://raw.githubusercontent.com/alibaba/AliOS-Things/a99f20706f9c666903a12a205edce13263b1fadb/hardware/chip/haas1000/drivers/platform/hal/hal_trace.h
+diff -sw local remote
+---
+
+1,8c1,5
+< /***************************************************************************
+<  *
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+<  *
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+10,13c7
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+15c9,14
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+24d22
+< #include "hal_trace_mod.h"
+45,46d42
+< #ifndef TPORTS_KEY_COEXIST
+< #ifndef HAL_TRACE_RX_ENABLE
+48,49d43
+< #endif
+< #ifndef CRASH_REBOOT
+52,53d45
+< #endif
+< #endif
+67,84c59,63
+< // Log Attributes
+< #define LOG_ATTR_ARG_NUM_SHIFT              0
+< #define LOG_ATTR_ARG_NUM_MASK               (0xF << LOG_ATTR_ARG_NUM_SHIFT)
+< #define LOG_ATTR_ARG_NUM(n)                 BITFIELD_VAL(LOG_ATTR_ARG_NUM, n)
+< #define LOG_ATTR_LEVEL_SHIFT                4
+< #define LOG_ATTR_LEVEL_MASK                 (0x7 << LOG_ATTR_LEVEL_SHIFT)
+< #define LOG_ATTR_LEVEL(n)                   BITFIELD_VAL(LOG_ATTR_LEVEL, n)
+< #define LOG_ATTR_MOD_SHIFT                  7
+< #define LOG_ATTR_MOD_MASK                   (0x7F << LOG_ATTR_MOD_SHIFT)
+< #define LOG_ATTR_MOD(n)                     BITFIELD_VAL(LOG_ATTR_MOD, n)
+< #define LOG_ATTR_IMM                        (1 << 14)
+< #define LOG_ATTR_NO_LF                      (1 << 15)
+< #define LOG_ATTR_NO_TS                      (1 << 16)
+< #define LOG_ATTR_NO_ID                      (1 << 17)
+< 
+< // Count variadic argument number
+< #define _VAR_ARG_12(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, ...) a12
+< #define COUNT_ARG_NUM(...)                  _VAR_ARG_12(unused, ##__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
+---
+> enum PRINTF_FLAG_T {
+>     PRINTF_FLAG_LINE_FEED   = (1 << 0),
+>     PRINTF_FLAG_TIME_STAMP  = (1 << 1),
+> 	PRINTF_FLAG_CHECK_CRLR	= (1 << 2),
+> };
+88a68
+> 
+90c70,71
+< #define TRC_STR_LOC                         __attribute__((section(TO_STRING(CONCATS(.trc_str,__LINE__)))))
+---
+> 
+> #define TRC_STR_LOC                 __attribute__((section(TO_STRING(CONCATS(.trc_str.,__LINE__)))))
+94c75
+< #define TRC_STR(s)                          (s)
+---
+> #define TRC_STR(s)                  ((char *)s)
+97c78
+< #define LOG_DUMMY(attr, str, ...)           hal_trace_dummy(str, ##__VA_ARGS__)
+---
+> #define TRACE_DUMMY(str, ...)       hal_trace_dummy(str, ##__VA_ARGS__)
+100,104c81,89
+< #define REL_LOG(attr, str, ...)             hal_trace_printf(((attr) & ~LOG_ATTR_ARG_NUM_MASK) | \
+<                                                             LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)), \
+<                                                             TRC_STR(str), ##__VA_ARGS__)
+< #define REL_LOG_RAW_OUTPUT(str, len)        hal_trace_output(str, len)
+< #define REL_LOG_FLUSH()                     hal_trace_flush_buffer()
+---
+> #define REL_TRACE(str, ...)         hal_trace_printf(TRC_STR(str), ##__VA_ARGS__)
+> #define REL_TRACE_IMM(str, ...)     hal_trace_printf_imm(str, ##__VA_ARGS__)
+> #define REL_TRACE_NOCRLF(str, ...)  hal_trace_printf_without_crlf(str, ##__VA_ARGS__)
+> #define REL_TRACE_NOTS(str, ...)    hal_trace_printf_without_ts(TRC_STR(str), ##__VA_ARGS__)
+> #define REL_TRACE_IMM_NOTS(str, ...) hal_trace_printf_imm_without_ts(str, ##__VA_ARGS__)
+> #define REL_TRACE_NOCRLF_NOTS(str, ...) hal_trace_printf_without_crlf_ts(str, ##__VA_ARGS__)
+> #define REL_TRACE_OUTPUT(str, len)  hal_trace_output(str, len)
+> #define REL_TRACE_FLUSH()           hal_trace_flush_buffer()
+> #define REL_FUNC_ENTRY_TRACE()      hal_trace_printf(__FUNCTION__)
+109,111c94,102
+< #define REL_LOG(attr, str, ...)             hal_trace_dummy(str, ##__VA_ARGS__)
+< #define REL_LOG_RAW_OUTPUT(str, len)        hal_trace_dummy((const char *)str, len)
+< #define REL_LOG_FLUSH()                     hal_trace_dummy(NULL)
+---
+> #define REL_TRACE(str, ...)         hal_trace_dummy(str, ##__VA_ARGS__)
+> #define REL_TRACE_IMM(str, ...)     hal_trace_dummy(str, ##__VA_ARGS__)
+> #define REL_TRACE_NOCRLF(str, ...)  hal_trace_dummy(str, ##__VA_ARGS__)
+> #define REL_TRACE_NOTS(str, ...)    hal_trace_dummy(str, ##__VA_ARGS__)
+> #define REL_TRACE_IMM_NOTS(str, ...) hal_trace_dummy(str, ##__VA_ARGS__)
+> #define REL_TRACE_NOCRLF_NOTS(str, ...) hal_trace_dummy(str, ##__VA_ARGS__)
+> #define REL_TRACE_OUTPUT(str, len)  hal_trace_dummy((const char *)str, len)
+> #define REL_TRACE_FLUSH()           hal_trace_dummy(NULL)
+> #define REL_FUNC_ENTRY_TRACE()      hal_trace_dummy(NULL)
+119,121c110,115
+< #define NORM_LOG(num,str, ...)              hal_trace_dummy(str, ##__VA_ARGS__)
+< #define NORM_LOG_RAW_OUTPUT(str, len)       hal_trace_dummy((const char *)str, len)
+< #define NORM_LOG_FLUSH()                    hal_trace_dummy(NULL)
+---
+> #define TRACE(str, ...)             hal_trace_dummy(str, ##__VA_ARGS__)
+> #define TRACE_IMM(str, ...)         hal_trace_dummy(str, ##__VA_ARGS__)
+> #define TRACE_NOCRLF(str, ...)      hal_trace_dummy(str, ##__VA_ARGS__)
+> #define TRACE_OUTPUT(str, len)      hal_trace_dummy((const char *)str, len)
+> #define TRACE_FLUSH()               hal_trace_dummy(NULL)
+> #define FUNC_ENTRY_TRACE()          hal_trace_dummy(NULL)
+126,128c120,125
+< #define NORM_LOG                            REL_LOG
+< #define NORM_LOG_RAW_OUTPUT                 REL_LOG_RAW_OUTPUT
+< #define NORM_LOG_FLUSH                      REL_TRACE_FLUSH
+---
+> #define TRACE                       REL_TRACE
+> #define TRACE_IMM                   REL_TRACE_IMM
+> #define TRACE_NOCRLF                REL_TRACE_NOCRLF
+> #define TRACE_OUTPUT                REL_TRACE_OUTPUT
+> #define TRACE_FLUSH                 REL_TRACE_FLUSH
+> #define FUNC_ENTRY_TRACE            REL_FUNC_ENTRY_TRACE
+134,187d130
+< #define RLOG_CRITICAL(attr, str, ...)       REL_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_CRITICAL), \
+<                                                     str, ##__VA_ARGS__)
+< #define RLOG_ERROR(attr, str, ...)          REL_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_ERROR), \
+<                                                     str, ##__VA_ARGS__)
+< #define RLOG_WARN(attr, str, ...)           REL_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_WARN), \
+<                                                     str, ##__VA_ARGS__)
+< #define RLOG_NOTIF(attr, str, ...)          REL_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_NOTIF), \
+<                                                     str, ##__VA_ARGS__)
+< #define RLOG_INFO(attr, str, ...)           REL_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_INFO), \
+<                                                     str, ##__VA_ARGS__)
+< #define RLOG_DEBUG(attr, str, ...)          REL_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_DEBUG), \
+<                                                     str, ##__VA_ARGS__)
+< #define RLOG_VERBOSE(attr, str, ...)        REL_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_VERBOSE), \
+<                                                     str, ##__VA_ARGS__)
+< 
+< #define LOG_CRITICAL(attr, str, ...)        NORM_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_CRITICAL), \
+<                                                     str, ##__VA_ARGS__)
+< #define LOG_ERROR(attr, str, ...)           NORM_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_ERROR), \
+<                                                     str, ##__VA_ARGS__)
+< #define LOG_WARN(attr, str, ...)            NORM_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_WARN), \
+<                                                     str, ##__VA_ARGS__)
+< #define LOG_NOTIF(attr, str, ...)           NORM_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_NOTIF), \
+<                                                     str, ##__VA_ARGS__)
+< #define LOG_INFO(attr, str, ...)            NORM_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_INFO), \
+<                                                     str, ##__VA_ARGS__)
+< #define LOG_DEBUG(attr, str, ...)           NORM_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_DEBUG), \
+<                                                     str, ##__VA_ARGS__)
+< #define LOG_VERBOSE(attr, str, ...)         NORM_LOG(((attr) & ~LOG_ATTR_LEVEL_MASK) | LOG_ATTR_LEVEL(LOG_LEVEL_VERBOSE), \
+<                                                     str, ##__VA_ARGS__)
+< 
+< #define REL_TRACE(attr, str, ...)           RLOG_NOTIF(attr, str, ##__VA_ARGS__)
+< #define REL_TRACE_IMM(attr, str, ...)       RLOG_NOTIF((attr) | LOG_ATTR_IMM, str, ##__VA_ARGS__)
+< #define REL_TRACE_NOCRLF(attr, str, ...)    RLOG_NOTIF((attr) | LOG_ATTR_NO_LF, str, ##__VA_ARGS__)
+< #define REL_TRACE_NOTS(attr, str, ...)      RLOG_NOTIF((attr) | LOG_ATTR_NO_TS, str, ##__VA_ARGS__)
+< #define REL_TRACE_IMM_NOTS(attr, str, ...)  RLOG_NOTIF((attr) | LOG_ATTR_IMM | LOG_ATTR_NO_TS, str, ##__VA_ARGS__)
+< #define REL_TRACE_NOCRLF_NOTS(attr, str, ...) RLOG_NOTIF((attr) | LOG_ATTR_NO_LF | LOG_ATTR_NO_TS, str, ##__VA_ARGS__)
+< #define REL_FUNC_ENTRY_TRACE()              RLOG_NOTIF(1, "%s", __FUNCTION__)
+< #define REL_TRACE_OUTPUT(str, len)          REL_LOG_RAW_OUTPUT(str, len)
+< #define REL_TRACE_FLUSH()                   REL_LOG_FLUSH()
+< 
+< #define TRACE(attr, str, ...)               LOG_INFO(attr, str, ##__VA_ARGS__)
+< #define TRACE_IMM(attr, str, ...)           LOG_INFO((attr) | LOG_ATTR_IMM, str, ##__VA_ARGS__)
+< #define TRACE_NOCRLF(attr, str, ...)        LOG_INFO((attr) | LOG_ATTR_NO_LF, str, ##__VA_ARGS__)
+< #define FUNC_ENTRY_TRACE()                  LOG_INFO(1, "%s", __FUNCTION__)
+< #define TRACE_OUTPUT(str, len)              NORM_LOG_RAW_OUTPUT(str, len)
+< #define TRACE_FLUSH()                       NORM_LOG_FLUSH()
+< #ifdef BES_AUTOMATE_TEST
+< #define AUTO_TEST_TRACE(attr, str, ...)     LOG_INFO(attr, "_AT_"str, ##__VA_ARGS__)
+< #else
+< #define AUTO_TEST_TRACE(attr, str, ...)     LOG_INFO(attr, str, ##__VA_ARGS__)
+< #endif
+< 
+< #define TRACE_DUMMY(attr, str, ...)         LOG_DUMMY(attr, str, ##__VA_ARGS__)
+< 
+245c188,190
+< 
+---
+> #if defined(CHIP_HAAS1000)
+>     HAL_TRACE_TRANSPORT_TRANSQ1,
+> #endif
+270,279c215,248
+< enum LOG_LEVEL_T {
+<     LOG_LEVEL_CRITICAL  = 0,
+<     LOG_LEVEL_ERROR     = 1,
+<     LOG_LEVEL_WARN      = 2,
+<     LOG_LEVEL_NOTIF     = 3,
+<     LOG_LEVEL_INFO      = 4,
+<     LOG_LEVEL_DEBUG     = 5,
+<     LOG_LEVEL_VERBOSE   = 6,
+< 
+<     LOG_LEVEL_QTY,
+---
+> enum HAL_TRACE_MODUAL {
+>     HAL_TRACE_LEVEL_0  = 1<<0,
+>     HAL_TRACE_LEVEL_1  = 1<<1,
+>     HAL_TRACE_LEVEL_2  = 1<<2,
+>     HAL_TRACE_LEVEL_3  = 1<<3,
+>     HAL_TRACE_LEVEL_4  = 1<<4,
+>     HAL_TRACE_LEVEL_5  = 1<<5,
+>     HAL_TRACE_LEVEL_6  = 1<<6,
+>     HAL_TRACE_LEVEL_7  = 1<<7,
+>     HAL_TRACE_LEVEL_8  = 1<<8,
+>     HAL_TRACE_LEVEL_9  = 1<<9,
+>     HAL_TRACE_LEVEL_10 = 1<<10,
+>     HAL_TRACE_LEVEL_11 = 1<<11,
+>     HAL_TRACE_LEVEL_12 = 1<<12,
+>     HAL_TRACE_LEVEL_13 = 1<<13,
+>     HAL_TRACE_LEVEL_14 = 1<<14,
+>     HAL_TRACE_LEVEL_15 = 1<<15,
+>     HAL_TRACE_LEVEL_16 = 1<<16,
+>     HAL_TRACE_LEVEL_17 = 1<<17,
+>     HAL_TRACE_LEVEL_18 = 1<<18,
+>     HAL_TRACE_LEVEL_19 = 1<<19,
+>     HAL_TRACE_LEVEL_20 = 1<<20,
+>     HAL_TRACE_LEVEL_21 = 1<<21,
+>     HAL_TRACE_LEVEL_22 = 1<<22,
+>     HAL_TRACE_LEVEL_23 = 1<<23,
+>     HAL_TRACE_LEVEL_24 = 1<<24,
+>     HAL_TRACE_LEVEL_25 = 1<<25,
+>     HAL_TRACE_LEVEL_26 = 1<<26,
+>     HAL_TRACE_LEVEL_27 = 1<<27,
+>     HAL_TRACE_LEVEL_28 = 1<<28,
+>     HAL_TRACE_LEVEL_29 = 1<<29,
+>     HAL_TRACE_LEVEL_30 = 1<<30,
+>     HAL_TRACE_LEVEL_31 = 1<<31,
+>     HAL_TRACE_LEVEL_ALL = 0XFFFFFFFF,
+281a251,268
+> typedef enum {
+>     LOG_LV_NONE,
+>     LOG_LV_FATAL,
+>     LOG_LV_ERROR,
+>     LOG_LV_WARN,
+>     LOG_LV_INFO,
+>     LOG_LV_DEBUG,
+> } LOG_LEVEL_T;
+> 
+> typedef enum {
+>     LOG_MOD_NONE,
+>     LOG_MOD_OS,
+>     LOG_MOD_BT_STACK,
+>     LOG_MOD_SYS,
+>     LOG_MOD_MEDIA,
+>     LOG_MOD_APP,
+> } LOG_MODULE_T;
+> 
+289a277,279
+> #include "stdarg.h"
+> typedef int (*HAL_TRACE_PRINTF_HOOK_T)(const char *tag, const char *fmt, enum PRINTF_FLAG_T flag, va_list ap);
+> 
+291a282,285
+> void hal_trace_register_hook(HAL_TRACE_PRINTF_HOOK_T hook);
+> 
+> void hal_trace_unregister_hook(HAL_TRACE_PRINTF_HOOK_T hook);
+> 
+298,305d291
+< TRACE_FUNC_DECLARE(int hal_trace_enable_log_module(enum LOG_MODULE_T module), return 0);
+< 
+< TRACE_FUNC_DECLARE(int hal_trace_disable_log_module(enum LOG_MODULE_T module), return 0);
+< 
+< TRACE_FUNC_DECLARE(int hal_trace_set_log_module(const uint32_t *map, uint32_t word_cnt), return 0);
+< 
+< TRACE_FUNC_DECLARE(int hal_trace_set_log_level(enum LOG_LEVEL_T level), return 0);
+< 
+313c299,324
+< TRACE_FUNC_DECLARE(int hal_trace_printf(uint32_t attr, const char *fmt, ...), return 0);
+---
+> TRACE_FUNC_DECLARE(int hal_trace_printf_with_lvl(unsigned int lvl, const char *fmt, ...), return 0);
+> 
+> TRC_FMT_CHK(1, 2)
+> TRACE_FUNC_DECLARE(int hal_trace_printf(const char *fmt, ...), return 0);
+> 
+> TRC_FMT_CHK(1, 2)
+> TRACE_FUNC_DECLARE(int hal_trace_printf_without_ts(const char *fmt, ...), return 0);
+> 
+> TRC_FMT_CHK(1, 2)
+> TRACE_FUNC_DECLARE(void hal_trace_printf_imm(const char *fmt, ...), return);
+> 
+> TRC_FMT_CHK(1, 2)
+> TRACE_FUNC_DECLARE(void hal_trace_printf_imm_without_ts(const char *fmt, ...), return);
+> 
+> TRC_FMT_CHK(1, 2)
+> TRACE_FUNC_DECLARE(int hal_trace_printf_without_crlf(const char *fmt, ...), return 0);
+> TRACE_FUNC_DECLARE(int hal_trace_printf_no_ts(const char *fmt, ...), return 0);
+> TRC_FMT_CHK(1, 2)
+> TRACE_FUNC_DECLARE(int hal_trace_printf_without_crlf_ts(const char *fmt, ...), return 0);
+> TRACE_FUNC_DECLARE(int hal_trace_printf_without_crlf_cmd(const char *fmt, ...), return 0);
+> TRACE_FUNC_DECLARE(int hal_trace_printf_no_ts_cmd(const char *fmt, ...), return 0);
+> 
+> TRC_FMT_CHK(2, 3)
+> TRACE_FUNC_DECLARE(int hal_trace_printf_with_tag(const char *tag, const char *fmt, ...), return 0);
+> 
+> TRACE_FUNC_DECLARE(int hal_trace_printf_without_crlf_fix_arg(const char *fmt), return 0);
+336a348,349
+> TRACE_FUNC_DECLARE(void hal_trace_print_a7(const unsigned char *buf, unsigned int buf_len), return);
+> 
+356a370,372
+> int32_t cli_printf(const char *buffer, ...);
+> 
+> int hal_trace_output_block(const unsigned char *buf, unsigned int len);
+366c382
+< 
+---
+> #define print_addr(k) TRACE("***addr:%02x:%02x:%02x:%02x:%02x:%02x\n", (k)[0],(k)[1],(k)[2],(k)[3],(k)[4],(k)[5])
+383d398
+< #ifndef HAL_TRACE_RX_ENABLE
+385d399
+< #endif
+389a404,405
+> #ifdef HAL_TRACE_RX_ENABLE
+> 
+398,399d413
+< int hal_trace_rx_reopen();
+< int hal_trace_rx_open();
+400a415,423
+> #endif
+> 
+> #define printf                         hal_trace_printf_without_crlf
+> #define printf_no_ts                   hal_trace_printf_no_ts
+> #define cmd_printf                     hal_trace_printf_without_crlf_cmd
+> #define cmd_printf_no_ts               hal_trace_printf_no_ts_cmd
+> #define printf_raw                     hal_trace_printf_without_crlf_ts
+> #define print_addr(k) TRACE("***addr:%02x:%02x:%02x:%02x:%02x:%02x\n", (k)[0],(k)[1],(k)[2],(k)[3],(k)[4],(k)[5])
+> #define uart_printf(...)                //hal_trace_printf(__VA_ARGS__)

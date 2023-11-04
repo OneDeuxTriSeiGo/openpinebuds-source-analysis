@@ -1,0 +1,120 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/ble_ip/rwip_task.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/rwip/api/rwip_task.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+31c45
+< #define TASK_TYPE_GET(ke_task_id) ((uint16_t) & 0xFF)
+---
+> #define TASK_TYPE_GET(ke_task_id) (((uint16_t)ke_task_id) & 0xFF)
+34c48
+< #define TASK_IDX_GET(ke_task_id) (((uint16_t) >> 8) & 0xFF)
+---
+> #define TASK_IDX_GET(ke_task_id) ((((uint16_t)ke_task_id) >> 8) & 0xFF)
+35a50,51
+> /// Message identifier index
+> #define MSG_ID(task, idx) (TASK_FIRST_MSG((TASK_ID_ ## task)) + idx)
+37a54
+> /*@TRACE*/
+39a57,59
+>     // -----------------------------------------------------------------------------------
+>     // ---------------------- Controller Task identifer ----------------------------------
+>     // -----------------------------------------------------------------------------------
+41,44c61,64
+<     TASK_ID_LLM          = 0,
+<     TASK_ID_LLC          = 1,
+<     TASK_ID_LLD          = 2,
+<     TASK_ID_DBG          = 3,
+---
+>     TASK_ID_LLM          = 0,   // BLE Link manager
+>     TASK_ID_LLC          = 1,   // BLE Link controller
+>     TASK_ID_LLD          = 2,   // BLE Link driver
+>     TASK_ID_LLI          = 3,   // BLE Link ISO
+46,50c66
+<     // BT Controller Tasks
+<     TASK_ID_LM           = 4,
+<     TASK_ID_LC           = 5,
+<     TASK_ID_LB           = 6,
+<     TASK_ID_LD           = 7,
+---
+>     TASK_ID_DBG          = 4,   // Debug task
+52,53c68,72
+<     TASK_ID_HCI          = 8,
+<     TASK_ID_DISPLAY      = 9,
+---
+>     // BT Controller Tasks
+>     TASK_ID_LM           = 5,   // BT Link manager
+>     TASK_ID_LC           = 6,   // BT Link controller
+>     TASK_ID_LB           = 7,   // BT Broadcast
+>     TASK_ID_LD           = 8,   // BT Link driver
+56a76
+>     // ---------------------     SHALL NOT BE CHANGED    ---------------------------------
+59,61c79,80
+<     TASK_ID_L2CC         = 10,   // L2CAP Controller Task
+<     TASK_ID_GATTM        = 11,   // Generic Attribute Profile Manager Task
+<     TASK_ID_GATTC        = 12,   // Generic Attribute Profile Controller Task
+---
+>     TASK_ID_L2CAP        = 10,   // L2CAP Task
+>     TASK_ID_GATT         = 11,   // Generic Attribute Profile Task
+64d82
+< 
+65a84,87
+> 
+>     // -----------------------------------------------------------------------------------
+>     // --------------------- TRANSPORT AND PLATFORM TASKS --------------------------------
+>     // -----------------------------------------------------------------------------------
+66a89,90
+>     TASK_ID_HCI          = 17,   // Host to Control Interface
+>     TASK_ID_DISPLAY      = 19,   // LCD/Display task
+69a94
+>     // ---------------------     SHALL NOT BE CHANGED    ---------------------------------
+163,165c188,217
+<     /* 240 -> 241 reserved for Audio Mode 0 */
+<     TASK_ID_AM0          = 240,  // BLE Audio Mode 0 Task
+<     TASK_ID_AM0_HAS      = 241,  // BLE Audio Mode 0 Hearing Aid Service Task
+---
+>     TASK_ID_CSISM        = 78,   // Coordinated Set Identification Profile Set Member Task
+>     TASK_ID_CSISC        = 79,   // Coordinated Set Identification Profile Set Coordinator Task
+> 
+>     TASK_ID_OTS          = 80,   // Object Transfer Profile Server Task
+>     TASK_ID_OTC          = 81,   // Object Transfer Profile Client Task
+> 
+>     TASK_ID_AMA          = 82,   // AMA Task
+> 
+>     TASK_ID_SMART        = 83,   // SMART Task
+> 
+>     TASK_ID_DMA          = 84,   // DMA Task
+> 
+>     TASK_ID_TENCENT      = 85,   // TENCENT Task
+> 
+>     TASK_ID_GMA          = 86,   // GMA Task
+> 
+>     TASK_ID_CUSTOMIZE    = 87,   // CUSTOMIZE Task
+> 
+> #ifdef USE_BT_ADAPTER
+>     TASK_ID_BLE_ADAPTER_SERVER,
+>     TASK_ID_BLE_ADAPTER_SERVER_END = TASK_ID_BLE_ADAPTER_SERVER + (BLE_ADAPTER_PROFILES_NUM - 1),
+>     TASK_ID_BLE_ADAPTER_CLIENT,
+> #endif 
+>     TASK_ID_MESH         = 200,  // Mesh Task
+> 
+>     TASK_ID_GAF          = 210,  // Generic Audio Framework
+>     
+>     TASK_ID_BUDS         = 211,
+> 
+>     TASK_ID_AM0          = 240,  // BLE Audio Mode 0

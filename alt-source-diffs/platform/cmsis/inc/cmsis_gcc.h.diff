@@ -1,0 +1,315 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/cmsis_gcc.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/cmsis/inc/cmsis_gcc.h
+diff -sw local remote
+---
+
+4,5c4,5
+<  * @version  V5.1.0
+<  * @date     20. December 2018
+---
+>  * @version  V5.3.0
+>  * @date     26. March 2020
+8c8
+<  * Copyright (c) 2009-2018 Arm Limited. All rights reserved.
+---
+>  * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+115a116,140
+> #ifndef   __COMPILER_BARRIER
+>   #define __COMPILER_BARRIER()                   __ASM volatile("":::"memory")
+> #endif
+> 
+> /* #########################  Startup and Lowlevel Init  ######################## */
+> 
+> #define __PROGRAM_START
+> #ifndef __PROGRAM_START
+> 
+> /**
+>   \brief   Initializes data and bss sections
+>   \details This default implementations initialized all data and additional bss
+>            sections relying on .copy.table and .zero.table specified properly
+>            in the used linker script.
+>   
+>  */
+> __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
+> {
+>   extern void _start(void) __NO_RETURN;
+>   
+>   typedef struct {
+>     uint32_t const* src;
+>     uint32_t* dest;
+>     uint32_t  wlen;
+>   } __copy_table_t;
+116a142,184
+>   typedef struct {
+>     uint32_t* dest;
+>     uint32_t  wlen;
+>   } __zero_table_t;
+>   
+>   extern const __copy_table_t __copy_table_start__;
+>   extern const __copy_table_t __copy_table_end__;
+>   extern const __zero_table_t __zero_table_start__;
+>   extern const __zero_table_t __zero_table_end__;
+> 
+>   for (__copy_table_t const* pTable = &__copy_table_start__; pTable < &__copy_table_end__; ++pTable) {
+>     for(uint32_t i=0u; i<pTable->wlen; ++i) {
+>       pTable->dest[i] = pTable->src[i];
+>     }
+>   }
+>  
+>   for (__zero_table_t const* pTable = &__zero_table_start__; pTable < &__zero_table_end__; ++pTable) {
+>     for(uint32_t i=0u; i<pTable->wlen; ++i) {
+>       pTable->dest[i] = 0u;
+>     }
+>   }
+>  
+>   _start();
+> }
+>   
+> #define __PROGRAM_START           __cmsis_start
+> #endif
+> 
+> #ifndef __INITIAL_SP
+> #define __INITIAL_SP              __StackTop
+> #endif
+> 
+> #ifndef __STACK_LIMIT
+> #define __STACK_LIMIT             __StackLimit
+> #endif
+> 
+> #ifndef __VECTOR_TABLE
+> #define __VECTOR_TABLE            __Vectors
+> #endif
+> 
+> #ifndef __VECTOR_TABLE_ATTRIBUTE
+> #define __VECTOR_TABLE_ATTRIBUTE  __attribute__((used, section(".vectors")))
+> #endif
+386c454
+<   __ASM volatile ("MRS %0, primask" : "=r" (result) :: "memory");
+---
+>   __ASM volatile ("MRS %0, primask" : "=r" (result) );
+401c469
+<   __ASM volatile ("MRS %0, primask_ns" : "=r" (result) :: "memory");
+---
+>   __ASM volatile ("MRS %0, primask_ns" : "=r" (result) );
+842c910
+< #define __WFI()                             __ASM volatile ("wfi")
+---
+> #define __WFI()                             __ASM volatile ("wfi":::"memory")
+850c918
+< #define __WFE()                             __ASM volatile ("wfe")
+---
+> #define __WFE()                             __ASM volatile ("wfe":::"memory")
+907c975
+<   __ASM volatile ("rev %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
+---
+>   __ASM ("rev %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
+923c991
+<   __ASM volatile ("rev16 %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
+---
+>   __ASM ("rev16 %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
+941c1009
+<   __ASM volatile ("revsh %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
+---
+>   __ASM ("revsh %0, %1" : __CMSIS_GCC_OUT_REG (result) : __CMSIS_GCC_USE_REG (value) );
+988c1056
+<    __ASM volatile ("rbit %0, %1" : "=r" (result) : "r" (value) );
+---
+>    __ASM ("rbit %0, %1" : "=r" (result) : "r" (value) );
+1173c1241
+<   __ASM ("ssat %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) ); \
+---
+>   __ASM volatile ("ssat %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) : "cc" ); \
+1189c1257
+<   __ASM ("usat %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) ); \
+---
+>   __ASM volatile ("usat %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) : "cc" ); \
+1374c1442
+<    __ASM volatile ("ldab %0, %1" : "=r" (result) : "Q" (*ptr) );
+---
+>    __ASM volatile ("ldab %0, %1" : "=r" (result) : "Q" (*ptr) : "memory" );
+1389c1457
+<    __ASM volatile ("ldah %0, %1" : "=r" (result) : "Q" (*ptr) );
+---
+>    __ASM volatile ("ldah %0, %1" : "=r" (result) : "Q" (*ptr) : "memory" );
+1404c1472
+<    __ASM volatile ("lda %0, %1" : "=r" (result) : "Q" (*ptr) );
+---
+>    __ASM volatile ("lda %0, %1" : "=r" (result) : "Q" (*ptr) : "memory" );
+1417c1485
+<    __ASM volatile ("stlb %1, %0" : "=Q" (*ptr) : "r" ((uint32_t)value) );
+---
+>    __ASM volatile ("stlb %1, %0" : "=Q" (*ptr) : "r" ((uint32_t)value) : "memory" );
+1429c1497
+<    __ASM volatile ("stlh %1, %0" : "=Q" (*ptr) : "r" ((uint32_t)value) );
+---
+>    __ASM volatile ("stlh %1, %0" : "=Q" (*ptr) : "r" ((uint32_t)value) : "memory" );
+1441c1509
+<    __ASM volatile ("stl %1, %0" : "=Q" (*ptr) : "r" ((uint32_t)value) );
+---
+>    __ASM volatile ("stl %1, %0" : "=Q" (*ptr) : "r" ((uint32_t)value) : "memory" );
+1455c1523
+<    __ASM volatile ("ldaexb %0, %1" : "=r" (result) : "Q" (*ptr) );
+---
+>    __ASM volatile ("ldaexb %0, %1" : "=r" (result) : "Q" (*ptr) : "memory" );
+1470c1538
+<    __ASM volatile ("ldaexh %0, %1" : "=r" (result) : "Q" (*ptr) );
+---
+>    __ASM volatile ("ldaexh %0, %1" : "=r" (result) : "Q" (*ptr) : "memory" );
+1485c1553
+<    __ASM volatile ("ldaex %0, %1" : "=r" (result) : "Q" (*ptr) );
+---
+>    __ASM volatile ("ldaex %0, %1" : "=r" (result) : "Q" (*ptr) : "memory" );
+1502c1570
+<    __ASM volatile ("stlexb %0, %2, %1" : "=&r" (result), "=Q" (*ptr) : "r" ((uint32_t)value) );
+---
+>    __ASM volatile ("stlexb %0, %2, %1" : "=&r" (result), "=Q" (*ptr) : "r" ((uint32_t)value) : "memory" );
+1519c1587
+<    __ASM volatile ("stlexh %0, %2, %1" : "=&r" (result), "=Q" (*ptr) : "r" ((uint32_t)value) );
+---
+>    __ASM volatile ("stlexh %0, %2, %1" : "=&r" (result), "=Q" (*ptr) : "r" ((uint32_t)value) : "memory" );
+1536c1604
+<    __ASM volatile ("stlex %0, %2, %1" : "=&r" (result), "=Q" (*ptr) : "r" ((uint32_t)value) );
+---
+>    __ASM volatile ("stlex %0, %2, %1" : "=&r" (result), "=Q" (*ptr) : "r" ((uint32_t)value) : "memory" );
+1566c1634
+<   __ASM volatile ("qadd8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("qadd8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1574c1642
+<   __ASM volatile ("shadd8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("shadd8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1590c1658
+<   __ASM volatile ("uqadd8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uqadd8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1598c1666
+<   __ASM volatile ("uhadd8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uhadd8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1615c1683
+<   __ASM volatile ("qsub8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("qsub8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1623c1691
+<   __ASM volatile ("shsub8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("shsub8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1639c1707
+<   __ASM volatile ("uqsub8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uqsub8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1647c1715
+<   __ASM volatile ("uhsub8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uhsub8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1664c1732
+<   __ASM volatile ("qadd16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("qadd16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1672c1740
+<   __ASM volatile ("shadd16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("shadd16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1688c1756
+<   __ASM volatile ("uqadd16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uqadd16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1696c1764
+<   __ASM volatile ("uhadd16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uhadd16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1712c1780
+<   __ASM volatile ("qsub16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("qsub16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1720c1788
+<   __ASM volatile ("shsub16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("shsub16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1736c1804
+<   __ASM volatile ("uqsub16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uqsub16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1744c1812
+<   __ASM volatile ("uhsub16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uhsub16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1760c1828
+<   __ASM volatile ("qasx %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("qasx %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1768c1836
+<   __ASM volatile ("shasx %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("shasx %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1784c1852
+<   __ASM volatile ("uqasx %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uqasx %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1792c1860
+<   __ASM volatile ("uhasx %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uhasx %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1808c1876
+<   __ASM volatile ("qsax %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("qsax %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1816c1884
+<   __ASM volatile ("shsax %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("shsax %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1832c1900
+<   __ASM volatile ("uqsax %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uqsax %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1840c1908
+<   __ASM volatile ("uhsax %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uhsax %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1848c1916
+<   __ASM volatile ("usad8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("usad8 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1856c1924
+<   __ASM volatile ("usada8 %0, %1, %2, %3" : "=r" (result) : "r" (op1), "r" (op2), "r" (op3) );
+---
+>   __ASM ("usada8 %0, %1, %2, %3" : "=r" (result) : "r" (op1), "r" (op2), "r" (op3) );
+1863c1931
+<   __ASM ("ssat16 %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) ); \
+---
+>   __ASM volatile ("ssat16 %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) : "cc" ); \
+1870c1938
+<   __ASM ("usat16 %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) ); \
+---
+>   __ASM volatile ("usat16 %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) : "cc" ); \
+1878c1946
+<   __ASM volatile ("uxtb16 %0, %1" : "=r" (result) : "r" (op1));
+---
+>   __ASM ("uxtb16 %0, %1" : "=r" (result) : "r" (op1));
+1886c1954
+<   __ASM volatile ("uxtab16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("uxtab16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+1894c1962
+<   __ASM volatile ("sxtb16 %0, %1" : "=r" (result) : "r" (op1));
+---
+>   __ASM ("sxtb16 %0, %1" : "=r" (result) : "r" (op1));
+1897a1966,1974
+> __STATIC_FORCEINLINE int32_t __SXTB16_RORn(uint32_t op1, uint32_t rotate)
+> {
+>   int32_t result;
+> 
+>   __ASM ("sxtb16 %0, %1, ROR %2" : "=r" (result) : "r" (op1), "i" (rotate) );
+> 
+>   return result;
+> }
+> 
+1902c1979
+<   __ASM volatile ("sxtab16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+---
+>   __ASM ("sxtab16 %0, %1, %2" : "=r" (result) : "r" (op1), "r" (op2) );
+2091c2168
+<  __ASM volatile ("smmla %0, %1, %2, %3" : "=r" (result): "r"  (op1), "r" (op2), "r" (op3) );
+---
+>  __ASM ("smmla %0, %1, %2, %3" : "=r" (result): "r"  (op1), "r" (op2), "r" (op3) );

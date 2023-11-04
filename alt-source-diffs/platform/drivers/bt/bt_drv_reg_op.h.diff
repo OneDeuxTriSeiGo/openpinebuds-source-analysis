@@ -1,0 +1,195 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/drivers/bt/bt_drv_reg_op.h
+remote: https://raw.githubusercontent.com/dawmlight/device_bestechnic/fc81e5e2ceafd3610bae6591117735ff997d478d/bes2600w/sdk_liteos/bsp/platform/drivers/bt/bt_drv_reg_op.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 bestechnic (Shanghai) Technologies CO., LIMITED.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+53a53,57
+> /** Bluetooth Address */
+> typedef struct {
+>     uint8_t address[6];
+> } __attribute__ ((packed)) bt_drv_bdaddr_t;
+> 
+105c109
+< #elif defined(CHIP_BEST2300A)
+---
+> #elif defined(CHIP_BEST2300A) || defined(CHIP_BEST1305)
+140,148c144,149
+< void bt_drv_reg_op_rssi_set(uint16_t rssi);
+< void bt_drv_reg_op_scan_intv_set(uint32_t scan_intv);
+< void bt_drv_reg_op_encryptchange_errcode_reset(uint16_t hci_handle);
+< void bt_drv_reg_op_sco_sniffer_checker(void);
+< void bt_drv_reg_op_trigger_time_checker(void);
+< void bt_drv_reg_op_tws_output_power_fix_separate(uint16_t hci_handle, uint16_t pwr);
+< bool bt_drv_reg_op_ld_sniffer_env_monitored_dev_state_get(void);
+< void bt_drv_reg_op_ld_sniffer_env_monitored_dev_state_set(bool state);
+< void bt_drv_reg_op_ld_sniffer_master_addr_set(uint8_t * addr);
+---
+> typedef struct{
+>     uint32_t clkn;
+>     int8_t rssi;
+> } __attribute__ ((__packed__)) CLKN_SER_NUM_T;
+> 
+> 
+155,161d155
+< int bt_drv_reg_op_packet_type_checker(uint16_t hciHandle);
+< void bt_drv_reg_op_max_slot_setting_checker(uint16_t hciHandle);
+< void bt_drv_reg_op_force_task_dbg_idle(void);
+< void bt_drv_reg_op_afh_follow_mobile_mobileidx_set(uint16_t hciHandle);
+< void bt_drv_reg_op_afh_follow_mobile_twsidx_set(uint16_t hciHandle);
+< void bt_drv_reg_op_sco_status_store(void);
+< void bt_drv_reg_op_sco_status_restore(void);
+169d162
+< void bt_drv_reg_op_ble_buffer_cleanup(void);
+180d172
+< void bt_drv_reg_op_enable_pcm_tx_hw_cal(void);
+185d176
+< void bt_drv_reg_op_set_reboot_pairing_mode(uint8_t mode);
+188,197c179
+< void bt_drv_reg_op_call_monitor(uint16_t connHandle, uint8_t tws_role);
+< void bt_drv_reg_op_lock_sniffer_sco_resync(void);
+< void bt_drv_reg_op_unlock_sniffer_sco_resync(void);
+< void bt_drv_reg_op_afh_set_default(void);
+< void bt_drv_reg_op_update_sniffer_bitoffset(uint16_t mobile_conhdl,uint16_t master_conhdl);
+< void bt_drv_reg_op_modify_bitoff_timer(uint16_t time_out);
+< uint16_t em_bt_bitoff_getf(int elt_idx);
+< void bt_drv_reg_op_ble_llm_substate_hacker(void);
+< void bt_drv_reg_op_esco_acl_sniff_delay_cal(uint16_t hciHandle,bool enable);
+< bool  bt_drv_reg_op_check_esco_acl_sniff_conflict(uint16_t hciHandle);
+---
+> uint16_t bt_drv_reg_op_bitoff_getf(int elt_idx);
+198a181
+> uint16_t bt_drv_reg_op_get_tpoll(uint8_t linkid);
+205a189,191
+> void bt_drv_reg_op_enable_dma_tc(uint8_t adma_ch);
+> void bt_drv_reg_op_disable_dma_tc(uint8_t adma_ch);
+> void bt_drv_reg_op_dma_tc_clkcnt_get_by_ch(uint32_t *btclk, uint16_t *btcnt, uint8_t adma_ch);
+215d200
+< void bt_drv_reg_op_afh_env_reset(void);
+297a283,284
+> void bt_drv_reg_op_set_music_link(uint8_t link_id);
+> void bt_drv_reg_op_set_music_link_duration_extra(uint8_t slot);
+308a296
+> void bt_drv_reg_op_reset_agc_thd(void);
+314a303
+> void bt_drv_reg_op_set_ibrt_second_sco_decision(uint8_t value);
+315a305
+> uint8_t bt_drv_reg_op_get_sync_id_by_conhdl(uint16_t conhdl);
+318,319d307
+< void bt_drv_reg_op_set_accept_new_mobile_enable(void);
+< void bt_drv_reg_op_clear_accept_new_mobile_enable(void);
+326d313
+< void bt_drv_reg_op_set_max_pwr_rcv(uint16_t connHandle);
+329c316,395
+< void bt_drv_reg_op_ble_sup_timeout_set(uint16_t ble_conhdl, uint16_t sup_to);
+---
+> #ifdef PCM_PRIVATE_DATA_FLAG
+> void bt_drv_reg_op_sco_pri_data_init();
+> #endif
+> void bt_drv_reg_op_init_rssi_setting(void);
+> void bt_drv_reg_op_init_sleep_para(void);
+> void bt_drv_reg_op_data_bakeup_init(void);
+> void bt_drv_reg_op_data_backup_write(const uint32_t *ptr,uint32_t cnt);
+> void bt_drv_reg_op_init_hwagc_corr_gain(void);
+> void bt_drv_reg_op_low_txpwr_set(uint8_t enable, uint8_t factor, uint8_t bt_or_ble, uint8_t link_id);
+> 
+> #ifdef __SW_TRIG__
+> uint16_t bt_drv_reg_op_rxbit_1us_get(uint16_t conhdl);
+> uint16_t btdrv_reg_op_rxclkn_get(uint8_t sel, uint8_t conidx);
+> uint16_t btdrv_reg_op_rxbit_get(uint8_t conidx);
+> void btdrv_reg_op_sw_trig_tg_finecnt_set(uint16_t tg_bitcnt, uint8_t trig_route);
+> uint16_t btdrv_reg_op_sw_trig_tg_finecnt_get(uint8_t trig_route);
+> void btdrv_reg_op_sw_trig_tg_clkncnt_set(uint32_t num, uint8_t trig_route);
+> void btdrv_sw_trig_en_set(uint8_t trig_route);
+> void btdrv_sw_trig_disable_set(uint8_t trig_route);
+> #endif
+> void bt_drv_reg_op_set_btpcm_trig_flag(bool flag);
+> void bt_drv_reg_op_multi_ibrt_music_config(uint8_t* link_id, uint8_t* active, uint8_t num);
+> void bt_drv_iq_tab_set_normalmode(void);
+> void bt_drv_iq_tab_set_value(uint32_t val);
+> void bt_drv_reg_op_set_replace_mobile_addr(uint8_t enable, uint8_t* addr);
+> void bt_drv_reg_op_power_adjust_onoff(uint8_t en);
+> uint32_t bt_drv_lp_clk_get();
+> 
+> void btdrv_reg_op_vco_test_start(uint8_t chnl);
+> void btdrv_reg_op_vco_test_stop(void);
+> void btdrv_reg_op_syn_set_tg_ticks_master_role(void);
+> void btdrv_reg_op_syn_set_tg_ticks_slave_role(uint32_t num);
+> uint32_t btdrv_reg_op_syn_get_curr_ticks(void);
+> uint32_t btdrv_reg_op_syn_get_cis_curr_time(void);
+> uint16_t btdrv_reg_op_get_offset_ticks(uint8_t sel, uint16_t conidx);
+> void btdrv_reg_op_sync_clr_trigger(uint8_t trig_route);
+> void btdrv_reg_op_syn_trigger_codec_en(uint32_t v);
+> uint32_t btdrv_reg_op_get_syn_trigger_codec_en(void);
+> uint32_t btdrv_reg_op_get_trigger_ticks(void);
+> void btdrv_reg_op_syn_set_tg_ticks_linkid(uint8_t link_id);
+> void btdrv_reg_op_enable_playback_triggler(uint8_t triggle_mode);
+> void btdrv_reg_op_play_trig_mode_set(uint8_t mode);
+> void btdrv_reg_op_disable_playback_triggler(void);
+> void btdrv_reg_op_set_pcm_data_ignore_crc(void);
+> void btdrv_reg_op_linear_format_16bit_set(void);
+> void btdrv_reg_op_pcm_enable(void);
+> void btdrv_reg_op_pcm_disable(void);
+> #ifdef PCM_FAST_MODE
+> void btdrv_reg_op_open_pcm_fast_mode_enable(void);
+> void btdrv_reg_op_open_pcm_fast_mode_disable(void);
+> #endif
+> #if defined(CVSD_BYPASS)
+> void btdrv_reg_op_cvsd_bypass_enable(void);
+> #endif
+> void bt_drv_set_fa_invert_enable(uint8_t en);
+> bool btdrv_reg_op_get_local_name(uint8_t* name);
+> int8_t btdrv_reg_op_txpwr_idx_to_rssidbm(uint8_t txpwr_idx);
+> void bt_drv_reg_op_set_nosig_sch_flag(uint8_t enable);
+> void bt_drv_reg_op_afh_assess_en(bool en);
+> void btdrv_reg_op_bts_to_bt_time(uint32_t bts, uint32_t* p_hs, uint16_t* p_hus);
+> uint32_t btdrv_reg_op_bt_time_to_bts(uint32_t hs, uint16_t hus);
+> uint8_t bt_drv_reg_op_get_ibrt_env(bt_drv_bdaddr_t* mobile_addr_ptr);
+> int bt_drv_reg_op_acl_chnmap(uint16_t hciHandle, uint8_t *chnmap, uint8_t chnmap_len);
+> 
+> int btdrv_host_gpio_tport_open(void);
+> int btdrv_gpio_port_set(int port);
+> int btdrv_gpio_tport_clr(int port);
+> int32_t bt_drv_reg_op_get_clkoffset(uint16_t linkid);
+> void btdrv_regop_dump_btpcm_reg(void);
+> void btdrv_regop_force_preferred_rate_send(uint16_t conhdl);
+> void btdrv_regop_host_set_txpwr(uint16_t acl_connhdl, uint8_t txpwr_idx);
+> 
+> void bt_drv_i2v_disable_sleep_for_bt_access(void);
+> void bt_drv_i2v_enable_sleep_for_bt_access(void);
+> 
+> int8_t bt_drv_reg_op_get_tx_pwr_dbm(uint16_t conhdl);
+> void bt_drv_reg_op_get_pkt_ts_rssi(uint16_t connhdl, CLKN_SER_NUM_T* buf);
+> void bt_drv_reg_op_rssi_adjust_mode_setting_for_test_mode(void);
+> bool bt_drv_reg_op_check_link_exist(uint16_t con_hdl);
+> void bt_drv_reg_op_setting_wesco(uint8_t wesco);

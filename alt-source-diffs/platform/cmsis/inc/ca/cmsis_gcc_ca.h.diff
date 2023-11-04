@@ -1,0 +1,33 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/ca/cmsis_gcc_ca.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/cmsis/inc/ca/cmsis_gcc_ca.h
+diff -sw local remote
+---
+
+811a812,838
+> /**
+>   \brief   Get APSR Register
+>   \details Returns the content of the APSR Register.
+>   \return               APSR Register value
+>  */
+> __STATIC_FORCEINLINE uint32_t __get_APSR(void)
+> {
+>   uint32_t result;
+> 
+>   __ASM volatile ("MRS %0, apsr" : "=r" (result) );
+>   return(result);
+> }
+> 
+> 
+> /**
+>   \brief   Get xPSR Register
+>   \details Returns the content of the xPSR Register.
+>   \return               xPSR Register value
+>  */
+> __STATIC_FORCEINLINE uint32_t __get_xPSR(void)
+> {
+>   uint32_t result;
+> 
+>   __ASM volatile ("MRS %0, xpsr" : "=r" (result) );
+>   return(result);
+> }
+> 

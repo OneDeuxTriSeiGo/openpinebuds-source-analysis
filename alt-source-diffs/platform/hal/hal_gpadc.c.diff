@@ -1,0 +1,354 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_gpadc.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_gpadc.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+18c17
+< #ifndef GPADC_CHIP_SPECIFIC
+---
+> #if !defined(GPADC_CHIP_SPECIFIC) && !defined(CHIP_SUBSYS_SENS)
+34,40c33,39
+< // Battery voltage = gpadc voltage * 4
+< // adc rate 0~2v(10bit)
+< // Battery_voltage:Adc_rate = 4:1
+< #define HAL_GPADC_MVOLT_A                   800
+< #define HAL_GPADC_MVOLT_B                   1050
+< #define HAL_GPADC_CALIB_DEFAULT_A           428
+< #define HAL_GPADC_CALIB_DEFAULT_B           565
+---
+> #ifdef GPADC_DYNAMIC_DATA_BITS
+> #define GPADC_VALUE_BITS                    gpadc_data_bits
+> #elif defined(CHIP_BEST1305) || defined(CHIP_BEST2002) || defined(CHIP_BEST2003)
+> #define GPADC_VALUE_BITS                    16
+> #else
+> #define GPADC_VALUE_BITS                    10
+> #endif
+43,44c42,46
+< #elif defined(CHIP_BEST1400) || defined(CHIP_BEST1402) || \
+<         defined(CHIP_BEST2000) || defined(CHIP_BEST2001) || \
+---
+> #elif defined(CHIP_BEST1305) || \
+>         defined(CHIP_BEST1400) || defined(CHIP_BEST1402) || \
+>         defined(CHIP_BEST1501) || defined(CHIP_BEST1600) || \
+>         defined(CHIP_BEST1501SIMU) || defined(CHIP_BEST1600SIMU) || \
+>         defined(CHIP_BEST2000) || defined(CHIP_BEST2001) || defined(CHIP_BEST2002) || defined(CHIP_BEST2003) || \
+48c50,52
+< #if defined(CHIP_BEST1400) || defined(CHIP_BEST1402) || defined(CHIP_BEST2001)
+---
+> #if defined(CHIP_BEST1305) || \
+>         defined(CHIP_BEST1400) || defined(CHIP_BEST1402) || \
+>         defined(CHIP_BEST2001) || defined(CHIP_BEST2002) || defined(CHIP_BEST2003)
+74c78,79
+< #if defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+---
+> #if defined(CHIP_BEST1501) || defined(CHIP_BEST1600) || defined(CHIP_BEST1501SIMU) || \
+>         defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+155c160
+< #define DATA_CHAN0_MASK                     (0x3FF << DATA_CHAN0_SHIFT)
+---
+> #define DATA_CHAN0_MASK                     (((1 << GPADC_VALUE_BITS) - 1) << DATA_CHAN0_SHIFT)
+241c246
+< #define DATA_CHAN0_MASK                     (0x3FF << DATA_CHAN0_SHIFT)
+---
+> #define DATA_CHAN0_MASK                     (((1 << GPADC_VALUE_BITS) - 1) << DATA_CHAN0_SHIFT)
+248,251c253,292
+< static int32_t g_adcSlope = 0;
+< static int32_t g_adcIntcpt = 0;
+< static bool gpadc_enabled = false;
+< static bool adckey_enabled = false;
+---
+> // Battery voltage = gpadc voltage * 4
+> // Range 0~2V
+> #define HAL_GPADC_MVOLT_A                   800
+> #define HAL_GPADC_MVOLT_B                   1050
+> #if (GPADC_VALUE_BITS == 16)
+> #if defined(CHIP_BEST2002) || defined(CHIP_BEST2003)
+> #define HAL_GPADC_CALIB_DEFAULT_A           0x3789
+> #define HAL_GPADC_CALIB_DEFAULT_B           0x4950
+> #else
+> #define HAL_GPADC_CALIB_DEFAULT_A           0x3E60
+> #define HAL_GPADC_CALIB_DEFAULT_B           0x5150
+> #endif
+> #else
+> #if !defined(GPADC_DYNAMIC_DATA_BITS) && (GPADC_VALUE_BITS < 10 || GPADC_VALUE_BITS > 16)
+> #error "GPADC value bits not in range"
+> #endif
+> #define HAL_GPADC_CALIB_DEFAULT_A           (428 << (GPADC_VALUE_BITS - 10))
+> #define HAL_GPADC_CALIB_DEFAULT_B           (565 << (GPADC_VALUE_BITS - 10))
+> #endif
+> 
+> #if defined(__FPU_USED) && (__FPU_USED == 1)
+> typedef float ADC_COEF_T;
+> #define ADC_CALC_FACTOR                     1
+> #else
+> typedef int32_t ADC_COEF_T;
+> #define ADC_CALC_FACTOR                     1000
+> #endif
+> 
+> #ifdef GPADC_DYNAMIC_DATA_BITS
+> static uint8_t gpadc_data_bits;
+> #endif
+> 
+> static ADC_COEF_T g_adcSlope = 0;
+> static ADC_COEF_T g_adcIntcpt = 0;
+> #ifdef PMU_EFUSE_PAGE_GPADC_CALI
+> static ADC_COEF_T g_adcSlope_1v = 0;
+> #define HAL_GPADC_CALIB_DEFAULT_1V 0x488F
+> #endif
+> static bool gpadc_irq_enabled = false;
+> static bool adckey_irq_enabled = false;
+255a297,337
+> static uint16_t gpadc_chan_en;
+> static uint16_t gpadc_irq_mask;
+> 
+> static uint16_t hal_gpadc_get_all_masked_irq(void)
+> {
+>     uint16_t all;
+> 
+>     all = KEY_ERR1_INTR_MSKED | KEY_ERR0_INTR_MSKED | KEY_PRESS_INTR_MSKED | KEY_RELEASE_INTR_MSKED |
+>         SAMPLE_DONE_INTR_MSKED | CHAN_DATA_INTR_MSKED_MASK;
+>     return all;
+> }
+> 
+> static uint16_t hal_gpadc_get_cur_masked_irq(void)
+> {
+> #if (KEY_ERR1_INTR_MSKED != KEY_ERR1_INTR_MSK) || \
+>         (KEY_ERR0_INTR_MSKED != KEY_ERR0_INTR_MSK) || \
+>         (KEY_PRESS_INTR_MSKED != KEY_PRESS_INTR_MSK) || \
+>         (KEY_RELEASE_INTR_MSKED != KEY_RELEASE_INTR_MSK) || \
+>         (SAMPLE_DONE_INTR_MSKED != SAMPLE_DONE_INTR_MSK) || \
+>         (CHAN_DATA_INTR_MSKED_MASK != CHAN_DATA_INTR_MSK_MASK)
+> #error "GPADC IRQ MASKED STS != IRQ MASK"
+> #endif
+> 
+>     uint16_t all = hal_gpadc_get_all_masked_irq();
+>     return (all & gpadc_irq_mask);
+> }
+> 
+> int hal_gpadc_masked_irq_valid(uint16_t irq)
+> {
+>     uint16_t masked = hal_gpadc_get_cur_masked_irq();
+>     irq &= masked;
+>     return (irq ? true: false);
+> }
+> 
+> uint16_t hal_gpadc_filter_out_unmasked_irq(uint16_t irq)
+> {
+>     uint16_t all = hal_gpadc_get_all_masked_irq();
+>     uint16_t masked = hal_gpadc_get_cur_masked_irq();
+>     irq &= ((~all) | masked);
+>     return irq;
+> }
+296c378
+<     int32_t y1, y2, x1, x2;
+---
+>     ADC_COEF_T y1, y2, x1, x2;
+302,303c384,385
+<         y1 = HAL_GPADC_MVOLT_A*1000;
+<         y2 = HAL_GPADC_MVOLT_B*1000;
+---
+>         y1 = (ADC_COEF_T)HAL_GPADC_MVOLT_A;
+>         y2 = (ADC_COEF_T)HAL_GPADC_MVOLT_B;
+307c389
+<         x1 = efuse_a > 0 ? efuse_a : HAL_GPADC_CALIB_DEFAULT_A;
+---
+>         x1 = (ADC_COEF_T)(efuse_a > 0 ? efuse_a : HAL_GPADC_CALIB_DEFAULT_A);
+310c392
+<         x2 = efuse_b > 0 ? efuse_b : HAL_GPADC_CALIB_DEFAULT_B;
+---
+>         x2 = (ADC_COEF_T)(efuse_b > 0 ? efuse_b : HAL_GPADC_CALIB_DEFAULT_B);
+312,313c394,395
+<         g_adcSlope = (y2-y1)/(x2-x1);
+<         g_adcIntcpt = ((y1*x2)-(x1*y2))/((x2-x1)*1000);
+---
+>         g_adcSlope = (y2 - y1) * ADC_CALC_FACTOR / (x2 - x1);
+>         g_adcIntcpt = ((y1 * x2) - (x1 * y2)) / ((x2 - x1));
+316c398,409
+<         TRACE(7,"%s efuse:%d/%d LV=%d, HV=%d, Slope:%d Intcpt:%d",__func__, efuse_a, efuse_b, x1, x2, g_adcSlope, g_adcIntcpt);
+---
+>         TRACE(7,"%s efuse:%d/%d LV=%d, HV=%d, Slope:%d Intcpt:%d", __func__,
+>             efuse_a, efuse_b, (int32_t)x1, (int32_t)x2, (int32_t)g_adcSlope, (int32_t)g_adcIntcpt);
+> 
+> #ifdef PMU_EFUSE_PAGE_GPADC_CALI
+>         ADC_COEF_T voltage;
+>         pmu_get_efuse(PMU_EFUSE_PAGE_GPADC_CALI, &efuse_a);
+>         x1 = (ADC_COEF_T)((HAL_GPADC_CALIB_DEFAULT_1V - 0x200 < efuse_a && efuse_a < HAL_GPADC_CALIB_DEFAULT_1V + 0x200) ? efuse_a : HAL_GPADC_CALIB_DEFAULT_1V);
+> 
+>         voltage = (g_adcSlope * x1) + (g_adcIntcpt * ADC_CALC_FACTOR);
+>         g_adcSlope_1v = voltage / 1000;
+>         TRACE(7,"%s efuse cali 1v:%d, Slope:%d", __func__, efuse_a, (int32_t)g_adcSlope_1v);
+> #endif
+335,336c428,433
+<         voltage = (((g_adcSlope*gpadcVal)/1000) + (g_adcIntcpt));
+< 
+---
+> #ifdef PMU_EFUSE_PAGE_GPADC_CALI
+>         voltage = (int32_t)((g_adcSlope * gpadcVal) + (g_adcIntcpt * ADC_CALC_FACTOR));
+>         voltage = (int32_t)((ADC_COEF_T)voltage / g_adcSlope_1v);
+> #else
+>         voltage = (int32_t)(((g_adcSlope * gpadcVal) / ADC_CALC_FACTOR) + (g_adcIntcpt));
+> #endif
+354c451,453
+< #ifndef PMU_IRQ_UNIFIED
+---
+> #ifdef PMU_IRQ_UNIFIED
+>     irq_status &= hal_gpadc_get_cur_masked_irq();
+> #else
+358,360c457
+<     irq_status &= (CHAN_DATA_INTR_MSKED_MASK|SAMPLE_DONE_INTR_MSKED|
+<         KEY_RELEASE_INTR_MSKED|KEY_PRESS_INTR_MSKED|
+<         KEY_ERR0_INTR_MSKED|KEY_ERR1_INTR_MSKED);
+---
+>     irq_status &= hal_gpadc_get_cur_masked_irq();
+395a493
+>                         gpadc_irq_mask = read_val;
+405a504
+>                         gpadc_chan_en = read_val;
+419,420c518
+<     gpadc_reg_read(GPADC_REG_CH_EN, &read_val);
+<     if ((read_val & CHAN_EN_REG((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6))) == 0) {
+---
+>     if ((gpadc_chan_en & CHAN_EN_REG((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6))) == 0) {
+423a522,524
+> #ifdef DCDC_CLOCK_CONTROL
+>         hal_cmu_dcdc_clock_disable(HAL_CMU_DCDC_CLOCK_USER_GPADC);
+> #endif
+453a555
+>                 gpadc_irq_mask = read_val;
+468c570
+< 
+---
+>             adc_val = hal_gpadc_adc2volt(adc_val);
+500c602
+<     if (gpadc_enabled || adckey_enabled) {
+---
+>     if (gpadc_irq_enabled || adckey_irq_enabled) {
+529a632,638
+> #ifdef GPADC_DYNAMIC_DATA_BITS
+>     if (gpadc_data_bits == 0) {
+>         gpadc_data_bits = pmu_get_gpadc_data_bits();
+>         ASSERT(10 <= gpadc_data_bits && gpadc_data_bits <= 16, "GPADC value bits not in range: %u", gpadc_data_bits);
+>     }
+> #endif
+> 
+552a662
+>             // FALLTHROUGH
+562c672,679
+< #if defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+---
+> #ifdef DCDC_CLOCK_CONTROL
+>             if (channel != HAL_GPADC_CHAN_ADCKEY) {
+>                 hal_cmu_dcdc_clock_enable(HAL_CMU_DCDC_CLOCK_USER_GPADC);
+>             }
+> #endif
+> 
+> #if defined(CHIP_BEST1305) || defined(CHIP_BEST1501) || defined(CHIP_BEST1600) || \
+>         defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+575c692,693
+<                 gpadc_enabled = true;
+---
+>                 gpadc_irq_mask = val;
+>                 gpadc_irq_enabled = true;
+594a713
+>                     gpadc_chan_en = reg_start_mask;
+598a718
+>                     gpadc_chan_en = val;
+654a775
+>             gpadc_irq_mask = val;
+668c789
+<                     val = reg_start;
+---
+>                     gpadc_chan_en = reg_start;
+672a794
+>                     gpadc_chan_en = val;
+674c796
+<                 if (val & CHAN_EN_REG((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6))) {
+---
+>                 if (gpadc_chan_en & CHAN_EN_REG((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6))) {
+682,683c804,811
+<             if ((chan_int_en & CHAN_DATA_INTR_EN((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7))) == 0) {
+<                 gpadc_enabled = false;
+---
+> #ifdef DCDC_CLOCK_CONTROL
+>              if ((reg_start & GPADC_START) == 0) {
+>                 hal_cmu_dcdc_clock_disable(HAL_CMU_DCDC_CLOCK_USER_GPADC);
+>             }
+> #endif
+> 
+>             if ((gpadc_irq_mask & CHAN_DATA_INTR_MSK((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7))) == 0) {
+>                 gpadc_irq_enabled = false;
+700c828,829
+< #if defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+---
+> #if defined(CHIP_BEST1305) || defined(CHIP_BEST1501) || defined(CHIP_BEST1600) || \
+>         defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+715c844,845
+< #if defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+---
+> #if defined(CHIP_BEST1305) || defined(CHIP_BEST1501) || defined(CHIP_BEST1600) || \
+>         defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+719,721c849
+<     gpadc_reg_read(GPADC_REG_CH_EN, &val);
+<     if (val & CHAN_EN_REG((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6))) {
+<         if (GPADC_REG_START != GPADC_REG_CH_EN) {
+---
+>     if (gpadc_chan_en & CHAN_EN_REG((1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6))) {
+723d850
+<         }
+750c877
+<         adckey_enabled = false;
+---
+>         adckey_irq_enabled = false;
+756c883
+<         adckey_enabled = true;
+---
+>         adckey_irq_enabled = true;
+762c889
+<         adckey_enabled = true;
+---
+>         adckey_irq_enabled = true;
+766c893
+<         adckey_enabled = true;
+---
+>         adckey_irq_enabled = true;
+770a898,904
+> #ifdef DCDC_CLOCK_CONTROL
+>     if (adckey_irq_enabled) {
+>         hal_cmu_dcdc_clock_enable(HAL_CMU_DCDC_CLOCK_USER_ADCKEY);
+>     }
+>     // Never disable adckey clock
+> #endif
+> 
+776a911
+>     gpadc_irq_mask = val;

@@ -1,0 +1,93 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/tota/app_spp_tota.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/services/tota/app_spp_tota.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+18,20c17,18
+< #include <map>
+< #include <stdint.h>
+< using namespace std;
+---
+> 
+> #include "me_api.h"
+23c21
+< #define TOTA_SPP_MAX_PACKET_SIZE     600
+---
+> #define TOTA_SPP_MAX_PACKET_SIZE     666
+31,61d28
+< /**
+<  * @brief Type of the tota module
+<  *
+<  */
+< typedef enum
+< {
+<     APP_TOTA_AUDIO_DUMP = 0,
+<     APP_TOTA_MIC,
+<     APP_TOTA_FLASH,
+<     APP_TOTA_ANC,
+<     APP_TOTA_GENERAL,
+<     APP_TOTA_CUSTOM,
+< 
+<     APP_TOTA_MODULE_NONE = 0xFF
+< } APP_TOTA_MODULE_E;
+< 
+< 
+< typedef struct{
+<     void (*tota_spp_connected)(void);
+<     void (*tota_spp_disconnected)(void);
+<     void (*tota_spp_tx_done)(void);
+<     void (*tota_spp_data_receive_hanle)(uint8_t * buf, uint32_t len);
+< }tota_callback_func_t;
+< 
+< 
+< void tota_callback_module_register(APP_TOTA_MODULE_E module, tota_callback_func_t tota_callback_func);
+< void tota_callback_module_set(APP_TOTA_MODULE_E module);
+< APP_TOTA_MODULE_E tota_callback_module_get();
+< 
+< 
+< 
+65c32,33
+< 
+---
+> void app_tota_send_cmd_via_spp(uint8_t* ptrData, uint32_t length);
+> void app_tota_send_data_via_spp(uint8_t* ptrData, uint32_t length);
+69,71d36
+< uint8_t* app_spp_tota_fill_data_into_tx_buf(uint8_t* ptrData, uint32_t dataLen);
+< 
+< bool app_spp_tota_send_data(uint8_t* ptrData, uint16_t length);
+73,74c38
+< /* for sniff */
+< bool spp_tota_in_progress(void);
+---
+> void app_spp_tota_client_open(btif_remote_device_t *remDev);

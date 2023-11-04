@@ -1,0 +1,11 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/ca/best2001_dsp.h
+remote: https://raw.githubusercontent.com/alibaba/AliOS-Things/a99f20706f9c666903a12a205edce13263b1fadb/hardware/chip/haas1000/drivers/platform/cmsis/inc/ca/haas1000_dsp.h
+diff -sw local remote
+---
+
+134a135
+> #define GPDMA_IRQn              BES2001_GPDMA_IRQn
+140c141
+< #define WDT_IRQn                AON_WDT_IRQn
+---
+> #define WDT_IRQn                DSP_WDT_IRQn

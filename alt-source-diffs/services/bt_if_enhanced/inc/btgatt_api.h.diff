@@ -1,0 +1,50 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/bt_if_enhanced/inc/btgatt_api.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/bt_if_enhanced/inc/btgatt_api.h
+diff -sw local remote
+---
+
+1c1,14
+< #ifdef __GATT_OVER_BR_EDR__
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+16d28
+< #define L2CAP_HEADER_LEN    4
+22c34
+< typedef void (*btif_btgatt_status_change_callback)(btif_btgatt_event event);
+---
+> typedef void (*btif_btgatt_status_change_callback)(uint8_t device_id,btif_btgatt_event event);
+24c36
+< typedef void (*btif_btgatt_data_received_callback)(uint8_t*, uint16_t);
+---
+> typedef void (*btif_btgatt_data_received_callback)(uint8_t, uint8_t*, uint16_t);
+34c46,47
+< uint8_t btif_btgatt_is_connected(void);;
+---
+> uint8_t btif_btgatt_is_connected(void);
+> void btif_btgatt_disconnect(void);
+45c58
+< void btif_btgatt_callback(BtgattChannel *Chan, BtgattCallbackParms *Info);
+---
+> void btif_btgatt_callback(uint8_t device_id, BtgattChannel *Chan, BtgattCallbackParms *Info);
+49a63,68
+> #if defined(IBRT)
+> uint32_t btif_btgatt_profile_save_ctx(btif_remote_device_t *rem_dev, uint8_t *buf, uint32_t buf_len);
+> uint32_t btif_btgatt_profile_restore_ctx(uint8_t *buf, uint32_t buf_len);
+> void btif_btgatt_force_disconnect_btgatt_profile(uint8_t device_id,uint8_t reason);
+> #endif
+> 
+55d73
+< #endif

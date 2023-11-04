@@ -1,0 +1,216 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/ble_ip/rwapp_config.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/ip/ble/hl/inc/rwapp_config.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+27a42,44
+> #define CFG_APP_BUDS
+> //#define CFG_APP_WATCH_SERVER
+> //#define CFG_APP_WATCH_CLIENT
+32a50,67
+> /// Mesh Application
+> #if defined(CFG_APP_MESH)
+> #define BLE_APP_MESH         1
+> #else // defined(CFG_APP_MESH)
+> #define BLE_APP_MESH         0
+> #endif // defined(CFG_APP_MESH)
+> 
+> /// Application Profile
+> #if defined(CFG_APP_PRF)
+> #define BLE_APP_PRF          1
+> #else // defined(CFG_APP_PRF)
+> #define BLE_APP_PRF          0
+> #endif // defined(CFG_APP_PRF)
+> 
+> #ifndef CFG_APP_SEC
+> #define CFG_APP_SEC
+> #endif
+> 
+44c79,80
+< #if defined(BISTO_ENABLED)
+---
+> #if defined(BISTO_ENABLED)||defined(VOICE_DATAPATH)|| \
+>     defined(CTKD_ENABLE)||defined(__AI_VOICE_BLE_ENABLE__)
+49a86,91
+> #if defined(BISTO_ENABLED)||defined(__AI_VOICE_BLE_ENABLE__)||defined(CTKD_ENABLE)||defined(GFPS_ENABLED)
+> #ifndef CFG_SEC_CON
+> #define CFG_SEC_CON
+> #endif
+> #endif
+> 
+52,54d93
+< #ifndef CFG_APP_SEC
+< #define CFG_APP_SEC
+< #endif
+61c100
+< #ifdef BES_OTA_BASIC
+---
+> #ifdef BES_OTA
+69c108,113
+< #ifdef __AI_VOICE__
+---
+> #ifdef __AI_VOICE_BLE_ENABLE__
+> #define CFG_APP_AI_VOICE
+> #endif
+> 
+> #if defined(BLE_HID_ENABLE)
+> #define CFG_APP_HID
+73,77d116
+< #ifndef CFG_SEC_CON
+< #define CFG_SEC_CON
+< #endif
+< 
+< #define CFG_APP_AI_VOICE
+80,83c119,120
+< #if defined(VOICE_DATAPATH) && defined(BISTO_ENABLED)
+< #define ANCS_PROXY_ENABLE 1
+< #else
+< #define ANCS_PROXY_ENABLE 0
+---
+> #if defined(BLE_BATT_ENABLE)
+> #define CFG_APP_BAS
+86,88c123,124
+< #if ANCS_PROXY_ENABLE
+< #define CFG_APP_AMS
+< #define CFG_APP_ANCC
+---
+> #if defined(BLE_DISS_ENABLE)
+> #define CFG_APP_DIS
+92a129,131
+> #ifdef ENABLE_BUD_TO_BUD_COMMUNICATION
+> #define CFG_APP_SECx
+> #else
+95a135
+> #endif
+115a156,169
+> /// Watch Server Application
+> #if defined(CFG_APP_WATCH_SERVER)
+> #define BLE_APP_WATCH_SERVER           1
+> #else // defined(CFG_APP_WATCH_SERVER)
+> #define BLE_APP_WATCH_SERVER           0
+> #endif // defined(CFG_APP_WATCH_SERVER)
+> 
+> /// Watch Client Application
+> #if defined(CFG_APP_WATCH_CLIENT)
+> #define BLE_APP_WATCH_CLIENT           1
+> #else // defined(CFG_APP_WATCH_CLIENT)
+> #define BLE_APP_WATCH_CLIENT           0
+> #endif // defined(CFG_APP_WATCH_CLIENT)
+> 
+122a177,183
+> /// Battery Service Application
+> #if defined(CFG_APP_BAS)
+> #define BLE_APP_BATT          1
+> #else // defined(BLE_APP_BATT)
+> #define BLE_APP_BATT          0
+> #endif // defined(BLE_APP_BATT)
+> 
+137,143d197
+< /// Battery Service Application
+< #if (BLE_APP_HID)
+< #define BLE_APP_BATT          1
+< #else
+< #define BLE_APP_BATT          0
+< #endif // (BLE_APP_HID)
+< 
+178c232
+< #if defined(CFG_APP_ANCC)
+---
+> #if defined(ANCC_ENABLED)
+180c234
+< #else // defined(CFG_APP_ANCC)
+---
+> #else // defined(ANCC_ENABLED)
+182c236,243
+< #endif // defined(CFG_APP_ANCC)
+---
+> #endif // defined(ANCC_ENABLED)
+> 
+> /// ANCS Application
+> #if defined(ANCS_ENABLED)
+> #define BLE_APP_ANCS    1
+> #else
+> #define BLE_APP_ANCS    0
+> #endif // defined(ANCS_ENABLED)
+185c246
+< #if defined(CFG_APP_AMS)
+---
+> #if defined(AMS_ENABLED)
+187c248
+< #else // defined(CFG_APP_AMS)
+---
+> #else // defined(AMS_ENABLED)
+189c250,265
+< #endif // defined(CFG_APP_AMS)
+---
+> #endif // defined(AMS_ENABLED)
+> 
+> /// AMSC Application
+> #if defined(AMSC_ENABLED)
+> #define BLE_APP_AMSC   1
+> #else // defined(AMS_ENABLED)
+> #define BLE_APP_AMSC   0
+> #endif // defined(AMSC_ENABLED)
+> 
+> /// BMS Application
+> #if defined(BMS_ENABLED)
+> #define BLE_APP_BMS    1
+> #else // defined(AMS_ENABLED)
+> #define BLE_APP_BMS    0
+> #endif // defined(AMS_ENABLED)
+> 
+197d272
+< 
+199a275,292
+> #if defined(__AMA_VOICE__)
+> #define BLE_APP_AMA_VOICE    1
+> #endif
+> #if defined(__DMA_VOICE__)
+> #define BLE_APP_DMA_VOICE    1
+> #endif
+> #if defined(__GMA_VOICE__)
+> #define BLE_APP_GMA_VOICE    1
+> #endif
+> #if defined(__SMART_VOICE__)
+> #define BLE_APP_SMART_VOICE    1
+> #endif
+> #if defined(__TENCENT_VOICE__)
+> #define BLE_APP_TENCENT_VOICE    1
+> #endif
+> #if defined(__CUSTOMIZE_VOICE__)
+> #define BLE_APP_CUSTOMIZE_VOICE    1
+> #endif
+201a295,312
+> #if defined(__AMA_VOICE__)
+> #define BLE_APP_AMA_VOICE    0
+> #endif
+> #if defined(__DMA_VOICE__)
+> #define BLE_APP_DMA_VOICE    0
+> #endif
+> #if defined(__GMA_VOICE__)
+> #define BLE_APP_GMA_VOICE    0
+> #endif
+> #if defined(__SMART_VOICE__)
+> #define BLE_APP_SMART_VOICE    0
+> #endif
+> #if defined(__TENCENT_VOICE__)
+> #define BLE_APP_TENCENT_VOICE    0
+> #endif
+> #if defined(__CUSTOMIZE_VOICE__)
+> #define BLE_APP_CUSTOMIZE_VOICE    0
+> #endif

@@ -1,0 +1,319 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/nv_section/userdata_section/nvrecord_extension.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/nv_section/userdata_section/nvrecord_extension.h
+diff -sw local remote
+---
+
+1,8c1,5
+< /***************************************************************************
+<  *
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+<  *
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+10,13c7
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+15c9,14
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+23a23
+> #ifdef LINK_KEY_ENCRYPT_BY_CUSTOMER
+25c25,29
+< #define NV_EXTENSION_MAJOR_VERSION 3
+---
+> #define NV_EXTENSION_MAJOR_VERSION 10
+> #else
+> // increase by 1 if the nvrecord's whole data structure is changed and the content needs to be rebuilt
+> #define NV_EXTENSION_MAJOR_VERSION 9
+> #endif
+27c31
+< #define NV_EXTENSION_MINOR_VERSION 1
+---
+> #define NV_EXTENSION_MINOR_VERSION 3
+59c63
+< #ifdef OTA_ENABLED
+---
+> #ifdef AI_OTA
+76a81,88
+> #ifdef PROMPT_IN_FLASH
+> #define LOCAL_PACKAGE_MAX 3
+> #endif
+> 
+> #ifdef COMBO_CUSBIN_IN_FLASH
+> #define COMBO_INFO_NUM_MAX   2 // current :soc firmware + mcu firmware
+> #endif
+> 
+79,80c91,92
+< #if defined(__AI_VOICE__ ) || (defined(BISTO_ENABLED)|| defined(GFPS_ENABLED))
+< #define NV_EXTENSION_MIRROR_RAM_SIZE 0x800
+---
+> #if defined(__AI_VOICE__ ) || (defined(BISTO_ENABLED)|| defined(GFPS_ENABLED))||(defined (TILE_DATAPATH))||defined(LINK_KEY_ENCRYPT_BY_CUSTOMER)
+> #define NV_EXTENSION_MIRROR_RAM_SIZE 0xA00
+82c94
+< #define NV_EXTENSION_MIRROR_RAM_SIZE 0x400
+---
+> #define NV_EXTENSION_MIRROR_RAM_SIZE 0x600
+85c97
+< #define TILE_INFO_SIZE 400
+---
+> #define TILE_INFO_SIZE 428
+95a108,121
+> typedef struct
+> {
+>     uint32_t validityMagicNum;
+>     int dc_i_val;
+>     int dc_q_val;
+> } BT_DC_CALIBRATION_CONFIG_T;
+> 
+> typedef struct
+> {
+>     uint32_t validityMagicNum;
+>     uint16_t rx_gain_cal_val[BT_FREQENCY_RANGE_NUM];
+>     uint16_t rx_phase_cal_val[BT_FREQENCY_RANGE_NUM];
+> } BT_IQ_RX_CALIBRATION_CONFIG_T;
+> 
+111c137
+< #if defined(APP_LINEIN_A2DP_SOURCE) || defined(APP_I2S_A2DP_SOURCE)
+---
+> #if defined(BT_SOURCE)
+120a147,148
+>     uint8_t tws_name_len;
+>     uint8_t tws_name[251];    
+122a151,204
+> enum NV_FACOTRY_T{
+>    NV_BT_NONSIGNALING_MODE          = 0x0,
+>    NV_LE_NONSIGNALING_TX_MODE       = 0x1,
+>    NV_LE_NONSIGNALING_RX_MODE       = 0x2,
+>    NV_LE_NONSIGNALING_CONT_TX_MODE  = 0x3,
+>    NV_LE_NONSIGNALING_CONT_RX_MODE  = 0x4,
+>    NV_READ_LE_TEST_RESULT           = 0x5,
+>    NV_BT_DUT_MODE                   = 0x6,
+>    NV_BT_NONSIGNALING_TX_MODE       = 0x7,
+>    NV_BT_NONSIGNALING_RX_MODE       = 0x8,
+>    NV_READ_BT_RX_TEST_RESULT        = 0x9,
+> 
+>    NV_BT_ERROR_TEST_MODE            = 0xff,
+> };
+> 
+> typedef struct {
+>     uint8_t rx_channel;
+>     uint8_t phy;
+>     uint8_t mod_idx;
+>     bool test_done;
+>     uint16_t test_result;
+> }le_rx_nonsignaling_test_t;
+> 
+> typedef struct {
+>     uint8_t tx_channel;
+>     uint8_t data_len;
+>     uint8_t pkt_payload;
+>     uint8_t phy;
+> }le_tx_nonsignaling_test_t;
+> 
+> typedef struct {
+>     uint8_t hopping_mode;
+>     uint8_t whitening_mode;
+>     uint8_t tx_freq;
+>     uint8_t rx_freq;
+>     uint8_t power_level;
+>     uint8_t lt_addr;
+>     uint8_t edr_enabled;
+>     uint8_t packet_type;
+>     uint8_t payload_pattern;
+>     bool test_done;
+>     uint16_t payload_length;
+>     uint16_t test_result;
+>     uint16_t hec_nb;
+>     uint16_t crc_nb;
+>     uint32_t tx_packet_num;
+> }bt_nonsignaling_test_t;
+> 
+> typedef struct {
+>     uint8_t test_type;
+>     uint32_t test_end_timeout;
+>     uint16_t tx_packet_nb;
+> }test_scenarios_t;
+> 
+137c219
+< #if defined(APP_LINEIN_A2DP_SOURCE) || defined(APP_I2S_A2DP_SOURCE)
+---
+> #if defined(BT_SOURCE)
+142c224
+< 
+---
+> #if defined(__TENCENT_VOICE__)
+143a226
+> #endif
+144a228,231
+>     test_scenarios_t factory_test_env;
+>     le_rx_nonsignaling_test_t le_rx_env;
+>     le_tx_nonsignaling_test_t le_tx_env;
+>     bt_nonsignaling_test_t bt_nonsignaling_env;
+148,149c235,236
+<     int8_t a2dp_vol;
+<     int8_t hfp_vol;
+---
+>     uint8_t a2dp_vol;
+>     uint8_t hfp_vol;
+154c241
+<     bool hsp_act;
+---
+>     uint8_t a2dp_abs_vol;
+158a246,255
+> typedef struct 
+> {
+>     uint16_t spec_id;
+>     uint16_t vend_id;
+>     uint16_t prod_id;
+>     uint16_t prod_ver;
+>     uint8_t  prim_rec;
+>     uint16_t vend_id_source;
+> } bt_dip_pnp_info_t;
+> 
+164,166c261
+<     uint16_t vend_id;
+<     uint16_t vend_id_source;
+<     uint16_t reserve;
+---
+>     bt_dip_pnp_info_t pnp_info;
+184a280,287
+> typedef struct
+> {
+>     /// BD Address of device
+>     uint8_t addr[BLE_ADDR_SIZE];
+>     /// Address type of the device 0=public/1=private random
+>     uint8_t addr_type;
+> } BLE_ADDR_INFO_T;
+> 
+186c289
+<     uint8_t peer_bleAddr[BLE_ADDR_SIZE];
+---
+>     BLE_ADDR_INFO_T peer_addr;
+193c296
+< } BleDeviceinfo;
+---
+> } __attribute__ ((packed)) BleDeviceinfo;
+199c302
+< } NV_RECORD_PAIRED_BLE_DEV_INFO_T;
+---
+> } __attribute__ ((packed)) NV_RECORD_PAIRED_BLE_DEV_INFO_T;
+236c339
+< #if defined(OTA_ENABLED)
+---
+> #if defined(AI_OTA)
+272a376,438
+> #ifdef PROMPT_IN_FLASH
+> typedef struct
+> {
+>     /// ID of package(corresponding language)
+>     uint8_t id;
+> 
+>     // start addr of the package
+>     uint32_t startAddr;
+> 
+>     // length of package
+>     uint32_t len;
+> } PACKAGE_NODE_T;
+> 
+> /**
+>  * @brief Prompt language information
+>  *
+>  * NOTE: prompt rely on language saved in @see nvrecord_env_t
+>  *
+>  */
+> typedef struct
+> {
+>     uint8_t num;
+>     PACKAGE_NODE_T packageInfo[LOCAL_PACKAGE_MAX];
+> } NV_PROMPT_INFO_T;
+> #endif
+> 
+> #ifdef COMBO_CUSBIN_IN_FLASH
+> typedef struct
+> {
+>     uint32_t id;
+>     uint32_t offset;
+>     uint32_t length;
+> } COMBO_CONTENT_INFO_T;
+> 
+> typedef struct
+> {
+>     uint32_t mainInfo;
+>     uint32_t version;
+>     uint32_t contentNum;
+>     COMBO_CONTENT_INFO_T info[COMBO_INFO_NUM_MAX];
+>     uint32_t crc32;
+> } NV_COMBO_IMAGE_INFO_T;
+> #endif
+> 
+> #ifdef CODEC_DAC_DC_NV_DATA
+> #define DAC_DC_CALIB_DATA_NV_NUM 2
+> struct HAL_CODEC_DAC_DRE_CALIB_CFG_NV_T {
+>     uint32_t valid;
+>     uint32_t dc_l;
+>     uint32_t dc_r;
+>     float    gain_l;
+>     float    gain_r;
+>     uint16_t ana_dc_l;
+>     uint16_t ana_dc_r;
+>     uint8_t ana_gain;
+>     uint8_t ini_ana_gain;
+>     uint8_t gain_offset;
+>     uint8_t step_mode;
+>     uint8_t top_gain;
+>     uint8_t rsv[3];
+> };
+> #endif
+> 
+295c461
+< #ifdef OTA_ENABLED
+---
+> #ifdef AI_OTA
+305a472,479
+> 
+> #ifdef PROMPT_IN_FLASH
+>     NV_PROMPT_INFO_T prompt_info;
+> #endif
+> 
+> #ifdef COMBO_CUSBIN_IN_FLASH
+>     NV_COMBO_IMAGE_INFO_T combo_bin_info;
+> #endif
+310a485,499
+> 
+> #ifdef CODEC_DAC_DC_NV_DATA
+>     struct HAL_CODEC_DAC_DRE_CALIB_CFG_NV_T dac_dre_calib_cfg_nv[DAC_DC_CALIB_DATA_NV_NUM];
+> #endif
+> 
+> #if 1//def RX_IQ_CAL
+>     BT_IQ_RX_CALIBRATION_CONFIG_T btIqRxCalConfig;
+> #endif
+> 
+> #if 1//def BT_DC_CAL
+>     BT_DC_CALIBRATION_CONFIG_T btDcCalibConfig;
+> #endif
+> 
+>     NV_RECORD_PAIRED_BT_DEV_INFO_T fake_master_bt_pair_info;
+> 
+356a546,549
+> 
+> uint32_t nv_record_get_ibrt_mode(void);
+> 
+> uint8_t* nv_record_get_ibrt_peer_addr(void);

@@ -1,0 +1,264 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/ble_ip/arch.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/common/api/arch.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+3a18,20
+> #include "cmsis_os.h"
+> #include "hal_trace.h"
+> 
+6,7c23,24
+<  * @defgroup REFIP
+<  * @brief Reference IP Platform
+---
+>  * @defgroup BLUEGRIP
+>  * @brief BlueGRiP IP Platform
+9c26
+<  * This module contains reference platform components - REFIP.
+---
+>  * This module contains reference platform components - RICOW.
+19c36
+<  * @ingroup REFIP
+---
+>  * @ingroup BLUEGRIP
+36,38c53
+< #include <stdint.h>        // standard integer definition
+< //#include "compiler.h"      // inline functions
+< #include "hal_trace.h"
+---
+> // required to define GLOBAL_INT_** macros as inline assembly
+44c59
+< /// ARM is a 32-bit CPU
+---
+> /// APS3 is a 32-bit CPU
+51c66
+< /// ARM is little endian
+---
+> /// APS3 is little endian
+63a79,162
+> #ifdef CFG_ROM
+> #define DBG_SWDIAG(bank , field , value)
+> #endif //CFG_ROM
+> 
+> #define DBG_DATA_TRACE(data, size)
+> 
+> #define DBG_DATA_ALLOC(data)
+> 
+> #define DBG_DATA_FREE(data)
+> 
+> #define DBG_FUNC_ENTER(func) 
+> 
+> #define DBG_FUNC_EXIT(func)
+> 
+> #define DBG_MEM_GRANT_CTRL(mem_ptr, enable)
+> 
+> #define DBG_MEM_PERM_SET(mem_ptr, size, write_en, read_en, init_clr)
+> 
+> #define DBG_MEM_INIT(mem_ptr, size)
+> 
+> 
+> /*
+>  * GAIA
+>  ****************************************************************************************
+>  */
+> 
+> /// GAIA board
+> #if defined(CFG_GAIA)
+> #define PLF_GAIA          1
+> #else // CFG_GAIA
+> #define PLF_GAIA          0
+> #endif // CFG_GAIA
+> 
+> /*
+>  * Bubble
+>  ****************************************************************************************
+>  */
+> 
+> /// Bubble board
+> #if defined(CFG_BUBBLE)
+> #define PLF_BUBBLE          1
+> #else // CFG_GAIA
+> #define PLF_BUBBLE          0
+> #endif // CFG_GAIA
+> 
+> /*
+>  * Display
+>  ****************************************************************************************
+>  */
+> 
+> /// Display controller enable/disable
+> #if defined(CFG_DISPLAY)
+> #define PLF_DISPLAY          1
+> #else // CFG_DISPLAY
+> #define PLF_DISPLAY          0
+> #endif // CFG_DISPLAY
+> 
+> /*
+> * LCD
+> ****************************************************************************************
+> */
+> 
+> #define PLF_LCD            1//((PLF_DISPLAY) || (PLF_BUBBLE))
+> 
+> /*
+> * MAILBOX
+> ****************************************************************************************
+> */
+> 
+> #define PLF_MBOX            (PLF_GAIA)
+> 
+> 
+> /*
+> * Bi-Directional RAM for Mailbox I/F
+> ****************************************************************************************
+> */
+> #if (PLF_GAIA)
+> /// BRAM location in address map
+> #define BRAM_BASE_ADDRESS    (0x50000000)
+> /// GAIA LEDS location in address map
+> #define GAIA_LEDS_BASE_ADDRESS (0x48000000)
+> /// GAIA PB location in address map
+> #define GAIA_PB_BASE_ADDRESS (GAIA_LEDS_BASE_ADDRESS + 0x20)
+> #endif //(PLF_GAIA)
+77d175
+< 
+86a185,257
+>  * SPI
+>  ****************************************************************************************
+>  */
+> 
+> /// SPI
+> #define PLF_SPI              1
+> 
+> /*
+>  * PS2
+>  ****************************************************************************************
+>  */
+> 
+> /// PS2
+> #ifdef CFG_PS2
+> #define PLF_PS2             1
+> #else // CFG_PS2
+> #define PLF_PS2             0
+> #endif // CFG_PS2
+> 
+> /*
+>  * Accelerometer
+>  ****************************************************************************************
+>  */
+> 
+> /// Accelerometer
+> #define PLF_ACC              0
+> 
+> /*
+>  * RTC
+>  ****************************************************************************************
+>  */
+> 
+> /// RTC
+> #ifdef CFG_RTC
+> #define PLF_RTC             1
+> #else // CFG_RTC
+> #define PLF_RTC             0
+> #endif // CFG_RTC
+> 
+> /*
+>  * LE AUDIO PATH
+>  ****************************************************************************************
+>  */
+> /// AUDIO path enabled
+> #ifdef CFG_PCM
+> #define PLF_PCM   1
+> #else // CFG_PCM
+> #define PLF_PCM   0
+> #endif // CFG_PCM
+> 
+> /*
+>  * Joystick
+>  ****************************************************************************************
+>  */
+> 
+> /// Display controller enable/disable
+> #define PLF_JOYSTICK         (PLF_BUBBLE)
+> 
+> /*
+>  * NVDS mapping in flash
+>  ****************************************************************************************
+>  */
+> 
+> /// NVDS location in FLASH buffer 1 : 0x00F00000 (15 MB)
+> #define NVDS_FLASH_ADDRESS_1       (0x00F00000)
+> 
+> /// NVDS location in FLASH buffer 2 : 0x00FC0000 (15.75 MB)
+> #define NVDS_FLASH_ADDRESS_2       (0x00FC0000)
+> 
+> /// NVDS size in FLASH : 0x00000800 (2K)
+> #define NVDS_FLASH_SIZE            (0x00000800)
+> 
+> /*
+100a272,274
+> #if defined(BT_DUAL_MODE) && BT_DUAL_MODE
+> #define    EM_SIZE_LIMIT          0x10000
+> #else
+101a276,277
+> #endif 
+> 
+106a283,292
+> #if 1//(RW_DEBUG_STACK_PROF)
+> /**
+> ****************************************************************************************
+> * @brief Initialise stack memory area.
+> *
+> * This function initialises the stack memory with pattern for use in stack profiling.
+> ****************************************************************************************
+> */
+> void stack_init(void);
+> 
+116a303
+> #endif //(RW_DEBUG_STACK_PROF)
+135c322
+< #if PLF_DEBUG
+---
+> #if (PLF_DEBUG)
+171,181d357
+< 
+< 
+< /**
+<  ****************************************************************************************
+<  * @brief Dump data value into FW.
+<  *
+<  * @param data start pointer of the data.
+<  * @param length data size to dump
+<  ****************************************************************************************
+<  */
+< void dump_data(uint8_t* data, uint16_t length);
+194c370
+< #define ASSERT_INFO(cond, param0, param1)            { if (!(cond)) { TRACE(2,"line is %d file is %s", __LINE__, __FILE__); } }
+---
+> #define ASSERT_INFO(cond, param0, param1)            { if (!(cond)) { TRACE(4,"line is %d file is %s, %d, %d", __LINE__, __FILE__, param0, param1); } }
+197c373
+< #define ASSERT_WARN(cond, param0, param1)            { if (!(cond)) { TRACE(2,"line is %d file is %s", __LINE__, __FILE__); } }
+---
+> #define ASSERT_WARN(cond, param0, param1)            { if (!(cond)) { TRACE(4,"line is %d file is %s, %d, %d", __LINE__, __FILE__, param0, param1); } }
+214c390,393
+< #endif //PLF_DEBUG
+---
+> #endif 
+> 
+> /// Object allocated in shared memory - check linker script
+> #define __SHARED __attribute__ ((section("shram")))

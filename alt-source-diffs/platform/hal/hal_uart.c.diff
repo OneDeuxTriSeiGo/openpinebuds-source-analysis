@@ -1,0 +1,485 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_uart.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_uart.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+22a22
+> #include "hal_cache.h"
+57c57
+< #if (CHIP_HAS_UART > 1)
+---
+> #if (CHIP_HAS_UART >= 2)
+67c67
+< #if (CHIP_HAS_UART > 2)
+---
+> #if (CHIP_HAS_UART >= 3)
+76a77,86
+> #if (CHIP_HAS_UART >= 4)
+>     {
+>         .base = (struct UART_T *)UART3_BASE,
+>         .irq = UART3_IRQn,
+>         .mod = HAL_CMU_MOD_O_UART3,
+>         .apb = HAL_CMU_MOD_P_UART3,
+>         .rx_periph = HAL_GPDMA_UART3_RX,
+>         .tx_periph = HAL_GPDMA_UART3_TX,
+>     },
+> #endif
+105a116,120
+> #ifdef CORE_SLEEP_POWER_DOWN
+> static bool uart_opened[HAL_UART_ID_QTY];
+> static struct SAVED_UART_REGS_T saved_uart_regs[HAL_UART_ID_QTY];
+> #endif
+> 
+128a144,154
+>     uint32_t over_sample_ratio;
+> 
+> #ifdef UART_CLK_DIV_4
+>     over_sample_ratio = 4;
+> 
+>     uart[id].base->UARTOVSAMP = SET_BITFIELD(uart[id].base->UARTOVSAMP, UARTOVSAMP_RATIO, (over_sample_ratio - 1));
+>     uart[id].base->UARTOVSAMPST = SET_BITFIELD(uart[id].base->UARTOVSAMPST, UARTOVSAMPST_START, 1);
+> #else
+>     over_sample_ratio = 16;
+>     // over sample start is 8
+> #endif
+134,136c160,162
+<         mod_clk = 2 * hal_cmu_get_crystal_freq() / 16;
+<         if (cfg->baud > mod_clk) {
+<             mod_clk = PERIPH_PLL_FREQ / 2 / 16;
+---
+>         mod_clk = 2 * hal_cmu_get_crystal_freq() / over_sample_ratio;
+>         if (rate > mod_clk) {
+>             mod_clk = PERIPH_PLL_FREQ / 2 / over_sample_ratio;
+140c166
+< #if (CHIP_HAS_UART > 1)
+---
+> #if (CHIP_HAS_UART >= 2)
+144c170
+< #if (CHIP_HAS_UART > 2)
+---
+> #if (CHIP_HAS_UART >= 3)
+147a174,177
+> #if (CHIP_HAS_UART >= 4)
+>             } else if (id == HAL_UART_ID_3) {
+>                 hal_cmu_uart3_set_div(2);
+> #endif
+158c188
+<         mod_clk = hal_cmu_get_crystal_freq() / 16;
+---
+>         mod_clk = hal_cmu_get_crystal_freq() / over_sample_ratio;
+168c198
+< #if (CHIP_HAS_UART > 1)
+---
+> #if (CHIP_HAS_UART >= 2)
+172c202
+< #if (CHIP_HAS_UART > 2)
+---
+> #if (CHIP_HAS_UART >= 3)
+175a206,209
+> #if (CHIP_HAS_UART >= 4)
+>         } else if (id == HAL_UART_ID_3) {
+>             hal_cmu_uart3_set_freq(periph_freq);
+> #endif
+214a249,252
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     uart_opened[id] = true;
+> #endif
+> 
+220c258
+<     cr = lcr = 0;
+---
+>     lcr = UARTLCR_H_FEN | UARTLCR_H_DMA_RT_CNT(9);
+269a308,310
+> 
+>     cr = UARTCR_UARTEN | UARTCR_TXE | UARTCR_RXE;
+> 
+288,289d328
+<     lcr |= UARTLCR_H_FEN | UARTLCR_H_DMA_RT_CNT(9);
+<     cr |= UARTCR_UARTEN | UARTCR_TXE | UARTCR_RXE;
+291a331
+> 
+292a333
+>         lcr |= UARTLCR_H_DMA_RT_EN;
+314a356
+>     uart[id].base->UARTRXEXT = UARTRXEXT_BYPASS_HANDSHAKE | UARTRXEXT_USE_RXD_REG;
+334c376
+<     uint32_t cr, dmacr;
+---
+>     uint32_t cr, lcr, dmacr;
+347c389,395
+<     cr = 0;
+---
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     uart_opened[id] = true;
+> #endif
+> 
+>     cr = uart[id].base->UARTCR & ~(UARTCR_RTSEN | UARTCR_CTSEN);
+>     cr |= UARTCR_UARTEN | UARTCR_TXE | UARTCR_RXE;
+> 
+365a414
+>     lcr = uart[id].base->UARTLCR_H | UARTLCR_H_FEN;
+366a416
+> 
+367a418
+>         lcr |= UARTLCR_H_DMA_RT_EN;
+376a428,438
+>     // Disable UART
+>     uart[id].base->UARTCR &= ~UARTCR_UARTEN;
+>     // Empty FIFO
+>     uart[id].base->UARTLCR_H &= ~UARTLCR_H_FEN;
+>     // Wait until UART becomes idle
+>     while (((uart[id].base->UARTFR) & UARTFR_BUSY) != 0);
+>     // Clear previous errors
+>     uart[id].base->UARTECR = 1;
+>     // Clear previous IRQs
+>     uart[id].base->UARTIMSC = 0;
+>     uart[id].base->UARTICR = ~0UL;
+377a440
+>     uart[id].base->UARTLCR_H = lcr;
+379c442
+<     uart[id].base->UARTCR = (uart[id].base->UARTCR & ~(UARTCR_RTSEN | UARTCR_CTSEN)) | cr;
+---
+>     uart[id].base->UARTCR = cr;
+401a465
+>     if (init_done) {
+413a478
+>     }
+424a490,493
+> #ifdef CORE_SLEEP_POWER_DOWN
+>     uart_opened[id] = false;
+> #endif
+> 
+440a510,548
+> #ifdef CORE_SLEEP_POWER_DOWN
+> void hal_uart_sleep(void)
+> {
+>     enum HAL_UART_ID_T id;
+> 
+>     for (id = 0; id < HAL_UART_ID_QTY; id++) {
+>         if (uart_opened[id]) {
+>             saved_uart_regs[id].UARTILPR    = uart[id].base->UARTILPR;
+>             saved_uart_regs[id].UARTIBRD    = uart[id].base->UARTIBRD;
+>             saved_uart_regs[id].UARTFBRD    = uart[id].base->UARTFBRD;
+>             saved_uart_regs[id].UARTLCR_H   = uart[id].base->UARTLCR_H;
+>             saved_uart_regs[id].UARTCR      = uart[id].base->UARTCR;
+>             saved_uart_regs[id].UARTIFLS    = uart[id].base->UARTIFLS;
+>             saved_uart_regs[id].UARTIMSC    = uart[id].base->UARTIMSC;
+>             saved_uart_regs[id].UARTDMACR   = uart[id].base->UARTDMACR;
+>         }
+>     }
+> }
+> 
+> void hal_uart_wakeup(void)
+> {
+>     enum HAL_UART_ID_T id;
+> 
+>     for (id = 0; id < HAL_UART_ID_QTY; id++) {
+>         if (uart_opened[id]) {
+>             uart[id].base->UARTCR       = 0;
+>             uart[id].base->UARTILPR     = saved_uart_regs[id].UARTILPR;
+>             uart[id].base->UARTIBRD     = saved_uart_regs[id].UARTIBRD;
+>             uart[id].base->UARTFBRD     = saved_uart_regs[id].UARTFBRD;
+>             uart[id].base->UARTLCR_H    = saved_uart_regs[id].UARTLCR_H;
+>             uart[id].base->UARTIFLS     = saved_uart_regs[id].UARTIFLS;
+>             uart[id].base->UARTIMSC     = saved_uart_regs[id].UARTIMSC;
+>             uart[id].base->UARTDMACR    = saved_uart_regs[id].UARTDMACR;
+>             uart[id].base->UARTCR       = saved_uart_regs[id].UARTCR;
+>         }
+>     }
+> }
+> #endif
+> 
+466c574
+< int hal_uart_pause(enum HAL_UART_ID_T id)
+---
+> int hal_uart_pause(enum HAL_UART_ID_T id, enum HAL_UART_XFER_TYPE_T type)
+470c578,585
+<         uart[id].base->UARTCR &= ~(UARTCR_TXE | UARTCR_RXE);
+---
+>         uint32_t val = 0;
+>         if (type & HAL_UART_XFER_TYPE_TX) {
+>             val |= UARTCR_TXE;
+>         }
+>         if (type & HAL_UART_XFER_TYPE_RX) {
+>             val |= UARTCR_RXE;
+>         }
+>         uart[id].base->UARTCR &= ~val;
+476c591
+< int hal_uart_continue(enum HAL_UART_ID_T id)
+---
+> int hal_uart_continue(enum HAL_UART_ID_T id, enum HAL_UART_XFER_TYPE_T type)
+480c595,602
+<         uart[id].base->UARTCR |= (UARTCR_TXE | UARTCR_RXE);
+---
+>         uint32_t val = 0;
+>         if (type & HAL_UART_XFER_TYPE_TX) {
+>             val |= UARTCR_TXE;
+>         }
+>         if (type & HAL_UART_XFER_TYPE_RX) {
+>             val |= UARTCR_RXE;
+>         }
+>         uart[id].base->UARTCR |= val;
+509a632
+> #if !defined(ARM_CMSE) && !defined(CP_BUILD) && !defined(__ARM_ARCH_ISA_ARM)
+510a634
+> #endif
+613c737,740
+<     if (mask.RT) {
+---
+> 
+>     old_mask.reg = uart[id].base->UARTIMSC;
+> 
+>     if (old_mask.RT == 0 && mask.RT) {
+616c743
+<     old_mask.reg = uart[id].base->UARTIMSC;
+---
+> 
+636d762
+<     uint32_t lock;
+639,646d764
+<         if (recv_dma_mode[id] == UART_RX_DMA_MODE_NORMAL) {
+<             // Restore the traditional RT behaviour
+<             lock = int_lock();
+<             uart[id].base->UARTLCR_H &= ~UARTLCR_H_DMA_RT_EN;
+<             int_unlock(lock);
+<         }
+< 
+<         if (rxdma_handler[id]) {
+656a775,776
+> 
+>         if (rxdma_handler[id]) {
+695d814
+< 
+699d817
+<         status.reg = 0;
+712a831
+>         status.reg = 0;
+836a956,958
+>     struct HAL_DMA_DESC_T desc_c1;
+>     enum HAL_UART_FIFO_LEVEL_T rx_level;
+>     enum HAL_DMA_BSIZE_T src_bsize;
+908a1031,1033
+>     } else {
+>         // Use desc in current stack
+>         desc = &desc_c1;
+914,916d1038
+<     periph = uart[id].rx_periph;
+< 
+<     lock = int_lock();
+918d1039
+<         int_unlock(lock);
+921,926d1041
+<     recv_dma_chan[id] = hal_gpdma_get_chan(periph, HAL_DMA_HIGH_PRIO);
+<     if (recv_dma_chan[id] == HAL_DMA_CHAN_NONE) {
+<         int_unlock(lock);
+<         return 2;
+<     }
+<     int_unlock(lock);
+928,929c1043,1059
+<     recv_dma_mode[id] = mode;
+<     recv_dma_size[id] = len;
+---
+>     periph = uart[id].rx_periph;
+>     rx_level = GET_BITFIELD(uart[id].base->UARTIFLS, UARTIFLS_RXFIFO_LEVEL);
+>     // WARNING: this config is used for uart fifo length 16
+>     switch (rx_level) {
+>         case HAL_UART_FIFO_LEVEL_1_4:
+>             src_bsize = HAL_DMA_BSIZE_4;
+>             break;
+>         case HAL_UART_FIFO_LEVEL_1_2:
+>             src_bsize = HAL_DMA_BSIZE_8;
+>             break;
+>         case HAL_UART_FIFO_LEVEL_1_8:
+>         case HAL_UART_FIFO_LEVEL_3_4:
+>         case HAL_UART_FIFO_LEVEL_7_8:
+>         default:
+>             src_bsize = HAL_DMA_BSIZE_1;
+>             break;
+>     }
+932d1061
+<     dma_cfg.ch = recv_dma_chan[id];
+939c1068
+<     dma_cfg.src_bsize = HAL_DMA_BSIZE_8;
+---
+>     dma_cfg.src_bsize = src_bsize;
+947d1075
+<         recv_mask[id] = *mask;
+956,960d1083
+<     // Activate DMA RT behaviour
+<     lock = int_lock();
+<     uart[id].base->UARTLCR_H |= UARTLCR_H_DMA_RT_EN;
+<     int_unlock(lock);
+< 
+962c1085,1088
+<         ret = hal_gpdma_start(&dma_cfg);
+---
+>         ret = hal_dma_init_desc(desc, &dma_cfg, NULL, 1);
+>         if (ret != HAL_DMA_OK) {
+>             ret = 1;
+>         }
+969,970d1094
+<         if (ret) {
+<             goto _err_exit;
+972c1096,1097
+<         ret = hal_gpdma_sg_start(desc, &dma_cfg);
+---
+>     if (ret) {
+>         return 2;
+975,977d1099
+<     if (ret != HAL_DMA_OK) {
+< _err_exit:
+<         // Restore the traditional RT behaviour
+979c1101
+<         uart[id].base->UARTLCR_H &= ~UARTLCR_H_DMA_RT_EN;
+---
+>     if (recv_dma_chan[id] != HAL_DMA_CHAN_NONE) {
+980a1103,1123
+>         return 3;
+>     }
+>     dma_cfg.ch = hal_gpdma_get_chan(periph, HAL_DMA_HIGH_PRIO);
+>     if (dma_cfg.ch == HAL_DMA_CHAN_NONE) {
+>         int_unlock(lock);
+>         return 4;
+>     }
+>     recv_dma_chan[id] = dma_cfg.ch;
+>     recv_dma_mode[id] = mode;
+>     recv_dma_size[id] = len;
+>     if (mask) {
+>         recv_mask[id] = *mask;
+>     }
+> 
+>     // Clear previous RT interrupt if any
+>     uart[id].base->UARTICR = UARTINTERRUPT_RT;
+> 
+>     ret = hal_gpdma_sg_start(desc, &dma_cfg);
+>     if (ret == HAL_DMA_OK) {
+>         ret = 0;
+>     } else {
+983c1126
+<         return 3;
+---
+>         ret = 5;
+984a1128
+>     int_unlock(lock);
+986c1130
+<     return 0;
+---
+>     return ret;
+1097,1098d1240
+<     // Restore the traditional RT behaviour
+<     uart[id].base->UARTLCR_H &= ~UARTLCR_H_DMA_RT_EN;
+1294c1436,1443
+< #if !defined(DEBUG_PORT) || (DEBUG_PORT == 1)
+---
+> #ifndef UART_PRINTF_ID
+> #if (CHIP_HAS_UART >= 4) && (DEBUG_PORT == 4)
+> #define UART_PRINTF_ID                  HAL_UART_ID_3
+> #elif (CHIP_HAS_UART >= 3) && (DEBUG_PORT == 3)
+> #define UART_PRINTF_ID                  HAL_UART_ID_2
+> #elif (CHIP_HAS_UART >= 2) && (DEBUG_PORT == 2)
+> #define UART_PRINTF_ID                  HAL_UART_ID_1
+> #elif (DEBUG_PORT == 1)
+1297c1446,1447
+< #define UART_PRINTF_ID                  HAL_UART_ID_1
+---
+> #define UART_PRINTF_ID                  HAL_UART_ID_QTY
+> #endif
+1303a1454,1457
+> #ifndef TRACE_PRINTF_LEN
+> #define TRACE_PRINTF_LEN                (120)
+> #endif
+> 
+1319c1473,1474
+<     if (UART_PRINTF_ID == HAL_UART_ID_0) {
+---
+>     if (0) {
+>     } else if (UART_PRINTF_ID == HAL_UART_ID_0) {
+1321c1476,1477
+<     } else {
+---
+> #if (CHIP_HAS_UART >= 2)
+>     } else if (UART_PRINTF_ID == HAL_UART_ID_1) {
+1322a1479,1489
+> #endif
+> #if (CHIP_HAS_UART >= 3)
+>     } else if (UART_PRINTF_ID == HAL_UART_ID_2) {
+>         hal_iomux_set_uart2();
+> #endif
+> #if (CHIP_HAS_UART >= 4)
+>     } else if (UART_PRINTF_ID == HAL_UART_ID_3) {
+>         hal_iomux_set_uart3();
+> #endif
+>     } else {
+>         return 0;
+1327a1495,1515
+> int hal_uart_get_port(void)
+> {
+>     return UART_PRINTF_ID;
+> }
+> 
+> void hal_uart_printf_output(const uint8_t *buf, uint32_t len)
+> {
+>     uint32_t i;
+> 
+>     if (UART_PRINTF_ID >= HAL_UART_ID_QTY) {
+>         return;
+>     }
+>     if (!hal_uart_opened(UART_PRINTF_ID)) {
+>         return;
+>     }
+> 
+>     for (i = 0; i < len; i++) {
+>         hal_uart_blocked_putc(UART_PRINTF_ID, buf[i]);
+>     }
+> }
+> 
+1330c1518
+<     char buf[200];
+---
+>     char buf[TRACE_PRINTF_LEN];
+1332d1519
+<     int i;
+1349,1351c1536
+<         for (i = 0; i < ret; i++) {
+<             hal_uart_blocked_putc(UART_PRINTF_ID, buf[i]);
+<         }
+---
+>         hal_uart_printf_output((const uint8_t *)buf, ret);
+1354a1540,1545
+> int hal_uart_dma_send_sync_cache(enum HAL_UART_ID_T id, const uint8_t *buf, uint32_t len,struct HAL_DMA_DESC_T *desc, uint32_t *desc_cnt)
+> {
+>     hal_cache_sync_all(HAL_CACHE_ID_D_CACHE);
+>     hal_uart_dma_send(id,buf,len,desc,desc_cnt);
+>     return 0;
+> }

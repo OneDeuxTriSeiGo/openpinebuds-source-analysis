@@ -1,0 +1,20 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/drivers/bt/besbt_string.h
+remote: https://raw.githubusercontent.com/dawmlight/device_bestechnic/fc81e5e2ceafd3610bae6591117735ff997d478d/bes2600w/sdk_liteos/bsp/platform/drivers/bt/besbt_string.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 bestechnic (Shanghai) Technologies CO., LIMITED.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */

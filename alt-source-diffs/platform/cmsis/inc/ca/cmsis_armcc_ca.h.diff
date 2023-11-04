@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/ca/cmsis_armcc_ca.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/cmsis/inc/ca/cmsis_armcc_ca.h
+diff -sw local remote
+---
+
+Files local and remote are identical

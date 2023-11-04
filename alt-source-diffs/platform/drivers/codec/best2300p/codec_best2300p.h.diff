@@ -1,0 +1,45 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/drivers/codec/best2300p/codec_best2300p.h
+remote: https://raw.githubusercontent.com/dawmlight/device_bestechnic/fc81e5e2ceafd3610bae6591117735ff997d478d/bes2600w/sdk_liteos/bsp/platform/drivers/codec/best2003/codec_best2003.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 bestechnic (Shanghai) Technologies CO., LIMITED.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,17c9,16
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+< #ifndef __CODEC_BEST2300P_H__
+< #define __CODEC_BEST2300P_H__
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+> #ifndef __CODEC_BEST2003_H__
+> #define __CODEC_BEST2003_H__
+22,25d20
+< 
+< typedef void (*CODEC_ANC_BOOST_DELAY_FUNC)(uint32_t ms);
+< 
+< void codec_set_anc_boost_delay_func(CODEC_ANC_BOOST_DELAY_FUNC delay_func);

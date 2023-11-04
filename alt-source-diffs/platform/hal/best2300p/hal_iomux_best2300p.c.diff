@@ -1,0 +1,2087 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/best2300p/hal_iomux_best2300p.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/best2003/hal_iomux_best2003.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+23a23
+> #include "hal_uart.h"
+24a25,27
+> #include "hal_chipid.h"
+> 
+> #define UART_HALF_DUPLEX
+73a77,82
+> #ifdef I2C2_VOLTAGE_VMEM
+> #define I2C2_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define I2C2_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+> #endif
+> 
+80,81c89,104
+< #ifndef I2S0_IOMUX_INDEX
+< #define I2S0_IOMUX_INDEX                    0
+---
+> #ifdef PWM0_VOLTAGE_VMEM
+> #define PWM0_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define PWM0_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+> #endif
+> 
+> #ifdef PWM1_VOLTAGE_VMEM
+> #define PWM1_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define PWM1_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+> #endif
+> 
+> #ifdef PWM2_VOLTAGE_VMEM
+> #define PWM2_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define PWM2_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+84,85c107,110
+< #ifndef I2S1_IOMUX_INDEX
+< #define I2S1_IOMUX_INDEX                    0
+---
+> #ifdef PWM3_VOLTAGE_VMEM
+> #define PWM3_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define PWM3_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+88,89c113,134
+< #ifndef I2S_MCLK_IOMUX_INDEX
+< #define I2S_MCLK_IOMUX_INDEX                0
+---
+> #ifdef PWM4_VOLTAGE_VMEM
+> #define PWM4_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define PWM4_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+> #endif
+> 
+> #ifdef PWM5_VOLTAGE_VMEM
+> #define PWM5_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define PWM5_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+> #endif
+> 
+> #ifdef PWM6_VOLTAGE_VMEM
+> #define PWM6_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define PWM6_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+> #endif
+> 
+> #ifdef PWM7_VOLTAGE_VMEM
+> #define PWM7_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define PWM7_VOLTAGE_SEL                    HAL_IOMUX_PIN_VOLTAGE_VIO
+92,93c137,140
+< #ifndef SPDIF0_IOMUX_INDEX
+< #define SPDIF0_IOMUX_INDEX                  0
+---
+> #ifdef IR_VOLTAGE_VMEM
+> #define IR_VOLTAGE_SEL                      HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define IR_VOLTAGE_SEL                      HAL_IOMUX_PIN_VOLTAGE_VIO
+96,97c143,146
+< #ifndef DIG_MIC2_CK_IOMUX_INDEX
+< #define DIG_MIC2_CK_IOMUX_INDEX             0
+---
+> #ifdef SDMMC_VOLTAGE_VMEM
+> #define SDMMC_VOLTAGE_SEL                   HAL_IOMUX_PIN_VOLTAGE_MEM
+> #else
+> #define SDMMC_VOLTAGE_SEL                   HAL_IOMUX_PIN_VOLTAGE_VIO
+100,101c149,229
+< #ifndef DIG_MIC3_CK_IOMUX_INDEX
+< #define DIG_MIC3_CK_IOMUX_INDEX             0
+---
+> #ifndef I2S0_I_IOMUX_INDEX
+> //00, 13, 37
+> #define I2S0_I_IOMUX_INDEX                  00
+> #endif
+> #ifndef I2S0_I1_IOMUX_INDEX
+> //12, 36
+> //#define I2S0_I1_IOMUX_INDEX                 12
+> #endif
+> #ifndef I2S0_I2_IOMUX_INDEX
+> //11, 35
+> //#define I2S0_I2_IOMUX_INDEX                 11
+> #endif
+> #ifndef I2S0_I3_IOMUX_INDEX
+> //10, 35
+> //#define I2S0_I3_IOMUX_INDEX                 10
+> #endif
+> 
+> #ifndef I2S0_O_IOMUX_INDEX
+> //01, 07
+> #define I2S0_O_IOMUX_INDEX                  01
+> #endif
+> #ifndef I2S0_O1_IOMUX_INDEX
+> //06
+> #define I2S0_O1_IOMUX_INDEX                 06
+> #endif
+> #ifndef I2S0_O2_IOMUX_INDEX
+> //05
+> #define I2S0_O2_IOMUX_INDEX                 05
+> #endif
+> #ifndef I2S0_O3_IOMUX_INDEX
+> //04
+> #define I2S0_O3_IOMUX_INDEX                 04
+> #endif
+> 
+> #ifndef I2S1_I_IOMUX_INDEX
+> //20, 33
+> #define I2S1_I_IOMUX_INDEX                  20
+> #endif
+> #ifndef I2S1_I1_IOMUX_INDEX
+> //32
+> //#define I2S1_I1_IOMUX_INDEX                 32
+> #endif
+> #ifndef I2S1_I2_IOMUX_INDEX
+> //31
+> //#define I2S1_I2_IOMUX_INDEX                 31
+> #endif
+> #ifndef I2S1_I3_IOMUX_INDEX
+> //30
+> //#define I2S1_I3_IOMUX_INDEX                 30
+> #endif
+> 
+> #ifndef I2S1_O_IOMUX_INDEX
+> //21, 27
+> #define I2S1_O_IOMUX_INDEX                  21
+> #endif
+> #ifndef I2S1_O1_IOMUX_INDEX
+> //26
+> #define I2S1_O1_IOMUX_INDEX                 26
+> #endif
+> #ifndef I2S1_O2_IOMUX_INDEX
+> //25
+> #define I2S1_O2_IOMUX_INDEX                 25
+> #endif
+> #ifndef I2S1_O3_IOMUX_INDEX
+> //24
+> #define I2S1_O3_IOMUX_INDEX                 24
+> #endif
+> 
+> #ifndef I2S_MCLK_IOMUX_INDEX
+> //04, 13, 15, 20, 22, 27, 34
+> #define I2S_MCLK_IOMUX_INDEX                04
+> #endif
+> 
+> #ifndef SPDIF0_I_IOMUX_INDEX
+> //02, 10, 20, 26, 37, 24
+> #define SPDIF0_I_IOMUX_INDEX                02
+> #endif
+> 
+> #ifndef SPDIF0_O_IOMUX_INDEX
+> //03, 11, 21, 27, 37, 07
+> #define SPDIF0_O_IOMUX_INDEX                03
+104a233
+> //HAL_IOMUX_PIN_P0_0, HAL_IOMUX_PIN_P0_4, HAL_IOMUX_PIN_P3_3, HAL_IOMUX_PIN_P3_4
+108a238
+> //HAL_IOMUX_PIN_P0_1, HAL_IOMUX_PIN_P0_5, HAL_IOMUX_PIN_P3_0, HAL_IOMUX_PIN_P3_5
+112a243
+> //HAL_IOMUX_PIN_P0_2, HAL_IOMUX_PIN_P0_6, HAL_IOMUX_PIN_P3_1, HAL_IOMUX_PIN_P3_6
+116a248
+> //HAL_IOMUX_PIN_P0_3, HAL_IOMUX_PIN_P0_7, HAL_IOMUX_PIN_P3_2, HAL_IOMUX_PIN_P3_7
+121c253,280
+< #define SPI_IOMUX_INDEX                     0
+---
+> //04(05,06,07), 24(25,26,27), 30(31,32,33)
+> #define SPI_IOMUX_INDEX                    04
+> #endif
+> 
+> #ifndef SPI_IOMUX_CS1_INDEX
+> //10, 35
+> //#define SPI_IOMUX_CS1_INDEX                10
+> #endif
+> #ifndef SPI_IOMUX_CS2_INDEX
+> //11, 37
+> //#define SPI_IOMUX_CS2_INDEX                11
+> #endif
+> #ifndef SPI_IOMUX_CS3_INDEX
+> //12, 25
+> //#define SPI_IOMUX_CS3_INDEX                12
+> #endif
+> 
+> #ifndef SPI_IOMUX_DI1_INDEX
+> //13, 34
+> //#define SPI_IOMUX_DI1_INDEX                13
+> #endif
+> #ifndef SPI_IOMUX_DI2_INDEX
+> //14, 36
+> //#define SPI_IOMUX_DI2_INDEX                14
+> #endif
+> #ifndef SPI_IOMUX_DI3_INDEX
+> //15, 24
+> //#define SPI_IOMUX_DI3_INDEX                15
+124a284
+> //00(01,02,03), 10(11,14,15), 20(21,22,23), 34(35,36,37)
+127a288,313
+> #ifndef SPILCD_IOMUX_CS1_INDEX
+> //05, 12, 27
+> //#define SPILCD_IOMUX_CS1_INDEX                05
+> #endif
+> #ifndef SPILCD_IOMUX_CS2_INDEX
+> //06, 31
+> //#define SPILCD_IOMUX_CS2_INDEX                06
+> #endif
+> #ifndef SPILCD_IOMUX_CS3_INDEX
+> //07, 32
+> //#define SPILCD_IOMUX_CS3_INDEX                07
+> #endif
+> 
+> #ifndef SPILCD_IOMUX_DI1_INDEX
+> //02, 26
+> //#define SPILCD_IOMUX_DI1_INDEX                02
+> #endif
+> #ifndef SPILCD_IOMUX_DI2_INDEX
+> //03, 30
+> //#define SPILCD_IOMUX_DI2_INDEX                03
+> #endif
+> #ifndef SPILCD_IOMUX_DI3_INDEX
+> //04, 33
+> //#define SPILCD_IOMUX_DI3_INDEX                04
+> #endif
+> 
+129c315,316
+< #define I2C0_IOMUX_INDEX                    0
+---
+> //00(01), 04(05), 16(17), 20(21), 26(27), 34(35)
+> #define I2C0_IOMUX_INDEX                    4
+133c320,326
+< #define I2C1_IOMUX_INDEX                    0
+---
+> //02(03), 06(07), 14(15), 22(23), 30(31)
+> #define I2C1_IOMUX_INDEX                    22
+> #endif
+> 
+> #ifndef I2C2_IOMUX_INDEX
+> //10(11), 12(13), 24(25), 32(33), 36(37)
+> #define I2C2_IOMUX_INDEX                    10
+137c330,366
+< #define CLKOUT_IOMUX_INDEX                  0
+---
+> //04, 13, 15, 20, 21, 22, 23, 27, 34
+> #define CLKOUT_IOMUX_INDEX                  20
+> #endif
+> 
+> #ifndef WIFI_UART_IOMUX_INDEX
+> //00(nothing), 20, 21, 30
+> #define WIFI_UART_IOMUX_INDEX               00
+> #endif
+> 
+> #ifndef UART1_IOMUX_INDEX
+> //02, 10, 20, 30, 32
+> #define UART1_IOMUX_INDEX                   20
+> #endif
+> 
+> #ifndef UART2_IOMUX_INDEX
+> //00, 12, 14, 22, 36
+> #define UART2_IOMUX_INDEX                   22
+> #endif
+> 
+> #ifndef UART3_IOMUX_INDEX
+> //04, 06, 24, 26, 34
+> #define UART3_IOMUX_INDEX                   04
+> #endif
+> 
+> #ifndef PWM0_IOMUX_INDEX
+> //00, 10, 20, 30
+> #define PWM0_IOMUX_INDEX                    00
+> #endif
+> 
+> #ifndef PWM1_IOMUX_INDEX
+> //01, 11, 21, 31
+> #define PWM1_IOMUX_INDEX                    01
+> #endif
+> 
+> #ifndef PWM2_IOMUX_INDEX
+> //02, 12, 22, 32
+> #define PWM2_IOMUX_INDEX                    02
+140c369,404
+< #define IOMUX_FUNC_VAL_GPIO                 0
+---
+> #ifndef PWM3_IOMUX_INDEX
+> //03, 13, 23, 33
+> #define PWM3_IOMUX_INDEX                    03
+> #endif
+> 
+> #ifndef PWM4_IOMUX_INDEX
+> //04, 14, 24, 34
+> #define PWM4_IOMUX_INDEX                    04
+> #endif
+> 
+> #ifndef PWM5_IOMUX_INDEX
+> //05, 15, 25, 35
+> #define PWM5_IOMUX_INDEX                    05
+> #endif
+> 
+> #ifndef PWM6_IOMUX_INDEX
+> //06, 16, 26, 36
+> #define PWM6_IOMUX_INDEX                    06
+> #endif
+> 
+> #ifndef PWM7_IOMUX_INDEX
+> //07, 17, 27, 37
+> #define PWM7_IOMUX_INDEX                    07
+> #endif
+> 
+> #ifndef IR_RX_IOMUX_INDEX
+> //00, 02, 06, 10, 12, 14, 22, 26, 31, 33, 36
+> #define IR_RX_IOMUX_INDEX                   00
+> #endif
+> 
+> #ifndef IR_TX_IOMUX_INDEX
+> //01, 03, 07, 11, 13, 15, 21, 27, 32, 34, 37
+> #define IR_TX_IOMUX_INDEX                   01
+> #endif
+> 
+> #define IOMUX_FUNC_VAL_GPIO                 15
+142c406
+< #define IOMUX_ALT_FUNC_NUM                  6
+---
+> #define IOMUX_ALT_FUNC_NUM                  11
+144,145c408,413
+< // Other func values: 0 -> gpio, 6 -> rf_ana, 7 -> jtag/btdm, 9 -> clk_req, 10 -> ana_test
+< static const uint8_t index_to_func_val[IOMUX_ALT_FUNC_NUM] = { 1, 2, 3, 4, 5, 8, };
+---
+> // Other func values: 2 -> uart rtx/ctx, 12 -> btdm, 13 -> wf_fem, 14 -> tport, 15 -> gpio
+> static const uint8_t index_to_func_val[IOMUX_ALT_FUNC_NUM] = {
+>     0,  1,  3,  4,
+>     5,  6,  7,  8,
+>     9,  10, 11
+> };
+149,150c417,419
+<     { HAL_IOMUX_FUNC_I2S0_SDI0, HAL_IOMUX_FUNC_UART2_RX, HAL_IOMUX_FUNC_PCM_DI, HAL_IOMUX_FUNC_SPILCD_DI0,
+<       HAL_IOMUX_FUNC_PDM0_CK, HAL_IOMUX_FUNC_SPILCD_DCN, },
+---
+>     { HAL_IOMUX_FUNC_PWM0, HAL_IOMUX_FUNC_UART2_RX, HAL_IOMUX_FUNC_I2C_M0_SCL, HAL_IOMUX_FUNC_SPILCD_DI0,
+>       HAL_IOMUX_FUNC_SPILCD_DCN, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE,
+>       HAL_IOMUX_FUNC_IR_RX, HAL_IOMUX_FUNC_PDM0_CK, HAL_IOMUX_FUNC_I2S0_SDI0, },
+152,153c421,423
+<     { HAL_IOMUX_FUNC_I2S0_SDO, HAL_IOMUX_FUNC_UART2_TX, HAL_IOMUX_FUNC_PCM_DO, HAL_IOMUX_FUNC_SPILCD_DIO,
+<       HAL_IOMUX_FUNC_PDM0_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM1, HAL_IOMUX_FUNC_UART2_TX, HAL_IOMUX_FUNC_I2C_M0_SDA, HAL_IOMUX_FUNC_SPILCD_DIO,
+>       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE,
+>       HAL_IOMUX_FUNC_IR_TX, HAL_IOMUX_FUNC_PDM0_D, HAL_IOMUX_FUNC_I2S0_SDO0, },
+155,156c425,427
+<     { HAL_IOMUX_FUNC_I2S0_WS, HAL_IOMUX_FUNC_I2C_M1_SCL, HAL_IOMUX_FUNC_PCM_FSYNC, HAL_IOMUX_FUNC_SPILCD_CS0,
+<       HAL_IOMUX_FUNC_PDM1_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM2, HAL_IOMUX_FUNC_UART1_RX, HAL_IOMUX_FUNC_I2C_M1_SCL, HAL_IOMUX_FUNC_SPILCD_CS0,
+>       HAL_IOMUX_FUNC_SPILCD_DI1, HAL_IOMUX_FUNC_SPDIF0_DI, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_DISPLAY_BL_EN,
+>       HAL_IOMUX_FUNC_IR_RX, HAL_IOMUX_FUNC_PDM1_D, HAL_IOMUX_FUNC_I2S0_WS, },
+158,159c429,431
+<     { HAL_IOMUX_FUNC_I2S0_SCK, HAL_IOMUX_FUNC_I2C_M1_SDA, HAL_IOMUX_FUNC_PCM_CLK, HAL_IOMUX_FUNC_SPILCD_CLK,
+<       HAL_IOMUX_FUNC_PDM2_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM3, HAL_IOMUX_FUNC_UART1_TX, HAL_IOMUX_FUNC_I2C_M1_SDA, HAL_IOMUX_FUNC_SPILCD_CLK,
+>       HAL_IOMUX_FUNC_SPILCD_DI2, HAL_IOMUX_FUNC_SPDIF0_DO, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_DISPLAY_BL_PWM,
+>       HAL_IOMUX_FUNC_IR_TX, HAL_IOMUX_FUNC_PDM2_D, HAL_IOMUX_FUNC_I2S0_SCK, },
+161,162c433,435
+<     { HAL_IOMUX_FUNC_SDMMC_DATA7, HAL_IOMUX_FUNC_SPI_DI0, HAL_IOMUX_FUNC_I2S0_MCLK, HAL_IOMUX_FUNC_CLK_OUT,
+<       HAL_IOMUX_FUNC_PDM1_CK, HAL_IOMUX_FUNC_SPI_DCN, },
+---
+>     { HAL_IOMUX_FUNC_PWM4, HAL_IOMUX_FUNC_UART3_RX, HAL_IOMUX_FUNC_I2C_M0_SCL, HAL_IOMUX_FUNC_SPI_DI0,
+>       HAL_IOMUX_FUNC_SPILCD_DI3, HAL_IOMUX_FUNC_I2S_MCLK, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_SPI_DCN,
+>       HAL_IOMUX_FUNC_SDMMC_DATA7, HAL_IOMUX_FUNC_PDM1_CK, HAL_IOMUX_FUNC_I2S0_SDO3, },
+164,165c437,439
+<     { HAL_IOMUX_FUNC_SDMMC_DATA6, HAL_IOMUX_FUNC_SPI_CLK, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPILCD_CS1,
+<       HAL_IOMUX_FUNC_PDM1_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM5, HAL_IOMUX_FUNC_UART3_TX, HAL_IOMUX_FUNC_I2C_M0_SDA, HAL_IOMUX_FUNC_SPI_CLK,
+>       HAL_IOMUX_FUNC_SPILCD_CS1, HAL_IOMUX_FUNC_DISPLAY_SPI_CLK, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_DISPLAY_TE,
+>       HAL_IOMUX_FUNC_SDMMC_DATA6, HAL_IOMUX_FUNC_PDM0_D, HAL_IOMUX_FUNC_I2S0_SDO2, },
+167,168c441,443
+<     { HAL_IOMUX_FUNC_SDMMC_DATA5, HAL_IOMUX_FUNC_SPI_CS0, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPILCD_CS2,
+<       HAL_IOMUX_FUNC_PDM0_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM6, HAL_IOMUX_FUNC_UART3_RX, HAL_IOMUX_FUNC_I2C_M1_SCL, HAL_IOMUX_FUNC_SPI_CS0,
+>       HAL_IOMUX_FUNC_SPILCD_CS2, HAL_IOMUX_FUNC_DISPLAY_SPI_CS, HAL_IOMUX_FUNC_WF_WAKE_HOST, HAL_IOMUX_FUNC_IR_RX,
+>       HAL_IOMUX_FUNC_SDMMC_DATA5, HAL_IOMUX_FUNC_PDM1_D, HAL_IOMUX_FUNC_I2S0_SDO1, },
+170,171c445,447
+<     { HAL_IOMUX_FUNC_SDMMC_DATA4, HAL_IOMUX_FUNC_SPI_DIO, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPILCD_CS3,
+<       HAL_IOMUX_FUNC_PDM2_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM7, HAL_IOMUX_FUNC_UART3_TX, HAL_IOMUX_FUNC_I2C_M1_SDA, HAL_IOMUX_FUNC_SPI_DIO,
+>       HAL_IOMUX_FUNC_SPILCD_CS3, HAL_IOMUX_FUNC_DISPLAY_SPI_DIO, HAL_IOMUX_FUNC_SPDIF0_DO, HAL_IOMUX_FUNC_IR_TX,
+>       HAL_IOMUX_FUNC_SDMMC_DATA4, HAL_IOMUX_FUNC_PDM2_D, HAL_IOMUX_FUNC_I2S0_SDO0, },
+173,174c449,451
+<     { HAL_IOMUX_FUNC_SDMMC_DATA2, HAL_IOMUX_FUNC_I2S1_SCK, HAL_IOMUX_FUNC_SPILCD_CLK, HAL_IOMUX_FUNC_SPI_CS1,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM0, HAL_IOMUX_FUNC_UART1_RX, HAL_IOMUX_FUNC_I2C_M2_SCL, HAL_IOMUX_FUNC_SPILCD_CLK,
+>       HAL_IOMUX_FUNC_SPI_CS1, HAL_IOMUX_FUNC_DISPLAY_SPI_DO1_DCN, HAL_IOMUX_FUNC_IR_RX, HAL_IOMUX_FUNC_WF_SDIO_CLK,
+>       HAL_IOMUX_FUNC_SDMMC_DATA2, HAL_IOMUX_FUNC_SPDIF0_DI, HAL_IOMUX_FUNC_I2S0_SDI3, },
+176,177c453,455
+<     { HAL_IOMUX_FUNC_SDMMC_DATA3, HAL_IOMUX_FUNC_I2S1_WS, HAL_IOMUX_FUNC_SPILCD_CS0, HAL_IOMUX_FUNC_SPI_CS2,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM1, HAL_IOMUX_FUNC_UART1_TX, HAL_IOMUX_FUNC_I2C_M2_SDA, HAL_IOMUX_FUNC_SPILCD_CS0,
+>       HAL_IOMUX_FUNC_SPI_CS2, HAL_IOMUX_FUNC_DISPLAY_SPI_DO2, HAL_IOMUX_FUNC_IR_TX, HAL_IOMUX_FUNC_WF_SDIO_CMD,
+>       HAL_IOMUX_FUNC_SDMMC_DATA3, HAL_IOMUX_FUNC_SPDIF0_DO, HAL_IOMUX_FUNC_I2S0_SDI2, },
+179,180c457,459
+<     { HAL_IOMUX_FUNC_SDMMC_CMD, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPILCD_CS1, HAL_IOMUX_FUNC_SPI_CS3,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM2, HAL_IOMUX_FUNC_UART2_RX, HAL_IOMUX_FUNC_I2C_M2_SCL, HAL_IOMUX_FUNC_SPILCD_CS1,
+>       HAL_IOMUX_FUNC_SPI_CS3, HAL_IOMUX_FUNC_DISPLAY_SPI_DO3, HAL_IOMUX_FUNC_CLK_32K_IN, HAL_IOMUX_FUNC_WF_SDIO_DATA0,
+>       HAL_IOMUX_FUNC_SDMMC_CMD, HAL_IOMUX_FUNC_IR_RX, HAL_IOMUX_FUNC_I2S0_SDI1, },
+182,183c461,463
+<     { HAL_IOMUX_FUNC_SDMMC_CLK, HAL_IOMUX_FUNC_I2S0_MCLK, HAL_IOMUX_FUNC_SPILCD_DCN, HAL_IOMUX_FUNC_CLK_OUT,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM3, HAL_IOMUX_FUNC_UART2_TX, HAL_IOMUX_FUNC_I2C_M2_SDA, HAL_IOMUX_FUNC_SPILCD_DCN,
+>       HAL_IOMUX_FUNC_SPI_DI1, HAL_IOMUX_FUNC_I2S_MCLK, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_WF_SDIO_DATA1,
+>       HAL_IOMUX_FUNC_SDMMC_CLK, HAL_IOMUX_FUNC_IR_TX, HAL_IOMUX_FUNC_I2S0_SDI0, },
+185,186c465,467
+<     { HAL_IOMUX_FUNC_SDMMC_DATA0, HAL_IOMUX_FUNC_I2S1_SDI0, HAL_IOMUX_FUNC_SPILCD_DI0, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM4, HAL_IOMUX_FUNC_UART2_RX, HAL_IOMUX_FUNC_I2C_M1_SCL, HAL_IOMUX_FUNC_SPILCD_DI0,
+>       HAL_IOMUX_FUNC_SPI_DI2, HAL_IOMUX_FUNC_DISPLAY_SPI_DI, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_WF_SDIO_DATA2,
+>       HAL_IOMUX_FUNC_SDMMC_DATA0, HAL_IOMUX_FUNC_IR_RX, HAL_IOMUX_FUNC_DISPLAY_TE, },
+188,189c469,471
+<     { HAL_IOMUX_FUNC_SDMMC_DATA1, HAL_IOMUX_FUNC_I2S1_SDO, HAL_IOMUX_FUNC_SPILCD_DIO, HAL_IOMUX_FUNC_I2S0_MCLK,
+<       HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM5, HAL_IOMUX_FUNC_UART2_TX, HAL_IOMUX_FUNC_I2C_M1_SDA, HAL_IOMUX_FUNC_SPILCD_DIO,
+>       HAL_IOMUX_FUNC_SPI_DI3, HAL_IOMUX_FUNC_I2S_MCLK, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_WF_SDIO_DATA3,
+>       HAL_IOMUX_FUNC_SDMMC_DATA1, HAL_IOMUX_FUNC_IR_TX, HAL_IOMUX_FUNC_DISPLAY_TE, },
+191,192c473,475
+<     { HAL_IOMUX_FUNC_UART0_RX, HAL_IOMUX_FUNC_I2C_M0_SCL, HAL_IOMUX_FUNC_BT_UART_RX, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM6, HAL_IOMUX_FUNC_UART0_RX, HAL_IOMUX_FUNC_I2C_M0_SCL, HAL_IOMUX_FUNC_NONE,
+>       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_WF_WAKE_HOST,
+>       HAL_IOMUX_FUNC_BT_UART_RX, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+194,195c477,479
+<     { HAL_IOMUX_FUNC_UART0_TX, HAL_IOMUX_FUNC_I2C_M0_SDA, HAL_IOMUX_FUNC_BT_UART_TX, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM7, HAL_IOMUX_FUNC_UART0_TX, HAL_IOMUX_FUNC_I2C_M0_SDA, HAL_IOMUX_FUNC_NONE,
+>       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE,
+>       HAL_IOMUX_FUNC_BT_UART_TX, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+197,198c481,483
+<     { HAL_IOMUX_FUNC_UART1_RX, HAL_IOMUX_FUNC_I2C_M0_SCL, HAL_IOMUX_FUNC_BT_UART_RX, HAL_IOMUX_FUNC_SPDIF0_DI,
+<       HAL_IOMUX_FUNC_PWM0, HAL_IOMUX_FUNC_I2S0_MCLK, },
+---
+>     { HAL_IOMUX_FUNC_PWM0, HAL_IOMUX_FUNC_UART1_RX, HAL_IOMUX_FUNC_I2C_M0_SCL, HAL_IOMUX_FUNC_SPILCD_DI0,
+>       HAL_IOMUX_FUNC_SPILCD_DCN, HAL_IOMUX_FUNC_I2S_MCLK, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_WF_UART_RX,
+>       HAL_IOMUX_FUNC_BT_UART_RX, HAL_IOMUX_FUNC_SPDIF0_DI, HAL_IOMUX_FUNC_I2S1_SDI0, },
+200,201c485,487
+<     { HAL_IOMUX_FUNC_UART1_TX, HAL_IOMUX_FUNC_I2C_M0_SDA, HAL_IOMUX_FUNC_BT_UART_TX, HAL_IOMUX_FUNC_SPDIF0_DO,
+<       HAL_IOMUX_FUNC_PWM1, HAL_IOMUX_FUNC_CLK_OUT, },
+---
+>     { HAL_IOMUX_FUNC_PWM1, HAL_IOMUX_FUNC_UART1_TX, HAL_IOMUX_FUNC_I2C_M0_SDA, HAL_IOMUX_FUNC_SPILCD_DIO,
+>       HAL_IOMUX_FUNC_IR_TX, HAL_IOMUX_FUNC_DISPLAY_TE, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_WF_UART_TX,
+>       HAL_IOMUX_FUNC_BT_UART_TX, HAL_IOMUX_FUNC_SPDIF0_DO, HAL_IOMUX_FUNC_I2S1_SDO0, },
+203,204c489,491
+<     { HAL_IOMUX_FUNC_I2C_M1_SCL, HAL_IOMUX_FUNC_UART2_RX, HAL_IOMUX_FUNC_UART1_CTS, HAL_IOMUX_FUNC_BT_UART_CTS,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_I2S0_MCLK, },
+---
+>     { HAL_IOMUX_FUNC_PWM2, HAL_IOMUX_FUNC_UART2_RX, HAL_IOMUX_FUNC_I2C_M1_SCL, HAL_IOMUX_FUNC_SPILCD_CS0,
+>       HAL_IOMUX_FUNC_DISPLAY_BL_EN, HAL_IOMUX_FUNC_I2S_MCLK, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_WF_UART_CTS,
+>       HAL_IOMUX_FUNC_BT_UART_CTS, HAL_IOMUX_FUNC_IR_RX, HAL_IOMUX_FUNC_I2S1_WS, },
+206,207c493,495
+<     { HAL_IOMUX_FUNC_I2C_M1_SDA, HAL_IOMUX_FUNC_UART2_TX, HAL_IOMUX_FUNC_UART1_RTS, HAL_IOMUX_FUNC_BT_UART_RTS,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_CLK_OUT, },
+---
+>     { HAL_IOMUX_FUNC_PWM3, HAL_IOMUX_FUNC_UART2_TX, HAL_IOMUX_FUNC_I2C_M1_SDA, HAL_IOMUX_FUNC_SPILCD_CLK,
+>       HAL_IOMUX_FUNC_SPI_DCN, HAL_IOMUX_FUNC_DISPLAY_BL_PWM, HAL_IOMUX_FUNC_PCM_DI, HAL_IOMUX_FUNC_WF_UART_RTS,
+>       HAL_IOMUX_FUNC_BT_UART_RTS, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_I2S1_SCK, },
+209,210c497,499
+<     { HAL_IOMUX_FUNC_PWM0, HAL_IOMUX_FUNC_CLK_REQ_OUT, HAL_IOMUX_FUNC_SPI_DI3, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM4, HAL_IOMUX_FUNC_UART3_RX, HAL_IOMUX_FUNC_I2C_M2_SCL, HAL_IOMUX_FUNC_SPI_DI0,
+>       HAL_IOMUX_FUNC_SPI_DI3, HAL_IOMUX_FUNC_SPI_DCN, HAL_IOMUX_FUNC_PCM_DO, HAL_IOMUX_FUNC_SPDIF0_DI,
+>       HAL_IOMUX_FUNC_WF_SDIO_CLK, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_I2S1_SDO3, },
+212,213c501,503
+<     { HAL_IOMUX_FUNC_PWM1, HAL_IOMUX_FUNC_CLK_REQ_IN, HAL_IOMUX_FUNC_SPI_CS3, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM5, HAL_IOMUX_FUNC_UART3_TX, HAL_IOMUX_FUNC_I2C_M2_SDA, HAL_IOMUX_FUNC_SPI_DIO,
+>       HAL_IOMUX_FUNC_SPI_CS3, HAL_IOMUX_FUNC_DISPLAY_TE, HAL_IOMUX_FUNC_PCM_FSYNC, HAL_IOMUX_FUNC_NONE,
+>       HAL_IOMUX_FUNC_WF_SDIO_CMD, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_I2S1_SDO2, },
+215,216c505,507
+<     { HAL_IOMUX_FUNC_PWM2, HAL_IOMUX_FUNC_SPILCD_DI1, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPDIF0_DI,
+<       HAL_IOMUX_FUNC_CLK_32K_IN, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM6, HAL_IOMUX_FUNC_UART3_RX, HAL_IOMUX_FUNC_I2C_M0_SCL, HAL_IOMUX_FUNC_SPI_CS0,
+>       HAL_IOMUX_FUNC_SPILCD_DI1, HAL_IOMUX_FUNC_CLK_32K_IN, HAL_IOMUX_FUNC_PCM_CLK, HAL_IOMUX_FUNC_IR_RX,
+>       HAL_IOMUX_FUNC_WF_SDIO_DATA0, HAL_IOMUX_FUNC_SPDIF0_DI, HAL_IOMUX_FUNC_I2S1_SDO1, },
+218,219c509,511
+<     { HAL_IOMUX_FUNC_PWM3, HAL_IOMUX_FUNC_SPILCD_CS1, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPDIF0_DO,
+<       HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM7, HAL_IOMUX_FUNC_UART3_TX, HAL_IOMUX_FUNC_I2C_M0_SDA, HAL_IOMUX_FUNC_SPI_CLK,
+>       HAL_IOMUX_FUNC_SPILCD_CS1, HAL_IOMUX_FUNC_I2S_MCLK, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_IR_TX,
+>       HAL_IOMUX_FUNC_WF_SDIO_DATA1, HAL_IOMUX_FUNC_SPDIF0_DO, HAL_IOMUX_FUNC_I2S1_SDO0, },
+221,222c513,515
+<     { HAL_IOMUX_FUNC_SPILCD_DI2, HAL_IOMUX_FUNC_I2S1_SCK, HAL_IOMUX_FUNC_SPILCD_CS1, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_PDM0_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM0, HAL_IOMUX_FUNC_UART1_RX, HAL_IOMUX_FUNC_I2C_M1_SCL, HAL_IOMUX_FUNC_SPI_DI0,
+>       HAL_IOMUX_FUNC_SPILCD_DI2, HAL_IOMUX_FUNC_SPI_DCN, HAL_IOMUX_FUNC_WF_UART_RX, HAL_IOMUX_FUNC_SPILCD_CS1,
+>       HAL_IOMUX_FUNC_WF_SDIO_DATA2, HAL_IOMUX_FUNC_PDM0_D, HAL_IOMUX_FUNC_I2S1_SDI3, },
+224,225c517,519
+<     { HAL_IOMUX_FUNC_SPILCD_CS2, HAL_IOMUX_FUNC_I2S1_WS, HAL_IOMUX_FUNC_SPILCD_CS3, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_PDM1_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM1, HAL_IOMUX_FUNC_UART1_TX, HAL_IOMUX_FUNC_I2C_M1_SDA, HAL_IOMUX_FUNC_SPI_DIO,
+>       HAL_IOMUX_FUNC_WF_SDIO_DATA0, HAL_IOMUX_FUNC_DISPLAY_SPI_DI, HAL_IOMUX_FUNC_WF_UART_TX, HAL_IOMUX_FUNC_IR_RX,
+>       HAL_IOMUX_FUNC_WF_SDIO_DATA3, HAL_IOMUX_FUNC_PDM1_D, HAL_IOMUX_FUNC_I2S1_SDI2, },
+227,228c521,523
+<     { HAL_IOMUX_FUNC_SPILCD_CS3, HAL_IOMUX_FUNC_I2S1_SDI0, HAL_IOMUX_FUNC_SPILCD_CS3, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_PDM2_D, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM2, HAL_IOMUX_FUNC_UART1_RX, HAL_IOMUX_FUNC_I2C_M2_SCL, HAL_IOMUX_FUNC_SPI_CS0,
+>       HAL_IOMUX_FUNC_SPILCD_CS3, HAL_IOMUX_FUNC_DISPLAY_SPI_DO3, HAL_IOMUX_FUNC_WF_UART_CTS, HAL_IOMUX_FUNC_IR_TX,
+>       HAL_IOMUX_FUNC_WF_WAKE_HOST, HAL_IOMUX_FUNC_PDM2_D, HAL_IOMUX_FUNC_I2S1_SDI1, },
+230,231c525,527
+<     { HAL_IOMUX_FUNC_SPILCD_DI3, HAL_IOMUX_FUNC_I2S1_SDO, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE,
+<       HAL_IOMUX_FUNC_PDM2_CK, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM3, HAL_IOMUX_FUNC_UART1_TX, HAL_IOMUX_FUNC_I2C_M2_SDA, HAL_IOMUX_FUNC_SPI_CLK,
+>       HAL_IOMUX_FUNC_SPILCD_DI3, HAL_IOMUX_FUNC_DISPLAY_SPI_DO2, HAL_IOMUX_FUNC_WF_UART_RTS, HAL_IOMUX_FUNC_SPILCD_DCN,
+>       HAL_IOMUX_FUNC_IR_RX, HAL_IOMUX_FUNC_PDM2_CK, HAL_IOMUX_FUNC_I2S1_SDI0, },
+233,234c529,531
+<     { HAL_IOMUX_FUNC_PWM0, HAL_IOMUX_FUNC_SPI_DI1, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPILCD_DI0,
+<       HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_SPILCD_DCN, },
+---
+>     { HAL_IOMUX_FUNC_PWM4, HAL_IOMUX_FUNC_UART3_RX, HAL_IOMUX_FUNC_I2C_M0_SCL, HAL_IOMUX_FUNC_SPILCD_DI0,
+>       HAL_IOMUX_FUNC_SPI_DI1, HAL_IOMUX_FUNC_DISPLAY_SPI_DO1_DCN, HAL_IOMUX_FUNC_CLK_OUT, HAL_IOMUX_FUNC_SPILCD_DCN,
+>       HAL_IOMUX_FUNC_IR_TX, HAL_IOMUX_FUNC_PDM0_CK, HAL_IOMUX_FUNC_I2S0_SDI3, },
+236,237c533,535
+<     { HAL_IOMUX_FUNC_PWM1, HAL_IOMUX_FUNC_SPI_CS1, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPILCD_DIO,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM5, HAL_IOMUX_FUNC_UART3_TX, HAL_IOMUX_FUNC_I2C_M0_SDA, HAL_IOMUX_FUNC_SPILCD_DIO,
+>       HAL_IOMUX_FUNC_SPI_CS1, HAL_IOMUX_FUNC_DISPLAY_SPI_DIO, HAL_IOMUX_FUNC_CLK_32K_IN, HAL_IOMUX_FUNC_NONE,
+>       HAL_IOMUX_FUNC_DISPLAY_TE, HAL_IOMUX_FUNC_PDM0_D, HAL_IOMUX_FUNC_I2S0_SDI2, },
+239,240c537,539
+<     { HAL_IOMUX_FUNC_PWM2, HAL_IOMUX_FUNC_SPI_DI2, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPILCD_CS0,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM6, HAL_IOMUX_FUNC_UART2_RX, HAL_IOMUX_FUNC_I2C_M2_SCL, HAL_IOMUX_FUNC_SPILCD_CS0,
+>       HAL_IOMUX_FUNC_SPI_DI2, HAL_IOMUX_FUNC_DISPLAY_SPI_CS, HAL_IOMUX_FUNC_CLK_REQ_OUT, HAL_IOMUX_FUNC_SPDIF0_DI,
+>       HAL_IOMUX_FUNC_IR_RX, HAL_IOMUX_FUNC_PDM1_D, HAL_IOMUX_FUNC_I2S0_SDI1, },
+242,243c541,543
+<     { HAL_IOMUX_FUNC_PWM3, HAL_IOMUX_FUNC_SPI_CS2, HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_SPILCD_CLK,
+<       HAL_IOMUX_FUNC_NONE, HAL_IOMUX_FUNC_NONE, },
+---
+>     { HAL_IOMUX_FUNC_PWM7, HAL_IOMUX_FUNC_UART2_TX, HAL_IOMUX_FUNC_I2C_M2_SDA, HAL_IOMUX_FUNC_SPILCD_CLK,
+>       HAL_IOMUX_FUNC_SPI_CS2, HAL_IOMUX_FUNC_DISPLAY_SPI_CLK, HAL_IOMUX_FUNC_CLK_REQ_IN, HAL_IOMUX_FUNC_SPDIF0_DO,
+>       HAL_IOMUX_FUNC_IR_TX, HAL_IOMUX_FUNC_PDM2_D, HAL_IOMUX_FUNC_I2S0_SDI0, },
+260,262d559
+< static enum HAL_IOMUX_PIN_VOLTAGE_DOMAINS_T BOOT_DATA_LOC uart0_volt = HAL_IOMUX_PIN_VOLTAGE_VIO;
+< // UART1 is tied to vmem domain
+< 
+268a566
+>             iomux->REG_02C &= ~(1 << i);
+273a572
+>             iomux->REG_02C &= ~(1 << (i + 8));
+278a578
+>             iomux->REG_02C &= ~(1 << (i + 16));
+283a584
+>             iomux->REG_02C &= ~(1 << (i + 24));
+301a603,605
+>     if (map == NULL)
+>         return 1;
+> 
+320,341d623
+< #ifdef ANC_PROD_TEST
+< void hal_iomux_set_dig_mic_clock_pin(enum HAL_IOMUX_PIN_T pin)
+< {
+<     digmic_ck_pin = pin;
+< }
+< void hal_iomux_set_dig_mic_data0_pin(enum HAL_IOMUX_PIN_T pin)
+< {
+<     digmic_d0_pin = pin;
+< }
+< 
+< void hal_iomux_set_dig_mic_data1_pin(enum HAL_IOMUX_PIN_T pin)
+< {
+<     digmic_d1_pin = pin;
+< }
+< 
+< void hal_iomux_set_dig_mic_data2_pin(enum HAL_IOMUX_PIN_T pin)
+< {
+<     digmic_d2_pin = pin;
+< }
+< #endif
+< 
+< 
+357c639
+<         if (func ==  HAL_IOMUX_FUNC_I2C_SCL || func == HAL_IOMUX_FUNC_I2C_SDA) {
+---
+>         if (func ==  HAL_IOMUX_FUNC_I2C_M0_SCL || func == HAL_IOMUX_FUNC_I2C_M0_SDA) {
+358a641
+> #ifndef FPGA
+359a643
+> #endif
+364a649
+> #ifndef FPGA
+365a651
+> #endif
+402a689
+>             ASSERT(0, "[Func %d io %d] is unsupported by pin_func_map. Check it or use reg assignment like iomux_set_uart0.", pin, func);
+426c713
+< 
+---
+> #if !defined(CHIP_A7_DSP)
+430c717
+< 
+---
+> #endif
+440c727
+<     if (pin < HAL_IOMUX_PIN_LED1) {
+---
+>     if (pin < HAL_IOMUX_PIN_NUM) {
+447a735
+> #if !defined(CHIP_A7_DSP)
+449a738
+> #endif
+454a744,760
+> uint32_t hal_iomux_set_io_drv(enum HAL_IOMUX_PIN_T pin, uint32_t val)
+> {
+>     if (pin >= HAL_IOMUX_PIN_NUM) {
+>         return 1;
+>     }
+>     if (val > 3) {
+>         return 2;
+>     }
+>     if (pin < HAL_IOMUX_PIN_P2_0)
+>         iomux->REG_074 = (iomux->REG_074 & ~(IOMUX_GPIO_P0_DRV0_SEL_MASK << 2*(pin-HAL_IOMUX_PIN_P0_0))) |
+>             (IOMUX_GPIO_P0_DRV0_SEL(val) << 2*(pin-HAL_IOMUX_PIN_P0_0));
+>     else
+>         iomux->REG_078 = (iomux->REG_078 & ~(IOMUX_GPIO_P0_DRV0_SEL_MASK << 2*(pin-HAL_IOMUX_PIN_P2_0))) |
+>             (IOMUX_GPIO_P0_DRV0_SEL(val) << 2*(pin-HAL_IOMUX_PIN_P2_0));
+>     return 0;
+> }
+> 
+461d766
+<     uart0_volt = volt;
+480a786
+> #ifndef FPGA
+481a788
+> #endif
+486,491d792
+<     // Set voltage domain
+<     if (uart0_volt == HAL_IOMUX_PIN_VOLTAGE_VIO) {
+<         iomux->REG_070 |= (1 << (IOMUX_GPIO_P1_PWS_SHIFT + 1));
+<     } else {
+<         iomux->REG_070 &= ~(1 << (IOMUX_GPIO_P1_PWS_SHIFT + 1));
+<     }
+554a856
+> #ifndef FPGA
+555a858
+> #endif
+561,566d863
+<     // Set voltage domain
+<     if (uart0_volt == HAL_IOMUX_PIN_VOLTAGE_VIO) {
+<         iomux->REG_070 |= (1 << (IOMUX_GPIO_P1_PWS_SHIFT + 1));
+<     } else {
+<         iomux->REG_070 &= ~(1 << (IOMUX_GPIO_P1_PWS_SHIFT + 1));
+<     }
+576c873
+<     uint32_t mask;
+---
+>     uint32_t mask_pd_c, mask_pu, mask_pu_c;
+578a876,896
+> #if (UART1_IOMUX_INDEX == 02)
+>     iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P02_SEL_MASK | IOMUX_GPIO_P03_SEL_MASK)) |
+>         IOMUX_GPIO_P02_SEL(1) | IOMUX_GPIO_P03_SEL(1);
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P0_2) | (1 << HAL_IOMUX_PIN_P0_3);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P0_2);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P0_3);
+> #elif (UART1_IOMUX_INDEX == 03) // 32: UART1 RX; 03 UART1 TX
+>     iomux->REG_010 = (iomux->REG_010 & ~(IOMUX_GPIO_P32_SEL_MASK)) | IOMUX_GPIO_P32_SEL(1);
+>     iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P03_SEL_MASK)) | IOMUX_GPIO_P03_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P0_3) | (1 << HAL_IOMUX_PIN_P3_2);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P3_2);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P0_3);
+> #elif (UART1_IOMUX_INDEX == 10)
+>     iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P10_SEL_MASK | IOMUX_GPIO_P11_SEL_MASK)) |
+>         IOMUX_GPIO_P10_SEL(1) | IOMUX_GPIO_P11_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P1_0) | (1 << HAL_IOMUX_PIN_P1_1);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P1_0);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P1_1);
+> #elif (UART1_IOMUX_INDEX == 20)
+582c900,919
+<     mask = (1 << HAL_IOMUX_PIN_P2_0) | (1 << HAL_IOMUX_PIN_P2_1);
+---
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P2_0) | (1 << HAL_IOMUX_PIN_P2_1);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P2_0);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P2_1);
+> #elif (UART1_IOMUX_INDEX == 30)
+>     iomux->REG_010 = (iomux->REG_010 & ~(IOMUX_GPIO_P30_SEL_MASK | IOMUX_GPIO_P31_SEL_MASK)) |
+>         IOMUX_GPIO_P30_SEL(1) | IOMUX_GPIO_P31_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P3_0) | (1 << HAL_IOMUX_PIN_P3_1);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P3_0);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P3_1);
+> #elif (UART1_IOMUX_INDEX == 32)
+>     iomux->REG_010 = (iomux->REG_010 & ~(IOMUX_GPIO_P32_SEL_MASK | IOMUX_GPIO_P33_SEL_MASK)) |
+>         IOMUX_GPIO_P32_SEL(1) | IOMUX_GPIO_P33_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P3_2) | (1 << HAL_IOMUX_PIN_P3_3);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P3_2);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P3_3);
+> #else
+> #error "Unsupported UART1_IOMUX_INDEX"
+> #endif
+584,585c921,922
+<     iomux->REG_02C |= (1 << HAL_IOMUX_PIN_P2_0);
+<     iomux->REG_02C &= ~(1 << HAL_IOMUX_PIN_P2_1);
+---
+>     iomux->REG_02C |= mask_pu;
+>     iomux->REG_02C &= ~(mask_pu_c);
+587c924
+<     iomux->REG_030 &= ~mask;
+---
+>     iomux->REG_030 &= ~mask_pd_c;
+591a929,1021
+>     uint32_t mask_pd_c, mask_pu, mask_pu_c;
+> 
+>     // Set uart1 func
+> #if (UART2_IOMUX_INDEX == 00)
+>     iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P00_SEL_MASK | IOMUX_GPIO_P01_SEL_MASK)) |
+>         IOMUX_GPIO_P00_SEL(1) | IOMUX_GPIO_P01_SEL(1);
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P0_0) | (1 << HAL_IOMUX_PIN_P0_1);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P0_0);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P0_1);
+> #elif (UART2_IOMUX_INDEX == 12)
+>     iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P12_SEL_MASK | IOMUX_GPIO_P13_SEL_MASK)) |
+>         IOMUX_GPIO_P12_SEL(1) | IOMUX_GPIO_P13_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P1_2) | (1 << HAL_IOMUX_PIN_P1_3);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P1_2);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P1_3);
+> #elif (UART2_IOMUX_INDEX == 14)
+>     iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P14_SEL_MASK | IOMUX_GPIO_P15_SEL_MASK)) |
+>         IOMUX_GPIO_P14_SEL(1) | IOMUX_GPIO_P15_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P1_4) | (1 << HAL_IOMUX_PIN_P1_5);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P1_4);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P1_5);
+> #elif (UART2_IOMUX_INDEX == 22)
+>     iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P22_SEL_MASK | IOMUX_GPIO_P23_SEL_MASK)) |
+>         IOMUX_GPIO_P22_SEL(1) | IOMUX_GPIO_P23_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P2_2) | (1 << HAL_IOMUX_PIN_P2_3);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P2_2);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P2_3);
+> #elif (UART2_IOMUX_INDEX == 36)
+>     iomux->REG_010 = (iomux->REG_010 & ~(IOMUX_GPIO_P36_SEL_MASK | IOMUX_GPIO_P37_SEL_MASK)) |
+>         IOMUX_GPIO_P36_SEL(1) | IOMUX_GPIO_P37_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P3_6) | (1 << HAL_IOMUX_PIN_P3_7);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P3_6);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P3_7);
+> #else
+> #error "Unsupported UART1_IOMUX_INDEX"
+> #endif
+>     // Setup pullup
+>     iomux->REG_02C |= mask_pu;
+>     iomux->REG_02C &= ~(mask_pu_c);
+>     // Clear pulldown
+>     iomux->REG_030 &= ~mask_pd_c;
+> }
+> 
+> void hal_iomux_set_uart3(void)
+> {
+>     uint32_t mask_pd_c, mask_pu, mask_pu_c;
+> 
+>     // Set uart1 func
+> #if (UART3_IOMUX_INDEX == 04)
+>     iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P04_SEL_MASK | IOMUX_GPIO_P05_SEL_MASK)) |
+>         IOMUX_GPIO_P04_SEL(1) | IOMUX_GPIO_P05_SEL(1);
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P0_4) | (1 << HAL_IOMUX_PIN_P0_5);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P0_4);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P0_5);
+> #elif (UART3_IOMUX_INDEX == 06)
+>     iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P06_SEL_MASK | IOMUX_GPIO_P07_SEL_MASK)) |
+>         IOMUX_GPIO_P06_SEL(1) | IOMUX_GPIO_P07_SEL(1);
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P0_6) | (1 << HAL_IOMUX_PIN_P0_7);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P0_6);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P0_7);
+> #elif (UART3_IOMUX_INDEX == 24)
+>     iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P24_SEL_MASK | IOMUX_GPIO_P25_SEL_MASK)) |
+>         IOMUX_GPIO_P24_SEL(1) | IOMUX_GPIO_P25_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P2_4) | (1 << HAL_IOMUX_PIN_P2_5);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P2_4);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P2_5);
+> #elif (UART3_IOMUX_INDEX == 26)
+>     iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P26_SEL_MASK | IOMUX_GPIO_P27_SEL_MASK)) |
+>         IOMUX_GPIO_P26_SEL(1) | IOMUX_GPIO_P27_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P2_6) | (1 << HAL_IOMUX_PIN_P2_7);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P2_6);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P2_7);
+> #elif (UART3_IOMUX_INDEX == 34)
+>     iomux->REG_010 = (iomux->REG_010 & ~(IOMUX_GPIO_P34_SEL_MASK | IOMUX_GPIO_P35_SEL_MASK)) |
+>         IOMUX_GPIO_P34_SEL(1) | IOMUX_GPIO_P35_SEL(1);
+> 
+>     mask_pd_c = (1 << HAL_IOMUX_PIN_P3_4) | (1 << HAL_IOMUX_PIN_P3_5);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P3_4);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P3_5);
+> #else
+> #error "Unsupported UART1_IOMUX_INDEX"
+> #endif
+>     // Setup pullup
+>     iomux->REG_02C |= mask_pu;
+>     iomux->REG_02C &= ~(mask_pu_c);
+>     // Clear pulldown
+>     iomux->REG_030 &= ~mask_pd_c;
+602c1032
+<         IOMUX_GPIO_P16_SEL(0) | IOMUX_GPIO_P17_SEL(0);
+---
+>         IOMUX_GPIO_P16_SEL(0xF) | IOMUX_GPIO_P17_SEL(0xF);
+607,612d1036
+<     // Set voltage domain
+<     if (uart0_volt == HAL_IOMUX_PIN_VOLTAGE_VIO) {
+<         iomux->REG_070 |= (1 << (IOMUX_GPIO_P1_PWS_SHIFT + 1));
+<     } else {
+<         iomux->REG_070 &= ~(1 << (IOMUX_GPIO_P1_PWS_SHIFT + 1));
+<     }
+625,626c1049,1050
+<     mask = IOMUX_GPIO_P01_SEL_MASK | IOMUX_GPIO_P02_SEL_MASK;
+<     val = IOMUX_GPIO_P01_SEL(7) | IOMUX_GPIO_P02_SEL(7);
+---
+>     mask = IOMUX_GPIO_P01_SEL_MASK | IOMUX_GPIO_P00_SEL_MASK;
+>     val = IOMUX_GPIO_P01_SEL(7) | IOMUX_GPIO_P00_SEL(7);
+630,631c1054,1055
+<     mask |= IOMUX_GPIO_P00_SEL_MASK | IOMUX_GPIO_P03_SEL_MASK;
+<     val |= IOMUX_GPIO_P00_SEL(7) | IOMUX_GPIO_P03_SEL(7);
+---
+>     mask |= IOMUX_GPIO_P02_SEL_MASK | IOMUX_GPIO_P03_SEL_MASK;
+>     val |= IOMUX_GPIO_P02_SEL(7) | IOMUX_GPIO_P03_SEL(7);
+637c1061
+<     iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P20_SEL_MASK)) | IOMUX_GPIO_P20_SEL(7);
+---
+>     iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P05_SEL_MASK)) | IOMUX_GPIO_P05_SEL(7);
+640c1064
+<     mask = (1 << HAL_IOMUX_PIN_P0_1) | (1 << HAL_IOMUX_PIN_P0_2);
+---
+>     mask = (1 << HAL_IOMUX_PIN_P0_1) | (1 << HAL_IOMUX_PIN_P0_0);
+642c1066
+<     mask |= (1 << HAL_IOMUX_PIN_P0_0) | (1 << HAL_IOMUX_PIN_P0_3);
+---
+>     mask |= (1 << HAL_IOMUX_PIN_P0_2) | (1 << HAL_IOMUX_PIN_P0_3);
+645c1069
+<     mask |= (1 << HAL_IOMUX_PIN_P2_0);
+---
+>     mask |= (1 << HAL_IOMUX_PIN_P0_5);
+682,683d1105
+<         {HAL_IOMUX_PIN_P0_0, HAL_IOMUX_FUNC_I2S0_SDI0, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P0_1, HAL_IOMUX_FUNC_I2S0_SDO,  I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+685a1108,1148
+> #if (I2S0_I_IOMUX_INDEX == 00)
+>         {HAL_IOMUX_PIN_P0_0, HAL_IOMUX_FUNC_I2S0_SDI0, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S0_I_IOMUX_INDEX == 13)
+>         {HAL_IOMUX_PIN_P1_3, HAL_IOMUX_FUNC_I2S0_SDI0, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S0_I_IOMUX_INDEX == 37)
+>         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_I2S0_SDI0, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported I2S0_I_IOMUX_INDEX"
+> #endif
+> #if (I2S0_I1_IOMUX_INDEX == 12)
+>         {HAL_IOMUX_PIN_P1_2, HAL_IOMUX_FUNC_I2S0_SDI1, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S0_I1_IOMUX_INDEX == 36)
+>         {HAL_IOMUX_PIN_P3_6, HAL_IOMUX_FUNC_I2S0_SDI1, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (I2S0_I2_IOMUX_INDEX == 11)
+>         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_I2S0_SDI2, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S0_I2_IOMUX_INDEX == 35)
+>         {HAL_IOMUX_PIN_P3_5, HAL_IOMUX_FUNC_I2S0_SDI2, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (I2S0_I3_IOMUX_INDEX == 10)
+>         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_I2S0_SDI3, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S0_I3_IOMUX_INDEX == 34)
+>         {HAL_IOMUX_PIN_P3_4, HAL_IOMUX_FUNC_I2S0_SDI3, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> 
+> #if (I2S0_O_IOMUX_INDEX == 01)
+>         {HAL_IOMUX_PIN_P0_1, HAL_IOMUX_FUNC_I2S0_SDO0,  I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S0_O_IOMUX_INDEX == 07)
+>         {HAL_IOMUX_PIN_P0_7, HAL_IOMUX_FUNC_I2S0_SDO0,  I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported I2S0_O_IOMUX_INDEX"
+> #endif
+> #if (I2S0_O1_IOMUX_INDEX == 06)
+>         {HAL_IOMUX_PIN_P0_6, HAL_IOMUX_FUNC_I2S0_SDO1,  I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (I2S0_O2_IOMUX_INDEX == 05)
+>         {HAL_IOMUX_PIN_P0_5, HAL_IOMUX_FUNC_I2S0_SDO2,  I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (I2S0_O3_IOMUX_INDEX == 04)
+>         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_I2S0_SDO3,  I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+694,704c1157,1184
+< #if (I2S1_IOMUX_INDEX == 30)
+<         {HAL_IOMUX_PIN_P3_2, HAL_IOMUX_FUNC_I2S1_SDI0, I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P3_3, HAL_IOMUX_FUNC_I2S1_SDO,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_I2S1_WS,   I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P3_0, HAL_IOMUX_FUNC_I2S1_SCK,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #else
+<         {HAL_IOMUX_PIN_P1_4, HAL_IOMUX_FUNC_I2S1_SDI0, I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_I2S1_SDO,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P1_2, HAL_IOMUX_FUNC_I2S1_WS,   I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_I2S1_SCK,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<     };
+---
+>         {HAL_IOMUX_PIN_P2_2, HAL_IOMUX_FUNC_I2S1_WS,   I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P2_3, HAL_IOMUX_FUNC_I2S1_SCK,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #if (I2S1_I_IOMUX_INDEX == 20)
+>         {HAL_IOMUX_PIN_P2_0, HAL_IOMUX_FUNC_I2S1_SDI0, I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S1_I_IOMUX_INDEX == 33)
+>         {HAL_IOMUX_PIN_P3_3, HAL_IOMUX_FUNC_I2S1_SDI0, I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported I2S1_I_IOMUX_INDEX"
+> #endif
+> #if (I2S1_I1_IOMUX_INDEX == 32)
+>         {HAL_IOMUX_PIN_P3_2, HAL_IOMUX_FUNC_I2S1_SDI1, I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (I2S1_I2_IOMUX_INDEX == 31)
+>         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_I2S1_SDI2, I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (I2S1_I3_IOMUX_INDEX == 30)
+>         {HAL_IOMUX_PIN_P3_0, HAL_IOMUX_FUNC_I2S1_SDI3, I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> 
+> #if (I2S1_O_IOMUX_INDEX == 21)
+>         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_I2S1_SDO0,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S1_O_IOMUX_INDEX == 27)
+>         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_I2S1_SDO0,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported I2S1_O_IOMUX_INDEX"
+> #endif
+> #if (I2S1_O1_IOMUX_INDEX == 26)
+>         {HAL_IOMUX_PIN_P2_6, HAL_IOMUX_FUNC_I2S1_SDO1,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+705a1186,1193
+> #if (I2S1_O2_IOMUX_INDEX == 25)
+>         {HAL_IOMUX_PIN_P2_5, HAL_IOMUX_FUNC_I2S1_SDO2,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (I2S1_O3_IOMUX_INDEX == 24)
+>         {HAL_IOMUX_PIN_P2_4, HAL_IOMUX_FUNC_I2S1_SDO3,  I2S1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+>     };
+> 
+712,713c1200,1203
+< #if (I2S_MCLK_IOMUX_INDEX == 13)
+<         {HAL_IOMUX_PIN_P1_3, HAL_IOMUX_FUNC_I2S0_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> #if (I2S_MCLK_IOMUX_INDEX == 04)
+>         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_I2S_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S_MCLK_IOMUX_INDEX == 13)
+>         {HAL_IOMUX_PIN_P1_3, HAL_IOMUX_FUNC_I2S_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+715c1205
+<         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_I2S0_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+>         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_I2S_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+717c1207
+<         {HAL_IOMUX_PIN_P2_0, HAL_IOMUX_FUNC_I2S0_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+>         {HAL_IOMUX_PIN_P2_0, HAL_IOMUX_FUNC_I2S_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+719c1209,1213
+<         {HAL_IOMUX_PIN_P2_2, HAL_IOMUX_FUNC_I2S0_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+>         {HAL_IOMUX_PIN_P2_2, HAL_IOMUX_FUNC_I2S_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S_MCLK_IOMUX_INDEX == 27)
+>         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_I2S_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (I2S_MCLK_IOMUX_INDEX == 34)
+>         {HAL_IOMUX_PIN_P3_4, HAL_IOMUX_FUNC_I2S_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+721c1215
+<         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_I2S0_MCLK, I2S0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> #error "Unsupported I2S_MCLK_IOMUX_INDEX"
+731c1225,1229
+< #if (SPDIF0_IOMUX_INDEX == 20)
+---
+> #if (SPDIF0_I_IOMUX_INDEX == 02)
+>         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_SPDIF0_DI, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (SPDIF0_I_IOMUX_INDEX == 10)
+>         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_SPDIF0_DI, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (SPDIF0_I_IOMUX_INDEX == 20)
+733,734c1231
+<         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_SPDIF0_DO, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #elif (SPDIF0_IOMUX_INDEX == 26)
+---
+> #elif (SPDIF0_I_IOMUX_INDEX == 26)
+736c1233,1236
+<         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_SPDIF0_DO, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> #elif (SPDIF0_I_IOMUX_INDEX == 37)
+>         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_SPDIF0_DI, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (SPDIF0_I_IOMUX_INDEX == 24)
+>         {HAL_IOMUX_PIN_P2_4, HAL_IOMUX_FUNC_SPDIF0_DI, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+738c1238,1241
+<         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_SPDIF0_DI, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+---
+> #error "Unsupported SPDIF0_I_IOMUX_INDEX"
+> #endif
+> 
+> #if (SPDIF0_O_IOMUX_INDEX == 03)
+739a1243,1254
+> #elif (SPDIF0_O_IOMUX_INDEX == 11)
+>         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_SPDIF0_DO, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPDIF0_O_IOMUX_INDEX == 21)
+>         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_SPDIF0_DO, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPDIF0_O_IOMUX_INDEX == 27)
+>         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_SPDIF0_DO, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPDIF0_O_IOMUX_INDEX == 37)
+>         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_SPDIF0_DO, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPDIF0_O_IOMUX_INDEX == 07)
+>         {HAL_IOMUX_PIN_P0_7, HAL_IOMUX_FUNC_SPDIF0_DO, SPDIF0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported SPDIF0_O_IOMUX_INDEX"
+742d1256
+< 
+746,748d1259
+< void hal_iomux_set_spdif1(void)
+< {
+< }
+773a1285,1287
+>     } else if (digmic_ck_pin == HAL_IOMUX_PIN_P3_4) {
+>         pinmux_digitalmic_clk[0].pin = HAL_IOMUX_PIN_P3_4;
+>         pinmux_digitalmic_clk[0].function = HAL_IOMUX_FUNC_PDM0_CK;
+778,779c1292,1293
+<     } else if (digmic_d0_pin == HAL_IOMUX_PIN_P0_6) {
+<         pinmux_digitalmic0[0].pin = HAL_IOMUX_PIN_P0_6;
+---
+>     } else if (digmic_d0_pin == HAL_IOMUX_PIN_P0_5) {
+>         pinmux_digitalmic0[0].pin = HAL_IOMUX_PIN_P0_5;
+781a1296,1297
+>     } else if (digmic_d0_pin == HAL_IOMUX_PIN_P3_5) {
+>         pinmux_digitalmic0[0].pin = HAL_IOMUX_PIN_P3_5;
+786,787c1302,1303
+<     } else if (digmic_d1_pin == HAL_IOMUX_PIN_P0_5) {
+<         pinmux_digitalmic1[0].pin = HAL_IOMUX_PIN_P0_5;
+---
+>     } else if (digmic_d1_pin == HAL_IOMUX_PIN_P0_6) {
+>         pinmux_digitalmic1[0].pin = HAL_IOMUX_PIN_P0_6;
+789a1306,1307
+>     } else if (digmic_d1_pin == HAL_IOMUX_PIN_P3_6) {
+>         pinmux_digitalmic1[0].pin = HAL_IOMUX_PIN_P3_6;
+797a1316,1317
+>     } else if (digmic_d2_pin == HAL_IOMUX_PIN_P3_7) {
+>         pinmux_digitalmic2[0].pin = HAL_IOMUX_PIN_P3_7;
+817c1337,1341
+<     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_spi_3wire[3] = {
+---
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_spi[] = {
+> #if (SPI_IOMUX_INDEX == 04)
+> #ifdef SPI_IOMUX_4WIRE
+>         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_SPI_DI0, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+821,825c1345,1348
+< #ifdef SPI_IOMUX_CS1_INDEX
+< #if (SPI_IOMUX_CS1_INDEX == 35)
+<         {HAL_IOMUX_PIN_P3_5, HAL_IOMUX_FUNC_SPI_CS1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #else
+<         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_SPI_CS1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> 
+> #elif (SPI_IOMUX_INDEX == 24)
+> #ifdef SPI_IOMUX_4WIRE
+>         {HAL_IOMUX_PIN_P2_4, HAL_IOMUX_FUNC_SPI_DI0, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+826a1350,1356
+>         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_SPI_CLK, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P2_6, HAL_IOMUX_FUNC_SPI_CS0,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P2_5, HAL_IOMUX_FUNC_SPI_DIO, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> 
+> #elif (SPI_IOMUX_INDEX == 30)
+> #ifdef SPI_IOMUX_4WIRE
+>         {HAL_IOMUX_PIN_P3_0, HAL_IOMUX_FUNC_SPI_DI0, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+828,830c1358,1360
+< #ifdef SPI_IOMUX_CS2_INDEX
+< #if (SPI_IOMUX_CS2_INDEX == 37)
+<         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_SPI_CS2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+>         {HAL_IOMUX_PIN_P3_3, HAL_IOMUX_FUNC_SPI_CLK, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P3_2, HAL_IOMUX_FUNC_SPI_CS0,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_SPI_DIO, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+832c1362,1368
+<         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_SPI_CS2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> #error "Unsupported SPI_IOMUX_INDEX"
+> #endif
+> 
+> #if (SPI_IOMUX_CS1_INDEX == 10)
+>         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_SPI_CS1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPI_IOMUX_CS1_INDEX == 35)
+>         {HAL_IOMUX_PIN_P3_5, HAL_IOMUX_FUNC_SPI_CS1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+833a1370,1373
+> #if (SPI_IOMUX_CS2_INDEX == 11)
+>         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_SPI_CS2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPI_IOMUX_CS2_INDEX == 37)
+>         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_SPI_CS2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+835,838c1375
+< #ifdef SPI_IOMUX_CS3_INDEX
+< #if (SPI_IOMUX_CS3_INDEX == 25)
+<         {HAL_IOMUX_PIN_P2_5, HAL_IOMUX_FUNC_SPI_CS3,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #else
+---
+> #if (SPI_IOMUX_CS3_INDEX == 12)
+839a1377,1378
+> #elif (SPI_IOMUX_CS3_INDEX == 25)
+>         {HAL_IOMUX_PIN_P2_5, HAL_IOMUX_FUNC_SPI_CS3,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+841,842c1380
+< #endif
+<     };
+---
+> 
+844,846c1382,1384
+<     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_spi_4wire[1] = {
+<         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_SPI_DI0, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #ifdef SPI_IOMUX_DI1_INDEX
+---
+> #if (SPI_IOMUX_DI1_INDEX == 13)
+>         {HAL_IOMUX_PIN_P1_3, HAL_IOMUX_FUNC_SPI_DI1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPI_IOMUX_DI1_INDEX == 34)
+849c1387,1389
+< #ifdef SPI_IOMUX_DI2_INDEX
+---
+> #if (SPI_IOMUX_DI2_INDEX == 14)
+>         {HAL_IOMUX_PIN_P1_4, HAL_IOMUX_FUNC_SPI_DI2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPI_IOMUX_DI2_INDEX == 36)
+852c1392,1394
+< #ifdef SPI_IOMUX_DI3_INDEX
+---
+> #if (SPI_IOMUX_DI3_INDEX == 15)
+>         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_SPI_DI3,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPI_IOMUX_DI3_INDEX == 24)
+855d1396
+<     };
+856a1398
+>     };
+858,861c1400,1405
+<     hal_iomux_init(pinmux_spi_3wire, ARRAY_SIZE(pinmux_spi_3wire));
+< #ifdef SPI_IOMUX_4WIRE
+<     hal_iomux_init(pinmux_spi_4wire, ARRAY_SIZE(pinmux_spi_4wire));
+< #endif
+---
+>     hal_iomux_init(pinmux_spi, ARRAY_SIZE(pinmux_spi));
+> }
+> 
+> void hal_iomux_set_spilcd_slave(void)
+> {
+>     iomux->REG_050 |= IOMUX_SPILCD1_MASTER_N;
+866,888c1410,1413
+<     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_spilcd_3wire[] = {
+< #if (SPILCD_IOMUX_INDEX == 10)
+<         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_SPILCD_CLK, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_SPILCD_CS0, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_SPILCD_DIO, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #elif (SPILCD_IOMUX_INDEX == 35)
+<         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_SPILCD_CLK, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P3_6, HAL_IOMUX_FUNC_SPILCD_CS0, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P3_5, HAL_IOMUX_FUNC_SPILCD_DIO, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #else
+<         {HAL_IOMUX_PIN_P0_3, HAL_IOMUX_FUNC_SPILCD_CLK, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_SPILCD_CS0, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+<         {HAL_IOMUX_PIN_P0_1, HAL_IOMUX_FUNC_SPILCD_DIO, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #endif
+< #ifdef SPILCD_IOMUX_CS1_INDEX
+< #if (SPILCD_IOMUX_CS1_INDEX == 12)
+<         {HAL_IOMUX_PIN_P1_2, HAL_IOMUX_FUNC_SPILCD_CS1, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #elif (SPILCD_IOMUX_CS1_INDEX == 27)
+<         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_SPILCD_CS1, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #elif (SPILCD_IOMUX_CS1_INDEX == 30)
+<         {HAL_IOMUX_PIN_P3_0, HAL_IOMUX_FUNC_SPILCD_CS1, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #else
+<         {HAL_IOMUX_PIN_P0_5, HAL_IOMUX_FUNC_SPILCD_CS1, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_spilcd[] = {
+> #if (SPILCD_IOMUX_INDEX == 00)
+> #ifdef SPILCD_IOMUX_4WIRE
+>         {HAL_IOMUX_PIN_P0_0, HAL_IOMUX_FUNC_SPILCD_DI0, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+889a1415,1421
+>         {HAL_IOMUX_PIN_P0_3, HAL_IOMUX_FUNC_SPILCD_CLK, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_SPILCD_CS0,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P0_1, HAL_IOMUX_FUNC_SPILCD_DIO, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> 
+> #elif (SPILCD_IOMUX_INDEX == 10)
+> #ifdef SPILCD_IOMUX_4WIRE
+>         {HAL_IOMUX_PIN_P1_4, HAL_IOMUX_FUNC_SPILCD_DI0, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+891,895c1423,1429
+< #ifdef SPILCD_IOMUX_CS2_INDEX
+< #if (SPILCD_IOMUX_CS2_INDEX == 31)
+<         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_SPILCD_CS2, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #else
+<         {HAL_IOMUX_PIN_P0_6, HAL_IOMUX_FUNC_SPILCD_CS2, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+>         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_SPILCD_CLK, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_SPILCD_CS0,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_SPILCD_DIO, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> 
+> #elif (SPILCD_IOMUX_INDEX == 20)
+> #ifdef SPILCD_IOMUX_4WIRE
+>         {HAL_IOMUX_PIN_P2_0, HAL_IOMUX_FUNC_SPILCD_DI0, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+896a1431,1437
+>         {HAL_IOMUX_PIN_P2_3, HAL_IOMUX_FUNC_SPILCD_CLK, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P2_2, HAL_IOMUX_FUNC_SPILCD_CS0,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_SPILCD_DIO, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> 
+> #elif (SPILCD_IOMUX_INDEX == 34)
+> #ifdef SPILCD_IOMUX_4WIRE
+>         {HAL_IOMUX_PIN_P3_4, HAL_IOMUX_FUNC_SPILCD_DI0, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+898,902c1439,1441
+< #ifdef SPILCD_IOMUX_CS3_INDEX
+< #if (SPILCD_IOMUX_CS3_INDEX == 31)
+<         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_SPILCD_CS3, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #elif (SPILCD_IOMUX_CS3_INDEX == 32)
+<         {HAL_IOMUX_PIN_P3_2, HAL_IOMUX_FUNC_SPILCD_CS3, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+>         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_SPILCD_CLK, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P3_6, HAL_IOMUX_FUNC_SPILCD_CS0,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P3_5, HAL_IOMUX_FUNC_SPILCD_DIO, SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+904,905c1443
+<         {HAL_IOMUX_PIN_P0_7, HAL_IOMUX_FUNC_SPILCD_CS3, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #endif
+---
+> #error "Unsupported SPILCD_IOMUX_INDEX"
+907,916c1445,1451
+<     };
+< #ifdef SPILCD_IOMUX_4WIRE
+<     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_spilcd_4wire[] = {
+< #ifdef SPILCD_IOMUX_DI0_INDEX
+< #if (SPILCD_IOMUX_DI0_INDEX == 14)
+<         {HAL_IOMUX_PIN_P1_4, HAL_IOMUX_FUNC_SPILCD_DI0, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #elif (SPILCD_IOMUX_DI0_INDEX == 34)
+<         {HAL_IOMUX_PIN_P3_4, HAL_IOMUX_FUNC_SPILCD_DI0, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+< #else
+<         {HAL_IOMUX_PIN_P0_0, HAL_IOMUX_FUNC_SPILCD_DI0, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> 
+> #if (SPILCD_IOMUX_CS1_INDEX == 05)
+>         {HAL_IOMUX_PIN_P0_5, HAL_IOMUX_FUNC_SPILCD_CS1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPILCD_IOMUX_CS1_INDEX == 12)
+>         {HAL_IOMUX_PIN_P1_2, HAL_IOMUX_FUNC_SPILCD_CS1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPILCD_IOMUX_CS1_INDEX == 27)
+>         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_SPILCD_CS1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+917a1453,1456
+> #if (SPILCD_IOMUX_CS2_INDEX == 06)
+>         {HAL_IOMUX_PIN_P0_6, HAL_IOMUX_FUNC_SPILCD_CS2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPILCD_IOMUX_CS2_INDEX == 31)
+>         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_SPILCD_CS2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+919,920c1458,1461
+< #ifdef SPILCD_IOMUX_DI1_INDEX
+<         {HAL_IOMUX_PIN_P2_6, HAL_IOMUX_FUNC_SPILCD_DI1, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> #if (SPILCD_IOMUX_CS3_INDEX == 07)
+>         {HAL_IOMUX_PIN_P0_7, HAL_IOMUX_FUNC_SPILCD_CS3,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPILCD_IOMUX_CS3_INDEX == 32)
+>         {HAL_IOMUX_PIN_P3_2, HAL_IOMUX_FUNC_SPILCD_CS3,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+922,923c1463,1478
+< #ifdef SPILCD_IOMUX_DI2_INDEX
+<         {HAL_IOMUX_PIN_P3_0, HAL_IOMUX_FUNC_SPILCD_DI2, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> 
+> #ifdef SPILCD_IOMUX_4WIRE
+> #if (SPILCD_IOMUX_DI1_INDEX == 02)
+>         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_SPILCD_DI1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPILCD_IOMUX_DI1_INDEX == 26)
+>         {HAL_IOMUX_PIN_P2_6, HAL_IOMUX_FUNC_SPILCD_DI1,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (SPILCD_IOMUX_DI2_INDEX == 03)
+>         {HAL_IOMUX_PIN_P0_3, HAL_IOMUX_FUNC_SPILCD_DI2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPILCD_IOMUX_DI2_INDEX == 30)
+>         {HAL_IOMUX_PIN_P3_0, HAL_IOMUX_FUNC_SPILCD_DI2,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #endif
+> #if (SPILCD_IOMUX_DI3_INDEX == 04)
+>         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_SPILCD_DI3,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (SPILCD_IOMUX_DI3_INDEX == 33)
+>         {HAL_IOMUX_PIN_P3_3, HAL_IOMUX_FUNC_SPILCD_DI3,  SPI_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+925,926d1479
+< #ifdef SPILCD_IOMUX_DI3_INDEX
+<         {HAL_IOMUX_PIN_P3_3, HAL_IOMUX_FUNC_SPILCD_DI3, SPILCD_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+929d1481
+< #endif
+931,934c1483
+<     hal_iomux_init(pinmux_spilcd_3wire, ARRAY_SIZE(pinmux_spilcd_3wire));
+< #ifdef SPILCD_IOMUX_4WIRE
+<     hal_iomux_init(pinmux_spilcd_4wire, ARRAY_SIZE(pinmux_spilcd_4wire));
+< #endif
+---
+>     hal_iomux_init(pinmux_spilcd, ARRAY_SIZE(pinmux_spilcd));
+939,943d1487
+< #if (I2C0_IOMUX_INDEX == 16)
+<     hal_iomux_set_analog_i2c();
+<     // IOMUX_GPIO_I2C_MODE should be kept in disabled state
+<     iomux->REG_050 &= ~IOMUX_I2C0_M_SEL_GPIO;
+< #else
+944a1489,1498
+> #if   (I2C0_IOMUX_INDEX == 00)
+>         {HAL_IOMUX_PIN_P0_0, HAL_IOMUX_FUNC_I2C_M0_SCL, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P0_1, HAL_IOMUX_FUNC_I2C_M0_SDA, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C0_IOMUX_INDEX == 04)
+>         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_I2C_M0_SCL, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P0_5, HAL_IOMUX_FUNC_I2C_M0_SDA, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C0_IOMUX_INDEX == 16)
+>         {HAL_IOMUX_PIN_P1_6, HAL_IOMUX_FUNC_I2C_M0_SCL, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P1_7, HAL_IOMUX_FUNC_I2C_M0_SDA, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C0_IOMUX_INDEX == 20)
+946a1501,1509
+> #elif (I2C0_IOMUX_INDEX == 26)
+>         {HAL_IOMUX_PIN_P2_6, HAL_IOMUX_FUNC_I2C_M0_SCL, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_I2C_M0_SDA, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C0_IOMUX_INDEX == 34)
+>         {HAL_IOMUX_PIN_P3_4, HAL_IOMUX_FUNC_I2C_M0_SCL, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P3_5, HAL_IOMUX_FUNC_I2C_M0_SDA, I2C0_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #else
+> #error "Unsupported I2C0_IOMUX_INDEX"
+> #endif
+948d1510
+< 
+950c1512
+< #endif
+---
+>     iomux->REG_050 |= IOMUX_I2C0_M_SEL_GPIO;
+956c1518,1527
+< #if (I2C1_IOMUX_INDEX == 22)
+---
+> #if   (I2C1_IOMUX_INDEX == 02)
+>         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_I2C_M1_SCL, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P0_3, HAL_IOMUX_FUNC_I2C_M1_SDA, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C1_IOMUX_INDEX == 06)
+>         {HAL_IOMUX_PIN_P0_6, HAL_IOMUX_FUNC_I2C_M1_SCL, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P0_7, HAL_IOMUX_FUNC_I2C_M1_SDA, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C1_IOMUX_INDEX == 14)
+>         {HAL_IOMUX_PIN_P1_4, HAL_IOMUX_FUNC_I2C_M1_SCL, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_I2C_M1_SDA, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C1_IOMUX_INDEX == 22)
+958a1530,1532
+> #elif (I2C1_IOMUX_INDEX == 30)
+>         {HAL_IOMUX_PIN_P3_0, HAL_IOMUX_FUNC_I2C_M1_SCL, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_I2C_M1_SDA, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+960,961c1534
+<         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_I2C_M1_SCL, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+<         {HAL_IOMUX_PIN_P0_3, HAL_IOMUX_FUNC_I2C_M1_SDA, I2C1_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+---
+> #error "Unsupported I2C1_IOMUX_INDEX"
+964d1536
+< 
+968a1541,1783
+> void hal_iomux_set_i2c2(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_i2c[] = {
+> #if   (I2C2_IOMUX_INDEX == 10)
+>         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_I2C_M2_SCL, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_I2C_M2_SDA, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C2_IOMUX_INDEX == 12)
+>         {HAL_IOMUX_PIN_P1_2, HAL_IOMUX_FUNC_I2C_M2_SCL, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P1_3, HAL_IOMUX_FUNC_I2C_M2_SDA, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C2_IOMUX_INDEX == 24)
+>         {HAL_IOMUX_PIN_P2_4, HAL_IOMUX_FUNC_I2C_M2_SCL, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P2_5, HAL_IOMUX_FUNC_I2C_M2_SDA, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C2_IOMUX_INDEX == 32)
+>         {HAL_IOMUX_PIN_P3_2, HAL_IOMUX_FUNC_I2C_M2_SCL, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P3_3, HAL_IOMUX_FUNC_I2C_M2_SDA, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #elif (I2C2_IOMUX_INDEX == 36)
+>         {HAL_IOMUX_PIN_P3_6, HAL_IOMUX_FUNC_I2C_M2_SCL, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_I2C_M2_SDA, I2C2_VOLTAGE_SEL, HAL_IOMUX_PIN_PULLUP_ENABLE},
+> #else
+> #error "Unsupported I2C2_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_i2c, ARRAY_SIZE(pinmux_i2c));
+>     iomux->REG_050 |= IOMUX_I2C2_M_SEL_GPIO;
+> }
+> 
+> void hal_iomux_set_pwm0(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_pwm[] = {
+> #if   (PWM0_IOMUX_INDEX == 00)
+>         {HAL_IOMUX_PIN_P0_0, HAL_IOMUX_FUNC_PWM0, PWM0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM0_IOMUX_INDEX == 10)
+>         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_PWM0, PWM0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM0_IOMUX_INDEX == 20)
+>         {HAL_IOMUX_PIN_P2_0, HAL_IOMUX_FUNC_PWM0, PWM0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM0_IOMUX_INDEX == 30)
+>         {HAL_IOMUX_PIN_P3_0, HAL_IOMUX_FUNC_PWM0, PWM0_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported PWM0_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_pwm, ARRAY_SIZE(pinmux_pwm));
+> }
+> 
+> void hal_iomux_set_pwm1(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_pwm[] = {
+> #if   (PWM1_IOMUX_INDEX == 01)
+>         {HAL_IOMUX_PIN_P0_1, HAL_IOMUX_FUNC_PWM1, PWM1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM1_IOMUX_INDEX == 11)
+>         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_PWM1, PWM1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM1_IOMUX_INDEX == 21)
+>         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_PWM1, PWM1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM1_IOMUX_INDEX == 31)
+>         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_PWM1, PWM1_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported PWM1_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_pwm, ARRAY_SIZE(pinmux_pwm));
+> }
+> 
+> void hal_iomux_set_pwm2(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_pwm[] = {
+> #if   (PWM2_IOMUX_INDEX == 02)
+>         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_PWM2, PWM2_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM2_IOMUX_INDEX == 12)
+>         {HAL_IOMUX_PIN_P1_2, HAL_IOMUX_FUNC_PWM2, PWM2_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM2_IOMUX_INDEX == 22)
+>         {HAL_IOMUX_PIN_P2_2, HAL_IOMUX_FUNC_PWM2, PWM2_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM2_IOMUX_INDEX == 32)
+>         {HAL_IOMUX_PIN_P3_2, HAL_IOMUX_FUNC_PWM2, PWM2_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported PWM2_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_pwm, ARRAY_SIZE(pinmux_pwm));
+> }
+> 
+> void hal_iomux_set_pwm3(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_pwm[] = {
+> #if   (PWM3_IOMUX_INDEX == 03)
+>         {HAL_IOMUX_PIN_P0_3, HAL_IOMUX_FUNC_PWM3, PWM3_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM3_IOMUX_INDEX == 13)
+>         {HAL_IOMUX_PIN_P1_3, HAL_IOMUX_FUNC_PWM3, PWM3_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM3_IOMUX_INDEX == 23)
+>         {HAL_IOMUX_PIN_P2_3, HAL_IOMUX_FUNC_PWM3, PWM3_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM3_IOMUX_INDEX == 33)
+>         {HAL_IOMUX_PIN_P3_3, HAL_IOMUX_FUNC_PWM3, PWM3_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported PWM3_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_pwm, ARRAY_SIZE(pinmux_pwm));
+> }
+> 
+> void hal_iomux_set_pwm4(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_pwm[] = {
+> #if   (PWM4_IOMUX_INDEX == 04)
+>         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_PWM4, PWM4_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM4_IOMUX_INDEX == 14)
+>         {HAL_IOMUX_PIN_P1_4, HAL_IOMUX_FUNC_PWM4, PWM4_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM4_IOMUX_INDEX == 24)
+>         {HAL_IOMUX_PIN_P2_4, HAL_IOMUX_FUNC_PWM4, PWM4_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM4_IOMUX_INDEX == 34)
+>         {HAL_IOMUX_PIN_P3_4, HAL_IOMUX_FUNC_PWM4, PWM4_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported PWM4_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_pwm, ARRAY_SIZE(pinmux_pwm));
+> }
+> 
+> void hal_iomux_set_pwm5(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_pwm[] = {
+> #if   (PWM5_IOMUX_INDEX == 05)
+>         {HAL_IOMUX_PIN_P0_5, HAL_IOMUX_FUNC_PWM5, PWM5_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM5_IOMUX_INDEX == 15)
+>         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_PWM5, PWM5_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM5_IOMUX_INDEX == 25)
+>         {HAL_IOMUX_PIN_P2_5, HAL_IOMUX_FUNC_PWM5, PWM5_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM5_IOMUX_INDEX == 35)
+>         {HAL_IOMUX_PIN_P3_5, HAL_IOMUX_FUNC_PWM5, PWM5_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported PWM5_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_pwm, ARRAY_SIZE(pinmux_pwm));
+> }
+> 
+> void hal_iomux_set_pwm6(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_pwm[] = {
+> #if   (PWM6_IOMUX_INDEX == 06)
+>         {HAL_IOMUX_PIN_P0_6, HAL_IOMUX_FUNC_PWM6, PWM6_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM6_IOMUX_INDEX == 16)
+>         {HAL_IOMUX_PIN_P1_6, HAL_IOMUX_FUNC_PWM6, PWM6_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM6_IOMUX_INDEX == 26)
+>         {HAL_IOMUX_PIN_P2_6, HAL_IOMUX_FUNC_PWM6, PWM6_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM6_IOMUX_INDEX == 36)
+>         {HAL_IOMUX_PIN_P3_6, HAL_IOMUX_FUNC_PWM6, PWM6_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported PWM6_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_pwm, ARRAY_SIZE(pinmux_pwm));
+> }
+> 
+> void hal_iomux_set_pwm7(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_pwm[] = {
+> #if   (PWM7_IOMUX_INDEX == 07)
+>         {HAL_IOMUX_PIN_P0_7, HAL_IOMUX_FUNC_PWM7, PWM7_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM7_IOMUX_INDEX == 17)
+>         {HAL_IOMUX_PIN_P1_7, HAL_IOMUX_FUNC_PWM7, PWM7_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM7_IOMUX_INDEX == 27)
+>         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_PWM7, PWM7_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (PWM7_IOMUX_INDEX == 37)
+>         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_PWM7, PWM7_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported PWM7_IOMUX_INDEX"
+> #endif
+>     };
+>     hal_iomux_init(pinmux_pwm, ARRAY_SIZE(pinmux_pwm));
+> }
+> 
+> void hal_iomux_set_ir(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_ir[] = {
+> #if   (IR_RX_IOMUX_INDEX == 00)
+>         {HAL_IOMUX_PIN_P0_0, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 02)
+>         {HAL_IOMUX_PIN_P0_2, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 06)
+>         {HAL_IOMUX_PIN_P0_6, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 10)
+>         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 12)
+>         {HAL_IOMUX_PIN_P1_2, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 14)
+>         {HAL_IOMUX_PIN_P1_4, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 22)
+>         {HAL_IOMUX_PIN_P2_2, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 26)
+>         {HAL_IOMUX_PIN_P2_6, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 31)
+>         {HAL_IOMUX_PIN_P3_1, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 33)
+>         {HAL_IOMUX_PIN_P3_3, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_RX_IOMUX_INDEX == 36)
+>         {HAL_IOMUX_PIN_P3_6, HAL_IOMUX_FUNC_IR_RX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported IR_RX_IOMUX_INDEX"
+> #endif
+> 
+> #if   (IR_TX_IOMUX_INDEX == 01)
+>         {HAL_IOMUX_PIN_P0_1, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 03)
+>         {HAL_IOMUX_PIN_P0_3, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 07)
+>         {HAL_IOMUX_PIN_P0_7, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 11)
+>         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 13)
+>         {HAL_IOMUX_PIN_P1_3, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 15)
+>         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 21)
+>         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 27)
+>         {HAL_IOMUX_PIN_P2_7, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 32)
+>         {HAL_IOMUX_PIN_P3_2, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 34)
+>         {HAL_IOMUX_PIN_P3_4, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (IR_TX_IOMUX_INDEX == 37)
+>         {HAL_IOMUX_PIN_P3_7, HAL_IOMUX_FUNC_IR_TX, IR_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #else
+> #error "Unsupported IR_TX_IOMUX_INDEX"
+> #endif
+>     };
+> 
+>     hal_iomux_init(pinmux_ir, ARRAY_SIZE(pinmux_ir));
+> }
+> 
+> void hal_iomux_set_sdmmc(void)
+> {
+>     static const struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_sdmmc[] = {
+>         {HAL_IOMUX_PIN_P1_3, HAL_IOMUX_FUNC_SDMMC_CLK,   SDMMC_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P1_2, HAL_IOMUX_FUNC_SDMMC_CMD,   SDMMC_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P1_4, HAL_IOMUX_FUNC_SDMMC_DATA0, SDMMC_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_SDMMC_DATA1, SDMMC_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P1_0, HAL_IOMUX_FUNC_SDMMC_DATA2, SDMMC_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>         {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_SDMMC_DATA3, SDMMC_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+>     };
+> 
+>     hal_iomux_init(pinmux_sdmmc, ARRAY_SIZE(pinmux_sdmmc));
+> }
+> 
+972c1787,1789
+< #if (CLKOUT_IOMUX_INDEX == 13)
+---
+> #if (CLKOUT_IOMUX_INDEX == 04)
+>         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_CLK_OUT, CLKOUT_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+> #elif (CLKOUT_IOMUX_INDEX == 13)
+975a1793,1794
+> #elif (CLKOUT_IOMUX_INDEX == 20)
+>         {HAL_IOMUX_PIN_P2_0, HAL_IOMUX_FUNC_CLK_OUT, CLKOUT_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+977a1797,1798
+> #elif (CLKOUT_IOMUX_INDEX == 22)
+>         {HAL_IOMUX_PIN_P2_2, HAL_IOMUX_FUNC_CLK_OUT, CLKOUT_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+985c1806
+<         {HAL_IOMUX_PIN_P0_4, HAL_IOMUX_FUNC_CLK_OUT, CLKOUT_VOLTAGE_SEL, HAL_IOMUX_PIN_NOPULL},
+---
+> #error "Unsupported CLKOUT_IOMUX_INDEX"
+1001a1823,1824
+>     ///TODO:
+>     return ;
+1005,1009d1827
+< #ifdef TPORTS_KEY_COEXIST
+<     //P1_1 ~ P1_2,
+<     iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P11_SEL_MASK | IOMUX_GPIO_P12_SEL_MASK)) |
+<     IOMUX_GPIO_P11_SEL(0xA) | IOMUX_GPIO_P12_SEL(0xA);
+< #else
+1013d1830
+< #endif
+1021a1839,1840
+>     ///TODO:
+>     return ;
+1043a1863,1911
+> void hal_iomux_set_wifi_uart(void)
+> {
+> #if (WIFI_UART_IOMUX_INDEX == 20)
+>     uint32_t mask_pd, mask_pu, mask_pu_c;
+>     iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P20_SEL_MASK | IOMUX_GPIO_P21_SEL_MASK)) |
+>         IOMUX_GPIO_P20_SEL(8) | IOMUX_GPIO_P21_SEL(8);
+> 
+>     mask_pd = (1 << HAL_IOMUX_PIN_P2_0) | (1 << HAL_IOMUX_PIN_P2_1);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P2_0);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P2_1);
+> 
+>     // Setup pullup
+>     iomux->REG_02C |= mask_pu;
+>     iomux->REG_02C &= ~(mask_pu_c);
+>     // Clear pulldown
+>     iomux->REG_030 &= ~mask_pd;
+> 
+> #elif (WIFI_UART_IOMUX_INDEX == 21)
+>     uint32_t mask_pd, mask_pu, mask_pu_c;
+>     iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P21_SEL_MASK)) | IOMUX_GPIO_P21_SEL(8);
+> 
+>     mask_pd = (1 << HAL_IOMUX_PIN_P2_1);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P2_1);
+> 
+>     // Setup pullup
+>     // iomux->REG_02C |= mask_pu;
+>     iomux->REG_02C &= ~(mask_pu_c);
+>     // Clear pulldown
+>     iomux->REG_030 &= ~mask_pd;
+> 
+> #elif (WIFI_UART_IOMUX_INDEX == 30)
+>     uint32_t mask_pd, mask_pu, mask_pu_c;
+>     iomux->REG_010 = (iomux->REG_010 & ~(IOMUX_GPIO_P30_SEL_MASK | IOMUX_GPIO_P31_SEL_MASK)) |
+>         IOMUX_GPIO_P30_SEL(7) | IOMUX_GPIO_P31_SEL(7);
+> 
+>     mask_pd = (1 << HAL_IOMUX_PIN_P3_0) | (1 << HAL_IOMUX_PIN_P3_1);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P3_0);
+>     mask_pu_c = (1 << HAL_IOMUX_PIN_P3_1);
+> 
+>     // Setup pullup
+>     iomux->REG_02C |= mask_pu;
+>     iomux->REG_02C &= ~(mask_pu_c);
+>     // Clear pulldown
+>     iomux->REG_030 &= ~mask_pd;
+> 
+> #else
+>     //default:nothing
+> #endif
+> }
+1046a1915,1931
+>     uint32_t v;
+> 
+>     if (type == HAL_PWRKEY_IRQ_NONE) {
+>         v = IOMUX_POWER_KEY_ON_INT_STATUS | IOMUX_POWER_KEY_OFF_INT_STATUS;
+>     } else if (type == HAL_PWRKEY_IRQ_FALLING_EDGE) {
+>         v = IOMUX_POWER_KEY_ON_INT_EN | IOMUX_POWER_KEY_ON_INT_MSK;
+>     } else if (type == HAL_PWRKEY_IRQ_RISING_EDGE) {
+>         v = IOMUX_POWER_KEY_OFF_INT_EN | IOMUX_POWER_KEY_OFF_INT_MSK;
+>     } else if (type == HAL_PWRKEY_IRQ_BOTH_EDGE) {
+>         v = IOMUX_POWER_KEY_ON_INT_EN | IOMUX_POWER_KEY_ON_INT_MSK |
+>             IOMUX_POWER_KEY_OFF_INT_EN | IOMUX_POWER_KEY_OFF_INT_MSK;
+>     } else {
+>         return 1;
+>     }
+> 
+>     iomux->REG_040 = v;
+> 
+1049a1935
+> 
+1052c1938,1940
+<     return 0;
+---
+>     uint32_t v = iomux->REG_040;
+>     return !!(v & IOMUX_POWER_ON_FEEDOUT);
+> 
+1062a1951,1959
+>     uint32_t v = iomux->REG_040;
+> 
+>     if (v & IOMUX_R_POWER_KEY_INTR_U) {
+>         state |= HAL_PWRKEY_IRQ_FALLING_EDGE;
+>     }
+> 
+>     if (v & IOMUX_R_POWER_KEY_INTR_D) {
+>         state |= HAL_PWRKEY_IRQ_RISING_EDGE;
+>     }
+1067,1069c1964,2015
+< const struct HAL_IOMUX_PIN_FUNCTION_MAP iomux_tport[] = {
+< /*    {HAL_IOMUX_PIN_P1_1, HAL_IOMUX_FUNC_AS_GPIO, HAL_IOMUX_PIN_VOLTAGE_VIO, HAL_IOMUX_PIN_PULLUP_ENABLE},*/
+<     {HAL_IOMUX_PIN_P1_5, HAL_IOMUX_FUNC_AS_GPIO, HAL_IOMUX_PIN_VOLTAGE_VIO, HAL_IOMUX_PIN_PULLUP_ENABLE},
+---
+> void hal_iomux_set_codec_gpio_trigger(enum HAL_IOMUX_PIN_T pin, bool polarity)
+> {
+>     iomux->REG_064 = SET_BITFIELD(iomux->REG_064, IOMUX_CFG_CODEC_TRIG_SEL, pin);
+>     if (polarity) {
+>         iomux->REG_064 &= ~IOMUX_CFG_CODEC_TRIG_POL;
+>     } else {
+>         iomux->REG_064 |= IOMUX_CFG_CODEC_TRIG_POL;
+>     }
+> }
+> 
+> void hal_iomux_single_wire_uart_rx(uint32_t uart)
+> {
+> #ifdef UART_HALF_DUPLEX
+> #define SUART_TX_PIN_PULL_SEL_IN_RX         HAL_IOMUX_PIN_NOPULL
+> #else
+> #define SUART_TX_PIN_PULL_SEL_IN_RX         HAL_IOMUX_PIN_PULLUP_ENABLE
+> #endif
+> 
+>     struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_uart[] =
+>     {
+>         {HAL_IOMUX_PIN_P2_0, HAL_IOMUX_FUNC_UART1_RX, HAL_IOMUX_PIN_VOLTAGE_VIO, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_GPIO,     HAL_IOMUX_PIN_VOLTAGE_VIO, SUART_TX_PIN_PULL_SEL_IN_RX},
+>     };
+> 
+>     if (uart == HAL_UART_ID_2) {
+>         pinmux_uart[0].pin = HAL_IOMUX_PIN_P2_2;
+>         pinmux_uart[0].function = HAL_IOMUX_FUNC_UART2_RX;
+>         pinmux_uart[1].pin = HAL_IOMUX_PIN_P2_3;
+> #ifdef UART_HALF_DUPLEX
+>         iomux->REG_050 &= ~IOMUX_UART2_HALFN;
+>     } else {
+>         iomux->REG_050 &= ~IOMUX_UART1_HALFN;
+> #endif
+>     }
+> 
+>     hal_gpio_pin_set_dir((enum HAL_GPIO_PIN_T)pinmux_uart[0].pin, HAL_GPIO_DIR_IN, 1);
+>     hal_gpio_pin_set_dir((enum HAL_GPIO_PIN_T)pinmux_uart[1].pin, HAL_GPIO_DIR_IN, 1);
+> 
+>     hal_iomux_init(pinmux_uart, ARRAY_SIZE(pinmux_uart));
+> 
+> #ifndef UART_HALF_DUPLEX
+>     hal_uart_flush(uart, 0);
+> #endif
+> }
+> 
+> void hal_iomux_single_wire_uart_tx(uint32_t uart)
+> {
+> #ifndef UART_HALF_DUPLEX
+>     struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux_uart[] =
+>     {
+>         {HAL_IOMUX_PIN_P2_0, HAL_IOMUX_FUNC_GPIO,     HAL_IOMUX_PIN_VOLTAGE_VIO, HAL_IOMUX_PIN_PULLUP_ENABLE},
+>         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_UART1_TX, HAL_IOMUX_PIN_VOLTAGE_VIO, HAL_IOMUX_PIN_NOPULL},
+1072c2018,2031
+< int hal_iomux_tportopen(void)
+---
+>     if (uart == HAL_UART_ID_2) {
+>         pinmux_uart[0].pin = HAL_IOMUX_PIN_P2_2;
+>         pinmux_uart[1].pin = HAL_IOMUX_PIN_P2_3;
+>         pinmux_uart[1].function = HAL_IOMUX_FUNC_UART2_TX;
+>     }
+> 
+>     hal_gpio_pin_set_dir((enum HAL_GPIO_PIN_T)pinmux_uart[0].pin, HAL_GPIO_DIR_IN, 1);
+>     hal_gpio_pin_set_dir((enum HAL_GPIO_PIN_T)pinmux_uart[1].pin, HAL_GPIO_DIR_IN, 1);
+> 
+>     hal_iomux_init(pinmux_uart, ARRAY_SIZE(pinmux_uart));
+> #endif
+> }
+> 
+> void hal_iomux_set_dsi_te(void)
+1074c2033,2036
+<     int i;
+---
+>     struct HAL_IOMUX_PIN_FUNCTION_MAP pinmux[] =
+>     {
+>         {HAL_IOMUX_PIN_P2_1, HAL_IOMUX_FUNC_DISPLAY_TE, HAL_IOMUX_PIN_VOLTAGE_VIO, HAL_IOMUX_PIN_NOPULL},
+>     };
+1076,1078c2038
+<     for (i=0;i<sizeof(iomux_tport)/sizeof(struct HAL_IOMUX_PIN_FUNCTION_MAP);i++){
+<         hal_iomux_init((struct HAL_IOMUX_PIN_FUNCTION_MAP *)&iomux_tport[i], 1);
+<         hal_gpio_pin_set_dir((enum HAL_GPIO_PIN_T)iomux_tport[i].pin, HAL_GPIO_DIR_OUT, 0);
+---
+>     hal_iomux_init(pinmux, ARRAY_SIZE(pinmux));
+1080c2040,2043
+<     return 0;
+---
+> 
+> enum HAL_IOMUX_PIN_T hal_iomux_get_dsi_te_pin(void)
+> {
+>     return HAL_IOMUX_PIN_P2_1;
+1083c2046
+< int hal_iomux_tportset(int port)
+---
+> void hal_iomux_set_wf_fem(int rf_switch)
+1085,1086c2048,2081
+<     hal_gpio_pin_set((enum HAL_GPIO_PIN_T)iomux_tport[port].pin);
+<     return 0;
+---
+>     uint32_t mask_pd, mask_pu;
+> #if (1 == WIFI_RF_SWITCH) //bes EVB v2
+> 
+>     iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P20_SEL_MASK)) | IOMUX_GPIO_P20_SEL(13);
+> 
+>     // mask_pd = (1 << HAL_IOMUX_PIN_P2_0) | (1 << HAL_IOMUX_PIN_P2_1);
+>     mask_pd = (1 << HAL_IOMUX_PIN_P2_0);
+>     mask_pu = (1 << HAL_IOMUX_PIN_P2_0);
+>     // mask_pu_c = (1 << HAL_IOMUX_PIN_P2_1);
+> 
+>     // Setup voltage as VIO
+>     iomux->REG_090 &= ~(IOMUX_GPIO_P20_SEL_VIO);
+> 
+>     // Setup pullup
+>     iomux->REG_02C |= mask_pu;
+>     // iomux->REG_02C &= ~(mask_pu_c);
+>     // Clear pulldown
+>     iomux->REG_030 &= ~mask_pd;
+> 
+> #else
+>     if( (rf_switch  == 20) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4 )
+>     {
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P24_SEL_MASK)) | IOMUX_GPIO_P24_SEL(13);
+> 
+>         mask_pd = (1 << HAL_IOMUX_PIN_P2_4);
+>         mask_pu = (1 << HAL_IOMUX_PIN_P2_4);
+> 
+>         // Setup voltage as VIO
+>         iomux->REG_094 &= ~(IOMUX_GPIO_P24_SEL_VIO);
+> 
+>         // Setup pullup
+>         iomux->REG_02C |= mask_pu;
+>         // Clear pulldown
+>         iomux->REG_030 &= ~mask_pd;
+1089c2084
+< int hal_iomux_tportclr(int port)
+---
+>     if( (rf_switch  == 12) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+1091,1092c2086,2097
+<     hal_gpio_pin_clr((enum HAL_GPIO_PIN_T)iomux_tport[port].pin);
+<     return 0;
+---
+>         iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P14_SEL_MASK)) | IOMUX_GPIO_P14_SEL(13);
+> 
+>         mask_pd = (1 << HAL_IOMUX_PIN_P1_4);
+>         mask_pu = (1 << HAL_IOMUX_PIN_P1_4);
+> 
+>         // Setup voltage as VIO
+>         iomux->REG_090 &= ~(IOMUX_GPIO_P14_SEL_VIO);
+> 
+>         // Setup pullup
+>         iomux->REG_02C |= mask_pu;
+>         // Clear pulldown
+>         iomux->REG_030 &= ~mask_pd;
+1095c2100
+< void hal_iomux_set_codec_gpio_trigger(enum HAL_IOMUX_PIN_T pin, bool polarity)
+---
+>     if( (rf_switch  == 16) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+1097,1101c2102,2192
+<     iomux->REG_064 = SET_BITFIELD(iomux->REG_064, IOMUX_CFG_CODEC_TRIG_SEL, pin);
+<     if (polarity) {
+<         iomux->REG_064 &= ~IOMUX_CFG_CODEC_TRIG_POL;
+<     } else {
+<         iomux->REG_064 |= IOMUX_CFG_CODEC_TRIG_POL;
+---
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P20_SEL_MASK)) | IOMUX_GPIO_P20_SEL(13);
+> 
+>         // mask_pd = (1 << HAL_IOMUX_PIN_P2_0) | (1 << HAL_IOMUX_PIN_P2_1);
+>         mask_pd = (1 << HAL_IOMUX_PIN_P2_0);
+>         mask_pu = (1 << HAL_IOMUX_PIN_P2_0);
+>         // mask_pu_c = (1 << HAL_IOMUX_PIN_P2_1);
+> 
+>         // Setup voltage as VIO
+>         iomux->REG_094 &= ~(IOMUX_GPIO_P20_SEL_VIO);
+> 
+>         // Setup pullup
+>         iomux->REG_02C |= mask_pu;
+>         // iomux->REG_02C &= ~(mask_pu_c);
+>         // Clear pulldown
+>         iomux->REG_030 &= ~mask_pd;
+>     }
+> 
+>     if( (rf_switch  == 2) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P02_SEL_MASK)) | IOMUX_GPIO_P02_SEL(13);
+> 
+>         mask_pd = (1 << HAL_IOMUX_PIN_P0_2);
+>         mask_pu = (1 << HAL_IOMUX_PIN_P0_2);
+> 
+>         // Setup voltage as VIO
+>         iomux->REG_090 &= ~(IOMUX_GPIO_P02_SEL_VIO);
+> 
+>         // Setup pullup
+>         iomux->REG_02C |= mask_pu;
+>         // Clear pulldown
+>         iomux->REG_030 &= ~mask_pd;
+>     }
+> 
+>     //gpio12(sw2)5g txon; gpio13(sw3)0:bt, 1:2g4;
+>     if( (rf_switch  == 10) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P12_SEL_MASK)) | IOMUX_GPIO_P12_SEL(13);
+>         iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P13_SEL_MASK)) | IOMUX_GPIO_P13_SEL(13);
+>     }
+> 
+>     //gpio4 no 5G 2.4g/bt --> 1: 2.4, 0:bt;
+>     if( (rf_switch  == 4) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P04_SEL_MASK)) | IOMUX_GPIO_P04_SEL(13);
+>     }
+> 
+>     //5G GPIO-02 -sw1,2.4G GPIO-04-sw4
+>     if( (rf_switch  == 6) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P02_SEL_MASK)) | IOMUX_GPIO_P02_SEL(13);
+> 
+>         mask_pd = (1 << HAL_IOMUX_PIN_P0_2);
+>         mask_pu = (1 << HAL_IOMUX_PIN_P0_2);
+> 
+>         // Setup voltage as VIO
+>         iomux->REG_090 &= ~(IOMUX_GPIO_P02_SEL_VIO);
+> 
+>         // Setup pullup
+>         iomux->REG_02C |= mask_pu;
+>         // Clear pulldown
+>         iomux->REG_030 &= ~mask_pd;
+> 
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P04_SEL_MASK)) | IOMUX_GPIO_P04_SEL(13);
+> 
+>         mask_pd = (1 << HAL_IOMUX_PIN_P0_4);
+>         mask_pu = (1 << HAL_IOMUX_PIN_P0_4);
+> 
+>         // Setup voltage as VIO
+>         iomux->REG_090 &= ~(IOMUX_GPIO_P04_SEL_VIO);
+> 
+>         // Setup pullup
+>         iomux->REG_02C |= mask_pu;
+>         // Clear pulldown
+>         iomux->REG_030 &= ~mask_pd;
+> 
+>     }
+> 
+>     if( (rf_switch  == 25) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_010 = (iomux->REG_010 & ~(IOMUX_GPIO_P31_SEL_MASK)) | IOMUX_GPIO_P31_SEL(13);
+> 
+>         mask_pd = (1 << HAL_IOMUX_PIN_P3_1);
+>         mask_pu = (1 << HAL_IOMUX_PIN_P3_1);
+> 
+>         // Setup voltage as VIO
+>         iomux->REG_094 &= ~(IOMUX_GPIO_P31_SEL_VIO);
+> 
+>         // Setup pullup
+>         iomux->REG_02C |= mask_pu;
+>         // Clear pulldown
+>         iomux->REG_030 &= ~mask_pd;
+1102a2194,2264
+> 
+>     //gpio4:epta; gpio20: rxon
+>     if ((rf_switch  == 100) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P04_SEL_MASK)) | IOMUX_GPIO_P04_SEL(13);
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P20_SEL_MASK)) | IOMUX_GPIO_P20_SEL(13);
+>     }
+> 
+>     //gpio02 rxon
+>     if ((rf_switch  == 102) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P02_SEL_MASK)) | IOMUX_GPIO_P02_SEL(13);
+>     }
+>     //gpio35 :epta;
+>     if ((rf_switch  == 105) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_010 = (iomux->REG_010 & ~(IOMUX_GPIO_P35_SEL_MASK)) | IOMUX_GPIO_P35_SEL(13);
+>     }
+> 
+>     /*out fem */
+>     if( (rf_switch  == 37) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4 )
+>     {
+>         iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P13_SEL_MASK)) | IOMUX_GPIO_P13_SEL(13);
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P24_SEL_MASK)) | IOMUX_GPIO_P24_SEL(13);
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P27_SEL_MASK)) | IOMUX_GPIO_P27_SEL(13);
+>     }
+>     if( (rf_switch  == 101) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4 )
+>     {
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P02_SEL_MASK)) | IOMUX_GPIO_P02_SEL(13);
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P04_SEL_MASK)) | IOMUX_GPIO_P04_SEL(13);
+>     }
+>     //gpio13(sw2)5g txon; gpio12(sw3)0:bt, 1:2g4;
+>     if((rf_switch  == 103) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P12_SEL_MASK)) | IOMUX_GPIO_P12_SEL(13);
+>         iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P13_SEL_MASK)) | IOMUX_GPIO_P13_SEL(13);
+>     }
+>     if( (rf_switch  == 104) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4 )
+>     {
+>         iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P12_SEL_MASK)) | IOMUX_GPIO_P12_SEL(13);
+>         iomux->REG_008 = (iomux->REG_008 & ~(IOMUX_GPIO_P13_SEL_MASK)) | IOMUX_GPIO_P13_SEL(13);
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P24_SEL_MASK)) | IOMUX_GPIO_P24_SEL(13);
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P27_SEL_MASK)) | IOMUX_GPIO_P27_SEL(13);  
+>     }
+> 
+>     if ((rf_switch  == 106) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4)
+>     {
+>         iomux->REG_004 = (iomux->REG_004 & ~(IOMUX_GPIO_P04_SEL_MASK)) | IOMUX_GPIO_P04_SEL(13);
+>     }
+> 
+>     if( (rf_switch  == 107) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4 )
+>     {
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P22_SEL_MASK)) | IOMUX_GPIO_P22_SEL(13);
+>         mask_pd = (1 << HAL_IOMUX_PIN_P2_2);
+>         mask_pu = (1 << HAL_IOMUX_PIN_P2_2);
+>         // Setup voltage as VIO
+>         iomux->REG_094 &= ~(IOMUX_GPIO_P22_SEL_VIO);
+> 
+>         // Setup pullup
+>         iomux->REG_02C |= mask_pu;
+>         // Clear pulldown
+>         iomux->REG_030 &= ~mask_pd;
+>     }
+> 
+>     if( (rf_switch  == 108) && hal_get_chip_metal_id() >= HAL_CHIP_METAL_ID_4 )
+>     {
+>         iomux->REG_00C = (iomux->REG_00C & ~(IOMUX_GPIO_P22_SEL_MASK)) | IOMUX_GPIO_P22_SEL(13);
+>     }
+> 
+> #endif
+> 

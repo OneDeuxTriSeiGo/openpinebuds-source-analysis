@@ -1,0 +1,423 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_app/app_main/app_ble_mode_switch.h
+remote: https://raw.githubusercontent.com/alibaba/AliOS-Things/a99f20706f9c666903a12a205edce13263b1fadb/hardware/chip/haas1000/drivers/services/ble_app/app_main/app_ble_mode_switch.h
+diff -sw local remote
+---
+
+1,16c1,14
+< /***************************************************************************
+< *
+< *Copyright 2015-2019 BES.
+< *All rights reserved. All unpublished rights reserved.
+< *
+< *No part of this work may be used or reproduced in any form or by any
+< *means, or stored in a database or retrieval system, without prior written
+< *permission of BES.
+< *
+< *Use of this work is governed by a license granted by BES.
+< *This work contains confidential and proprietary information of
+< *BES. which is protected by copyright, trade secret,
+< *trademark and other intellectual property rights.
+< *
+< ****************************************************************************/
+< 
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+26d23
+< #include "co_bt_defines.h"
+29,30d25
+< #define BLE_ADV_DATA_STRUCT_HEADER_LEN (2)
+< 
+34a30,33
+> // 3 bytes reserved for FLAG field
+> #define BLE_ADV_DATA_MAX_LEN (28)
+> #define BLE_SCAN_RSP_DATA_MAX_LEN (31)
+> 
+85a85
+>     USER_BT_ADP            = 7,
+89,98c89
+< enum BLE_ADV_SWITCH_USER_E {
+<     BLE_SWITCH_USER_RS          = 0, // used for role switch
+<     BLE_SWITCH_USER_BOX         = 1, // used for box open/close
+<     BLE_SWITCH_USER_AI          = 2, // used for ai
+<     BLE_SWITCH_USER_BT_CONNECT  = 3, // used for bt connect
+<     BLE_SWITCH_USER_SCO         = 4, // used for sco
+<     BLE_SWITCH_USER_IBRT        = 5, // used for ibrt
+< 
+<     BLE_SWITCH_USER_NUM,
+< };
+---
+> typedef void (*BLE_DATA_FILL_FUNC_T)(void *advParam);
+100,109c91,94
+< //Scan filter policy
+< enum BLE_SCAN_FILTER_POLICY {
+<     ///Allow advertising packets from anyone
+<     BLE_SCAN_ALLOW_ADV_ALL            = 0x00,
+<     ///Allow advertising packets from White List devices only
+<     BLE_SCAN_ALLOW_ADV_WLST,
+<     ///Allow advertising packets from anyone and Direct adv using RPA in InitA
+<     BLE_SCAN_ALLOW_ADV_ALL_AND_INIT_RPA,
+<     ///Allow advertising packets from White List devices only and Direct adv using RPA in InitA
+<     BLE_SCAN_ALLOW_ADV_WLST_AND_INIT_RPA,
+---
+> enum BLE_CONNECT_STATE {
+>     BLE_DISCONNECTED  = 0,
+>     BLE_DISCONNECTING = 1,
+>     BLE_CONNECTED     = 2,
+113d97
+<     bool withFlag;
+117c101
+<     uint8_t advData[BLE_DATA_LEN];
+---
+>     uint8_t advData[BLE_ADV_DATA_MAX_LEN];
+119c103
+<     uint8_t scanRspData[BLE_DATA_LEN];
+---
+>     uint8_t scanRspData[BLE_SCAN_RSP_DATA_MAX_LEN];
+122,123d105
+< typedef void (*BLE_DATA_FILL_FUNC_T)(void *advParam);
+< 
+131c113,119
+<     uint32_t advSwitch;
+---
+>     uint8_t state;
+>     uint8_t addr[BTIF_BD_ADDR_SIZE];
+> } BLE_CONNECT_PARAM_T;
+> 
+> typedef struct
+> {
+>     bool advSwitch;
+133a122
+>     uint8_t connectNum;
+137a127,131
+>     /// Device Name length
+>     uint8_t dev_name_len;
+>     /// Device Name
+>     uint8_t dev_name[APP_DEVICE_NAME_MAX_LEN];
+> 
+146,147c140,141
+<     // pointer of @see app_env
+<     struct app_env_tag *bleEnv;
+---
+>     // param used for BLE connect
+>     BLE_CONNECT_PARAM_T connectInfo[BLE_CONNECTION_MAX];
+150c144
+< 
+---
+> /****************************function declearation**************************/
+152c146
+<  *            app_ble_mode_init
+---
+>  *            app_ble_mode_tws_sync_init
+156c150
+<  *    init the bleModeEnv
+---
+>  *    tws related environment initialization for ble module
+164c158
+< void app_ble_mode_init(void);
+---
+> void app_ble_mode_tws_sync_init(void);
+167c161
+<  *            app_ble_register_data_fill_handler
+---
+>  *            app_ble_mode_init
+171,173c165
+<  *    register a BLE advertisement and scan response data fill handler for a
+<  *    specific user(see @BLE_ADV_USER_E), so that the adv/scan response data
+<  *    could present in BLE adv/scan response data
+---
+>  *    init the bleModeEnv
+176,177c168
+<  *    user - see the defination in BLE_ADV_USER_E
+<  *    func - adv/scan response data fill handler for specific user
+---
+>  *    void
+182c173
+< void app_ble_register_data_fill_handle(enum BLE_ADV_USER_E user, BLE_DATA_FILL_FUNC_T func, bool enable);
+---
+> void app_ble_mode_init(void);
+185c176
+<  *            app_ble_data_fill_enable
+---
+>  *            app_ble_sync_ble_info
+189c180
+<  *    enable/disable specific user to fill the adv/scan response data
+---
+>  *    for tws sync ble info
+192,194c183
+<  *    user : user to enable/disable fill data
+<  *    enable : true - enable user
+<  *             false - disable user
+---
+>  *    void
+199c188
+< void app_ble_data_fill_enable(enum BLE_ADV_USER_E user, bool enable);
+---
+> void app_ble_sync_ble_info(void);
+202c191
+<  *            app_ble_get_data_fill_enable
+---
+>  *            app_ble_register_data_fill_handler
+206c195,197
+<  *    get if specific user is enabled to fill adv/scan response data
+---
+>  *    register a BLE advertisement and scan response data fill handler for a
+>  *    specific user(see @BLE_ADV_USER_E), so that the adv/scan response data
+>  *    could present in BLE adv/scan response data
+209c200,201
+<  *    user : user
+---
+>  *    user - see the defination in BLE_ADV_USER_E
+>  *    func - adv/scan response data fill handler for specific user
+212,213c204
+<  *    true - user is enabled to fill data
+<  *    false - user is disabled to fill data
+---
+>  *    void
+214a206,208
+> void app_ble_register_data_fill_handle(enum BLE_ADV_USER_E user, BLE_DATA_FILL_FUNC_T func, bool enable);
+> void app_ble_unregister_data_fill_handle(enum BLE_ADV_USER_E user);
+> void app_ble_data_fill_enable(enum BLE_ADV_USER_E user, bool enable);
+216c210
+< 
+---
+> bool app_ble_start_adv(uint8_t advType, uint16_t advInterval);
+232,262c226
+< /*---------------------------------------------------------------------------
+<  *            app_ble_refresh_adv_state
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    refresh adv state
+<  *
+<  * Parameters:
+<  *    advertisement interval in ms
+<  *
+<  * Return:
+<  *    None
+<  */
+< void app_ble_refresh_adv_state(uint16_t advInterval);
+< 
+< /*---------------------------------------------------------------------------
+<  *            app_ble_force_switch_adv
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    enable/disable all BLE adv request for specific UI user
+<  *
+<  * Parameters:
+<  *    user : UI user
+<  *    onOff : true - enable BLE adv for specific UI user
+<  *            false -  disable BLE adv for specific UI user
+<  *
+<  * Return:
+<  *    void
+<  */
+< void app_ble_force_switch_adv(uint8_t user, bool onOff);
+---
+> void app_ble_force_switch_adv(bool onOff);
+264,279c228
+< /*---------------------------------------------------------------------------
+<  *            app_ble_start_scan
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    start BLE scan
+<  *
+<  * Parameters:
+<  *    scanFilterPolicy : Scan filter policy
+<  *    scanWindow : BLE scan window size(in ms)
+<  *    scanWnInterval : BLE scan window interval(in ms)
+<  *
+<  * Return:
+<  *    void
+<  */
+< void app_ble_start_scan(enum BLE_SCAN_FILTER_POLICY scanFilterPolicy, uint16_t scanWindow, uint16_t scanWnterval);
+---
+> void app_ble_start_scan(uint16_t scanWindow, uint16_t scanWnterval);
+281,293d229
+< /*---------------------------------------------------------------------------
+<  *            app_ble_start_connect
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    start connect BLE with the given address
+<  *
+<  * Parameters:
+<  *    bdAddrToConnect : BLE address to connnect
+<  *
+<  * Return:
+<  *    void
+<  */
+296,371d231
+< /*---------------------------------------------------------------------------
+<  *            app_ble_is_connection_on
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    is a specific BLE connection exist
+<  *
+<  * Parameters:
+<  *    index: Index of the BLE connection to check
+<  *
+<  * Return:
+<  *    true - BLE connection exists
+<  *    false - BLE connection doesn't exist
+<  */
+< bool app_ble_is_connection_on(uint8_t index);
+< 
+< /*---------------------------------------------------------------------------
+<  *            app_ble_is_any_connection_exist
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    is there any BLE connection exist
+<  *
+<  * Parameters:
+<  *    void
+<  *
+<  * Return:
+<  *    true - at least one BLE connection exist
+<  *    false - no BLE connection exists
+<  */
+< bool app_ble_is_any_connection_exist();
+< 
+< /*---------------------------------------------------------------------------
+<  *            app_ble_start_disconnect
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    disconnect the BLE connection with given connection index
+<  *
+<  * Parameters:
+<  *    conIdx: connection index to disconnect
+<  *
+<  * Return:
+<  *    void
+<  */
+< void app_ble_start_disconnect(uint8_t conIdx);
+< 
+< /*---------------------------------------------------------------------------
+<  *            app_ble_disconnect_all
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    disconnect all BLE connections
+<  *
+<  * Parameters:
+<  *    void
+<  *
+<  * Return:
+<  *    void
+<  */
+< void app_ble_disconnect_all(void);
+< 
+< /*---------------------------------------------------------------------------
+<  *            app_ble_stop_activities
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    stop all BLE activities
+<  *    NOTE: will not disconnect the existed connections
+<  *
+<  * Parameters:
+<  *    void
+<  *
+<  * Return:
+<  *    void
+<  */
+374,433c234
+< /*---------------------------------------------------------------------------
+<  *            app_ble_is_in_advertising_state
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    is BLE in advertising progress
+<  *
+<  * Parameters:
+<  *    void
+<  *
+<  * Return:
+<  *    true - BLE adv is in progress
+<  *    false - BLE adv is not in progress
+<  */
+< bool app_ble_is_in_advertising_state(void);
+< 
+< /*---------------------------------------------------------------------------
+<  *            app_ble_get_user_register
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    to get adv user register
+<  *
+<  * Parameters:
+<  *    void
+<  *
+<  * Return:
+<  *    uint32_t -- adv user register
+<  */
+< uint32_t app_ble_get_user_register(void);
+< 
+< /*---------------------------------------------------------------------------
+<  *            app_ble_get_current_state
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    to get current ble state
+<  *
+<  * Parameters:
+<  *    void
+<  *
+<  * Return:
+<  *    enum BLE_STATE_E -- ble state
+<  */
+< enum BLE_STATE_E app_ble_get_current_state(void);
+< 
+< /*---------------------------------------------------------------------------
+<  *            app_ble_get_current_operation
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    to get current ble operation
+<  *
+<  * Parameters:
+<  *    void
+<  *
+<  * Return:
+<  *    enum BLE_OP_E -- ble operation
+<  */
+< enum BLE_OP_E app_ble_get_current_operation(void);
+---
+> bool app_ble_is_in_connected_state(void);
+435,449c236
+< /*---------------------------------------------------------------------------
+<  *            app_ble_get_runtime_adv_param
+<  *---------------------------------------------------------------------------
+<  *
+<  *Synopsis:
+<  *    to get current ble advertising parameters
+<  *
+<  * Parameters:
+<  *    pAdvType: Output pointer of adv type
+<  *    pAdvIntervalMs: Output pointer of adv internal in ms
+<  *
+<  * Return:
+<  *    void
+<  */
+< void app_ble_get_runtime_adv_param(uint8_t* pAdvType, uint16_t* pAdvIntervalMs);
+---
+> bool app_ble_is_in_advertising_state(void);
+450a238
+> void app_ble_stub_user_init(void);

@@ -1,0 +1,309 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/cmsis_nvic.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/cmsis/inc/cmsis.h
+diff -sw local remote
+---
+
+1,5c1,5
+< /* mbed Microcontroller Library
+<  * CMSIS-style functionality to support dynamic vectors
+<  *******************************************************************************
+<  * Copyright (c) 2011 ARM Limited. All rights reserved.
+<  * All rights reserved.
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+7,8c7
+<  * Redistribution and use in source and binary forms, with or without
+<  * modification, are permitted provided that the following conditions are met:
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+10,29c9,13
+<  * 1. Redistributions of source code must retain the above copyright notice,
+<  *    this list of conditions and the following disclaimer.
+<  * 2. Redistributions in binary form must reproduce the above copyright notice,
+<  *    this list of conditions and the following disclaimer in the documentation
+<  *    and/or other materials provided with the distribution.
+<  * 3. Neither the name of ARM Limited nor the names of its contributors
+<  *    may be used to endorse or promote products derived from this software
+<  *    without specific prior written permission.
+<  *
+<  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+<  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+<  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+<  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+<  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+<  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+<  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+<  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+<  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+<  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+<  *******************************************************************************
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+31,35c15,16
+< 
+< #ifndef MBED_CMSIS_NVIC_H
+< #define MBED_CMSIS_NVIC_H
+< 
+< #include "cmsis.h"
+---
+> #ifndef MBED_CMSIS_H
+> #define MBED_CMSIS_H
+41c22,23
+< typedef void (*NVIC_DEFAULT_FAULT_HANDLER_T)(void);
+---
+> #include "plat_addr_map.h"
+> #include _TO_STRING(CONCAT_SUFFIX(CHIP_ID_LITERAL, h))
+43c25,32
+< void NVIC_DisableAllIRQs(void);
+---
+> #define IRQ_PRIORITY_REALTIME               0
+> #define IRQ_PRIORITY_HIGHPLUSPLUS           1
+> #define IRQ_PRIORITY_HIGHPLUS               2
+> #define IRQ_PRIORITY_HIGH                   3
+> #define IRQ_PRIORITY_ABOVENORMAL            4
+> #define IRQ_PRIORITY_NORMAL                 5
+> #define IRQ_PRIORITY_BELOWNORMAL            6
+> #define IRQ_PRIORITY_LOW                    7
+45c34,41
+< void NVIC_InitVectors(void);
+---
+> #ifdef __ARM_ARCH_ISA_ARM
+> #define IRQ_LOCK_MASK                       (CPSR_I_Msk | CPSR_F_Msk)
+> #else
+> #define NVIC_USER_IRQ_OFFSET                16
+> #define NVIC_NUM_VECTORS                    (NVIC_USER_IRQ_OFFSET + USER_IRQn_QTY)
+> #endif
+> 
+> #ifndef __ASSEMBLER__
+47c43,53
+< void NVIC_SetDefaultFaultHandler(NVIC_DEFAULT_FAULT_HANDLER_T handler);
+---
+> #ifdef __ARMCC_VERSION
+> // Stupid armclang
+> #undef __SSAT
+> #define __SSAT(ARG1,ARG2) \
+> __extension__ \
+> ({                          \
+>   int32_t __RES, __ARG1 = (ARG1); \
+>   __ASM ("ssat %0, %1, %2" : "=r" (__RES) :  "I" (ARG2), "r" (__ARG1) ); \
+>   __RES; \
+>  })
+> #endif
+49c55,56
+< void NVIC_SetDefaultFaultHandler_cp(NVIC_DEFAULT_FAULT_HANDLER_T handler);
+---
+> struct irq_masked_address {uint32_t pc; uint32_t lr;};
+> extern struct irq_masked_address irq_masked_addr;
+51c58,75
+< IRQn_Type NVIC_GetCurrentActiveIRQ(void);
+---
+> __STATIC_FORCEINLINE uint32_t int_lock_global(void)
+> {
+> #ifdef __ARM_ARCH_ISA_ARM
+>     uint32_t cpsr = __get_CPSR();
+>     uint32_t st = cpsr & IRQ_LOCK_MASK;
+>     if (st != IRQ_LOCK_MASK) {
+>         cpsr |= IRQ_LOCK_MASK;
+>         __set_CPSR(cpsr);
+>     }
+>     return st;
+> #else
+> 	uint32_t pri = __get_PRIMASK();
+> 	if ((pri & 0x1) == 0) {
+> 		__disable_irq();
+> 	}
+> 	return pri;
+> #endif
+> }
+53c77,90
+< void NVIC_PowerDownSleep(uint32_t *buf, uint32_t cnt);
+---
+> __STATIC_FORCEINLINE void int_unlock_global(uint32_t pri)
+> {
+> #ifdef __ARM_ARCH_ISA_ARM
+>     if (pri != IRQ_LOCK_MASK) {
+>         uint32_t cpsr = __get_CPSR();
+>         cpsr = (cpsr & ~IRQ_LOCK_MASK) | pri;
+>         __set_CPSR(cpsr);
+>     }
+> #else
+> 	if ((pri & 0x1) == 0) {
+> 		__enable_irq();
+> 	}
+> #endif
+> }
+55c92,120
+< void NVIC_PowerDownWakeup(uint32_t *buf, uint32_t cnt);
+---
+> #if defined(NUTTX_BUILD) || defined(KERNEL_LITEOS_A) ||\
+>      (defined(__ARM_ARCH_ISA_ARM) && (defined(KERNEL_RHINO) || defined(KERNEL_RTT)))
+> extern uint32_t int_lock(void);
+> extern void int_unlock(uint32_t pri);
+> extern uint32_t int_lock_local(void);
+> extern void int_unlock_local(uint32_t pri);
+> #else
+> __STATIC_FORCEINLINE uint32_t int_lock(void)
+> {
+> #ifdef INT_LOCK_EXCEPTION
+> #ifdef __ARM_ARCH_ISA_ARM
+>     uint32_t mask = GIC_GetInterfacePriorityMask();
+>     // Only allow IRQs with priority IRQ_PRIORITY_HIGHPLUSPLUS and IRQ_PRIORITY_REALTIME
+>     GIC_SetInterfacePriorityMask(((IRQ_PRIORITY_HIGHPLUS << (8 - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL));
+>     return mask;
+> #else
+>     uint32_t pri = __get_BASEPRI();
+>     uint32_t pc;
+>     __ASM volatile ("mov %0, PC" : "=r"(pc));
+>     irq_masked_addr.pc = pc;
+>     irq_masked_addr.lr = (uint32_t)__builtin_return_address(0);
+>     // Only allow IRQs with priority IRQ_PRIORITY_HIGHPLUSPLUS and IRQ_PRIORITY_REALTIME
+>     __set_BASEPRI(((IRQ_PRIORITY_HIGHPLUS << (8 - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL));
+>     return pri;
+> #endif
+> #else
+>     return int_lock_global();
+> #endif
+> }
+56a122,124
+> __STATIC_FORCEINLINE void int_unlock(uint32_t pri)
+> {
+> #ifdef INT_LOCK_EXCEPTION
+58,67c126,188
+< enum EXCEPTION_ID_T {
+<     EXCEPTION_NONE = -1,
+<     EXCEPTION_UNDEF = -2,
+<     EXCEPTION_SVC = -3,
+<     EXCEPTION_PABT = -4,
+<     EXCEPTION_DABT = -5,
+<     EXCEPTION_HYP = -6,
+<     EXCEPTION_IRQ = -7,
+<     EXCEPTION_FIQ = -8,
+< };
+---
+>     GIC_SetInterfacePriorityMask(pri);
+> #else
+>     __set_BASEPRI(pri);
+> #endif
+> #else
+>     int_unlock_global(pri);
+> #endif
+> }
+> 
+> __STATIC_FORCEINLINE uint32_t int_lock_local(void)
+> {
+>     return int_lock();
+> }
+> __STATIC_FORCEINLINE void int_unlock_local(uint32_t pri)
+> {
+>     int_unlock(pri);
+> }
+> 
+> __STATIC_FORCEINLINE uint32_t int_lock_smp_com(void)
+> {
+>     return int_lock();
+> }
+> __STATIC_FORCEINLINE void int_unlock_smp_com(uint32_t pri)
+> {
+>     int_unlock(pri);
+> }
+> 
+> 
+> #endif
+> __STATIC_FORCEINLINE int in_isr(void)
+> {
+> #ifdef __ARM_ARCH_ISA_ARM
+> #ifdef KERNEL_RHINO
+>     extern int rhino_in_isr(void);
+>     return rhino_in_isr();
+> #else
+>     uint32_t mode = __get_mode();
+>     return mode != CPSR_M_USR && mode != CPSR_M_SYS;
+> #endif
+> #else
+>     return __get_IPSR() != 0;
+> #endif
+> }
+> 
+> __STATIC_FORCEINLINE int32_t ftoi_nearest(float f)
+> {
+>     return (f >= 0) ? (int32_t)(f + 0.5) : (int32_t)(f - 0.5);
+> }
+> 
+> __STATIC_FORCEINLINE uint32_t unsigned_range_value_map(uint32_t from_val, uint32_t from_min, uint32_t from_max, uint32_t to_min, uint32_t to_max)
+> {
+>     if (from_val <= from_min) {
+>         return to_min;
+>     }
+>     if (from_val >= from_max) {
+>         return to_max;
+>     }
+>     return ((from_val - from_min) * (to_max - to_min) + (from_max - from_min) / 2) / (from_max - from_min) + to_min;
+> }
+> 
+> void GotBaseInit(void);
+> 
+> void boot_init_boot_sections(void);
+69,72c190
+< struct FAULT_REGS_T {
+<     uint32_t r[16];
+<     uint32_t spsr;
+< };
+---
+> void boot_init_sram_sections(void);
+74,78c192
+< struct UNDEF_FAULT_INFO_T {
+<     enum EXCEPTION_ID_T id;
+<     uint32_t opcode;
+<     uint32_t state;
+< };
+---
+> void boot_init_rom_in_flash(void);
+80,83c194
+< struct SVC_FAULT_INFO_T {
+<     enum EXCEPTION_ID_T id;
+<     uint32_t svc_num;
+< };
+---
+> int set_bool_flag(bool *flag);
+85,89c196
+< struct PABT_FAULT_INFO_T {
+<     enum EXCEPTION_ID_T id;
+<     uint32_t IFSR;
+<     uint32_t IFAR;
+< };
+---
+> void clear_bool_flag(bool *flag);
+91,95c198
+< struct DABT_FAULT_INFO_T {
+<     enum EXCEPTION_ID_T id;
+<     uint32_t DFSR;
+<     uint32_t DFAR;
+< };
+---
+> float db_to_float(float db);
+97c200
+< typedef void (*GIC_FAULT_DUMP_HANDLER_T)(const uint32_t *regs, const uint32_t *extra, uint32_t extra_len);
+---
+> uint32_t get_msb_pos(uint32_t val);
+99c202
+< void GIC_DisableAllIRQs(void);
+---
+> uint32_t get_lsb_pos(uint32_t val);
+101c204
+< void GIC_InitVectors(void);
+---
+> uint32_t integer_sqrt(uint32_t val);
+103c206
+< void GIC_SetFaultDumpHandler(GIC_FAULT_DUMP_HANDLER_T handler);
+---
+> uint32_t integer_sqrt_nearest(uint32_t val);
+105d207
+< IRQn_Type IRQ_GetCurrentActiveIRQ(void);

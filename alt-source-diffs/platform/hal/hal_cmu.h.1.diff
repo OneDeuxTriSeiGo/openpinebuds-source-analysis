@@ -1,0 +1,108 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_cmu.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_cmu.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+24a24,28
+> #ifdef CHIP_SUBSYS_SENS
+> #include CHIP_SPECIFIC_HDR(hal_senscmu)
+> #elif defined(CHIP_SUBSYS_BTH)
+> #include CHIP_SPECIFIC_HDR(hal_bthcmu)
+> #else
+25a30
+> #endif
+107a113
+>     HAL_CMU_LPU_SLEEP_MODE_POWER_DOWN,
+146a153,160
+> enum HAL_FLASH_ID_T {
+>     HAL_FLASH_ID_0 = 0,
+> #ifdef FLASH1_CTRL_BASE
+>     HAL_FLASH_ID_1 = 1,
+> #endif
+>     HAL_FLASH_ID_NUM,
+> };
+> 
+152a167,168
+> uint32_t hal_cmu_get_fast_timer_freq(void);
+> 
+200a217,218
+> int hal_cmu_uart3_set_div(uint32_t div);
+> 
+216a235,236
+> int hal_cmu_uart3_set_freq(enum HAL_CMU_PERIPH_FREQ_T freq);
+> 
+232a253,254
+> int hal_cmu_flash1_set_freq(enum HAL_CMU_FREQ_T freq);
+> 
+240a263,266
+> void hal_cmu_flash_all_reset_clear(int reset);
+> 
+> int hal_cmu_flash_all_select_pll(enum HAL_CMU_PLL_T pll);
+> 
+242a269,270
+> int hal_cmu_flash1_select_pll(enum HAL_CMU_PLL_T pll);
+> 
+270a299,302
+> void hal_cmu_codec_vad_clock_enable(int type);
+> 
+> void hal_cmu_codec_vad_clock_disable(int type);
+> 
+326a359,362
+> void hal_cmu_i2s_resample_enable(enum HAL_I2S_ID_T id);
+> 
+> void hal_cmu_i2s_resample_disable(enum HAL_I2S_ID_T id);
+> 
+355c391,393
+< void hal_cmu_rom_select_usb_clock(enum HAL_CMU_USB_CLOCK_SEL_T sel);
+---
+> enum HAL_CMU_USB_CLOCK_SEL_T hal_cmu_usb_rom_select_clock_source(int pll_en, unsigned int crystal);
+> 
+> void hal_cmu_usb_rom_set_clock_source(enum HAL_CMU_USB_CLOCK_SEL_T sel);
+374a413,416
+> void hal_cmu_bt_sys_force_ram_on(void);
+> 
+> void hal_cmu_bt_sys_force_ram_auto(void);
+> 
+453c495,499
+< volatile uint32_t *hal_cmu_get_bootmode_addr(void);
+---
+> void hal_cmu_dbg_set_val(uint8_t id, uint32_t val);
+> 
+> uint32_t hal_cmu_dbg_get_val(uint8_t id);
+> 
+> void hal_cmu_set_wakeup_vector(uint32_t vector);
+455c501
+< volatile uint32_t *hal_cmu_get_memsc_addr(void);
+---
+> void hal_cmu_wakeup_check(void);

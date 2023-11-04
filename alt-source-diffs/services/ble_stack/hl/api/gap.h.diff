@@ -1,0 +1,940 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/hl/api/gap.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/ip/ble/hl/api/gap.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+29a44
+> #include <stdbool.h>
+35a51,52
+> /// Invalid Procedure Token
+> #define GAP_INVALID_TOKEN     (0x0000)
+54a72,73
+> enum gap_ad_type_flag
+> {
+56c75,76
+< #define GAP_LE_LIM_DISCOVERABLE_FLG             0x01
+---
+>     GAP_LE_LIM_DISCOVERABLE_FLG_BIT     = 0x01,
+>     GAP_LE_LIM_DISCOVERABLE_FLG_POS     = 0,
+58c78,79
+< #define GAP_LE_GEN_DISCOVERABLE_FLG             0x02
+---
+>     GAP_LE_GEN_DISCOVERABLE_FLG_BIT     = 0x02,
+>     GAP_LE_GEN_DISCOVERABLE_FLG_POS     = 1,
+60c81,82
+< #define GAP_BR_EDR_NOT_SUPPORTED                0x04
+---
+>     GAP_BR_EDR_NOT_SUPPORTED_BIT        = 0x04,
+>     GAP_BR_EDR_NOT_SUPPORTED_POS        =  2,
+62c84,85
+< #define GAP_SIMUL_BR_EDR_LE_CONTROLLER          0x08
+---
+>     GAP_SIMUL_BR_EDR_LE_CONTROLLER_BIT  = 0x08,
+>     GAP_SIMUL_BR_EDR_LE_CONTROLLER_POS  = 3,
+64c87,89
+< #define GAP_SIMUL_BR_EDR_LE_HOST                0x10
+---
+>     GAP_SIMUL_BR_EDR_LE_HOST_BIT        = 0x10,
+>     GAP_SIMUL_BR_EDR_LE_HOST_POS        = 4,
+> };
+66a92,93
+> /// Invalid activity index
+> #define GAP_INVALID_ACTV_IDX                    0xFF
+92a120,125
+> /// Number of bytes needed for a bit field indicated presence of a given Advertising Flag value
+> /// in the Advertising or the Scan Response data
+> /// Advertising Flags is a 8-bit value, hence 256 value are possible
+> /// -> 256 / 8 bytes = 32 bytes are needed
+> #define GAP_AD_TYPE_BITFIELD_BYTES                          (32)
+> 
+210a244,261
+> 
+> /// Acceptable encryption key size - strict access
+> #define GAP_SEC_ENC_KEY_SIZE                               (0x10)
+> 
+> /*
+>  * Macros
+>  ****************************************************************************************
+>  */
+> 
+> #define GAP_AD_TYPE_SET_BIT(bitfield, adv_flag)                             \
+>                 bitfield[adv_flag / 8] |= CO_BIT(adv_flag % 8)
+> 
+> #define GAP_AD_TYPE_CHECK_BIT(bitfield, adv_flag)                           \
+>                 (bitfield[adv_flag / 8] & CO_BIT(adv_flag % 8))
+> 
+> /// size of advertising data counting advertising type header
+> #define GAP_AD_TOTAL_LEN(data_size)      ((data_size) + 1)
+> 
+214a266,315
+> 
+> 
+> /// List of supported BLE Features
+> enum gap_le_feature
+> {
+>     //byte 0
+>     GAP_LE_FEAT_ENC                       = (0),
+>     GAP_LE_FEAT_CON_PARAM_REQ_PROC        = (1),
+>     GAP_LE_FEAT_EXT_REJ_IND               = (2),
+>     GAP_LE_FEAT_SLAVE_INIT_FEAT_EXCHG     = (3),
+>     GAP_LE_FEAT_PING                      = (4),
+>     GAP_LE_FEAT_DATA_PKT_LEN_EXT          = (5),
+>     GAP_LE_FEAT_LL_PRIVACY                = (6),
+>     GAP_LE_FEAT_EXT_SCAN_FILT_POLICY      = (7),
+>     //byte 1
+>     GAP_LE_FEAT_2M_PHY                    = (8),
+>     GAP_LE_FEAT_STABLE_MOD_IDX_TX         = (9),
+>     GAP_LE_FEAT_STABLE_MOD_IDX_RX         = (10),
+>     GAP_LE_FEAT_CODED_PHY                 = (11),
+>     GAP_LE_FEAT_EXT_ADV                   = (12),
+>     GAP_LE_FEAT_PER_ADV                   = (13),
+>     GAP_LE_FEAT_CHAN_SEL_ALGO_2           = (14),
+>     GAP_LE_FEAT_PWR_CLASS_1               = (15),
+>     //byte 2
+>     GAP_LE_FEAT_MIN_NUM_USED_CHAN_PROC    = (16),
+>     GAP_LE_FEAT_CON_CTE_REQ               = (17),
+>     GAP_LE_FEAT_CON_CTE_RSP               = (18),
+>     GAP_LE_FEAT_CONLESS_CTE_TX            = (19),
+>     GAP_LE_FEAT_CONLESS_CTE_RX            = (20),
+>     GAP_LE_FEAT_AOD                       = (21),
+>     GAP_LE_FEAT_AOA                       = (22),
+>     GAP_LE_FEAT_CTE_RX                    = (23),
+>     //byte 3
+>     GAP_LE_FEAT_PER_ADV_SYNC_TRANSF_TX    = (24),
+>     GAP_LE_FEAT_PER_ADV_SYNC_TRANSF_RX    = (25),
+>     GAP_LE_FEAT_SLEEP_CLK_ACC_UPD         = (26),
+>     GAP_LE_FEAT_PUB_KEY_VALID             = (27),
+>     GAP_LE_FEAT_CON_ISO_STREAM_MASTER     = (28),
+>     GAP_LE_FEAT_CON_ISO_STREAM_SLAVE      = (29),
+>     GAP_LE_FEAT_ISO_BROADCASTER           = (30),
+>     GAP_LE_FEAT_SYNCED_RECEIVER           = (31),
+>     //byte 4
+>     GAP_LE_FEAT_ISO_CHANNELS_HOST_SUPPORT = (32),
+>     GAP_LE_FEAT_POWER_CONTROL_REQ         = (33),
+>     GAP_LE_FEAT_POWER_CHANGE_IND          = (34),
+>     GAP_LE_FEAT_PATH_LOSS_MONITORING      = (35),
+> 
+>     GAP_LE_FEAT_MAX,
+> };
+> 
+285,296d385
+< 
+< /// Random Address type
+< enum gap_rnd_addr_type
+< {
+<     /// Static random address           - 11 (MSB->LSB)
+<     GAP_STATIC_ADDR     = 0xC0,
+<     /// Private non resolvable address  - 01 (MSB->LSB)
+<     GAP_NON_RSLV_ADDR   = 0x00,
+<     /// Private resolvable address      - 01 (MSB->LSB)
+<     GAP_RSLV_ADDR       = 0x40,
+< };
+< 
+306,324d394
+< 
+< /// GAP Attribute database handles
+< /// Generic Access Profile Service
+< enum
+< {
+<     GAP_IDX_PRIM_SVC,
+<     GAP_IDX_CHAR_DEVNAME,
+<     GAP_IDX_DEVNAME,
+<     GAP_IDX_CHAR_ICON,
+<     GAP_IDX_ICON,
+<     GAP_IDX_CHAR_SLAVE_PREF_PARAM,
+<     GAP_IDX_SLAVE_PREF_PARAM,
+<     GAP_IDX_CHAR_CNT_ADDR_RESOL,
+<     GAP_IDX_CNT_ADDR_RESOL,
+<     GAP_IDX_NUMBER
+< };
+< 
+< 
+< 
+330d399
+< 
+333d401
+< 
+336d403
+< 
+339d405
+< 
+342d407
+< 
+345,347d409
+< 
+<     /// Debug mode used to force LL configuration on BLE 4.0
+<     GAP_ROLE_DBG_LE_4_0      = 0x80,
+350,377d411
+< /// Advertising mode
+< enum gap_adv_mode
+< {
+<     /// Mode in non-discoverable
+<     GAP_NON_DISCOVERABLE,
+<     /// Mode in general discoverable
+<     GAP_GEN_DISCOVERABLE,
+<     /// Mode in limited discoverable
+<     GAP_LIM_DISCOVERABLE,
+<     /// Broadcaster mode which is a non discoverable and non connectable mode.
+<     GAP_BROADCASTER_MODE
+< };
+< 
+< /// Scan mode
+< enum gap_scan_mode
+< {
+<     /// Mode in general discovery
+<     GAP_GEN_DISCOVERY,
+<     /// Mode in limited discovery
+<     GAP_LIM_DISCOVERY,
+<     /// Observer mode
+<     GAP_OBSERVER_MODE,
+<     /// Invalid mode
+<     GAP_INVALID_MODE
+< };
+< 
+< 
+< 
+431c465
+< enum gap_lk_sec_lvl
+---
+> enum gap_sec_lvl
+433,440c467,474
+<     /// No authentication
+<     GAP_LK_NO_AUTH             = 0,
+<     /// Unauthenticated link
+<     GAP_LK_UNAUTH,
+<     /// Authenticated link
+<     GAP_LK_AUTH,
+<     /// Secure Connection link
+<     GAP_LK_SEC_CON,
+---
+>     /// Service accessible through an un-encrypted link
+>     GAP_SEC_NOT_ENC             = 0,
+>     /// Service require an unauthenticated pairing (just work pairing)
+>     GAP_SEC_UNAUTH,
+>     /// Service require an authenticated pairing (Legacy pairing with pin code or OOB)
+>     GAP_SEC_AUTH,
+>     /// Service require a secure connection pairing
+>     GAP_SEC_SECURE_CON,
+455c489
+<     GAP_AUTH_REQ_SEC_CON_NO_BOND  = (GAP_AUTH_SEC_CON),
+---
+>     GAP_AUTH_REQ_SEC_CON_NO_BOND  = (GAP_AUTH_SEC_CON | GAP_AUTH_MITM),
+457c491
+<     GAP_AUTH_REQ_SEC_CON_BOND     = (GAP_AUTH_SEC_CON | GAP_AUTH_BOND),
+---
+>     GAP_AUTH_REQ_SEC_CON_BOND     = (GAP_AUTH_SEC_CON | GAP_AUTH_MITM | GAP_AUTH_BOND),
+464a499,526
+> /// Pairing level achieved
+> enum gap_pairing_lvl
+> {
+>     /// Unauthenticated pairing achieved but without bond data
+>     /// (meaning-less for connection confirmation)
+>     GAP_PAIRING_UNAUTH           = 0x00,
+>     /// Authenticated pairing achieved but without bond data
+>     /// (meaning-less for connection confirmation)
+>     GAP_PAIRING_AUTH             = 0x04,
+>     /// Secure connection pairing achieved but without bond data
+>     /// (meaning-less for connection confirmation)
+>     GAP_PAIRING_SECURE_CON       = 0x0C,
+> 
+>     /// No pairing performed with peer device
+>     /// (meaning-less for connection confirmation)
+>     GAP_PAIRING_NO_BOND          = 0x00,
+>     /// Peer device bonded through an unauthenticated pairing.
+>     GAP_PAIRING_BOND_UNAUTH      = 0x01,
+>     /// Peer device bonded through an authenticated pairing.
+>     GAP_PAIRING_BOND_AUTH        = 0x05,
+>     /// Peer device bonded through a secure connection pairing pairing.
+>     GAP_PAIRING_BOND_SECURE_CON  = 0x0D,
+> 
+>     /// Pairing with bond data present Bit
+>     GAP_PAIRING_BOND_PRESENT_BIT = 0x01,
+>     GAP_PAIRING_BOND_PRESENT_POS = 0x00,
+> };
+> 
+499,500c561,562
+< /// Bit field use to select the preferred TX or RX LE PHY Rate. 0 means no preferences
+< enum gap_rate
+---
+> /// Bit field use to select the preferred TX or RX LE PHY. 0 means no preferences
+> enum gap_phy
+502,753c564,627
+<     /// No preferred rate
+<     GAP_RATE_ANY               = 0x00,
+<     /// LE PHY 1mb/s preferred rate for an active link
+<     GAP_RATE_LE_1MBPS          = (1 << 0),
+<     /// LE PHY 2mb/s preferred rate for an active link
+<     GAP_RATE_LE_2MBPS          = (1 << 1),
+< };
+< 
+< /// API settings bit field values
+< enum gap_api_settings
+< {
+<     /// Use deprecated API and do not use extended air operations
+<     GAP_ADD_INFO_USE_DEPRECATED_API_BIT = (1 << 0),
+< };
+< 
+< /// Privacy configuration
+< enum gap_priv_cfg
+< {
+<     /// Indicate if public or static private random address must be used by default
+<     GAP_PRIV_CFG_PRIV_ADDR_BIT = (1 << 0),
+<     /// Bit 1 is reserved
+<     GAP_PRIV_CFG_RSVD          = (1 << 1),
+<     /// Indicate if controller privacy is enabled
+<     GAP_PRIV_CFG_CTNL_PRIV_BIT = (1 << 2),
+< };
+< 
+< /// Type of own address
+< enum gap_own_addr_type
+< {
+<     /// Use address configured using GAPM_SET_DEV_CONFIG_CMD.
+<     /// Can be either a public address or a random static address
+<     GAP_OWN_ADDR_TYPE_DEFAULT = 0,
+<     /// Use a non-resolvable private address
+<     GAP_OWN_ADDR_TYPE_NRPA,
+<     /// Use a resolvable private address
+<     GAP_OWN_ADDR_TYPE_RPA,
+< };
+< 
+< /// Type of activities that can be created
+< enum gap_actv_type
+< {
+<     /// Advertising activity
+<     GAP_ACTV_TYPE_ADV = 0,
+<     /// Scanning activity
+<     GAP_ACTV_TYPE_SCAN,
+<     /// Initiating activity
+<     GAP_ACTV_TYPE_INIT,
+<     /// Periodic synchronization activity
+<     GAP_ACTV_TYPE_PERIOD_SYNC,
+< };
+< 
+< /// Type of advertising that can be created
+< enum gap_adv_type
+< {
+<     /// Legacy advertising
+<     GAP_ADV_TYPE_LEGACY = 0,
+<     /// Extended advertising
+<     GAP_ADV_TYPE_EXTENDED,
+<     /// Periodic advertising
+<     GAP_ADV_TYPE_PERIODIC,
+< };
+< 
+< /// Advertising report type
+< enum gap_adv_report_type
+< {
+<     /// Extended advertising report
+<     GAP_REPORT_TYPE_ADV_EXT = 0,
+<     /// Legacy advertising report
+<     GAP_REPORT_TYPE_ADV_LEG,
+<     /// Extended scan response report
+<     GAP_REPORT_TYPE_SCAN_RSP_EXT,
+<     /// Legacy scan response report
+<     GAP_REPORT_TYPE_SCAN_RSP_LEG,
+<     /// Periodic advertising report
+<     GAP_REPORT_TYPE_PER_ADV,
+< };
+< 
+< /// Advertising properties bit field bit value
+< enum gap_adv_prop
+< {
+<     /// Indicate that advertising is connectable, reception of CONNECT_REQ or AUX_CONNECT_REQ
+<     /// PDUs is accepted. Not applicable for periodic advertising.
+<     GAP_ADV_PROP_CONNECTABLE_BIT     = (1 << 0),
+<     /// Indicate that advertising is scannable, reception of SCAN_REQ or AUX_SCAN_REQ PDUs is
+<     /// accepted
+<     GAP_ADV_PROP_SCANNABLE_BIT       = (1 << 1),
+<     /// Indicate that advertising targets a specific device. Only apply in following cases:
+<     ///   - Legacy advertising: if connectable
+<     ///   - Extended advertising: connectable or (non connectable and non discoverable)
+<     GAP_ADV_PROP_DIRECTED_BIT        = (1 << 2),
+<     /// Indicate that High Duty Cycle has to be used for advertising on primary channel
+<     /// Apply only if created advertising is not an extended advertising
+<     GAP_ADV_PROP_HDC_BIT             = (1 << 3),
+<     /// Bit 4 is reserved
+<     GAP_ADV_PROP_RESERVED_4_BIT      = (1 << 4),
+<     /// Enable anonymous mode. Device address won't appear in send PDUs
+<     /// Valid only if created advertising is an extended advertising
+<     GAP_ADV_PROP_ANONYMOUS_BIT       = (1 << 5),
+<     /// Include TX Power in the extended header of the advertising PDU.
+<     /// Valid only if created advertising is not a legacy advertising
+<     GAP_ADV_PROP_TX_PWR_BIT          = (1 << 6),
+<     /// Include TX Power in the periodic advertising PDU.
+<     /// Valid only if created advertising is a periodic advertising
+<     GAP_ADV_PROP_PER_TX_PWR_BIT      = (1 << 7),
+<     /// Indicate if application must be informed about received scan requests PDUs
+<     GAP_ADV_PROP_SCAN_REQ_NTF_EN_BIT = (1 << 8),
+< };
+< 
+< /// PHY Type
+< enum gap_phy_type
+< {
+<     /// LE 1M
+<     GAP_PHY_TYPE_LE_1M = 0,
+<     /// LE 2M
+<     GAP_PHY_TYPE_LE_2M,
+<     /// LE Coded
+<     GAP_PHY_TYPE_LE_CODED,
+< };
+< 
+< /// Advertising discovery mode
+< enum gap_adv_disc_mode
+< {
+<     /// Mode in non-discoverable
+<     GAP_ADV_MODE_NON_DISC = 0,
+<     /// Mode in general discoverable
+<     GAP_ADV_MODE_GEN_DISC,
+<     /// Mode in limited discoverable
+<     GAP_ADV_MODE_LIM_DISC,
+< };
+< 
+< /// Scanning Types
+< enum gap_scan_type
+< {
+<     /// General discovery
+<     GAP_SCAN_TYPE_GEN_DISC = 0,
+<     /// Limited discovery
+<     GAP_SCAN_TYPE_LIM_DISC,
+<     /// Observer
+<     GAP_SCAN_TYPE_OBSERVER,
+<     /// Selective observer
+<     GAP_SCAN_TYPE_SEL_OBSERVER,
+<     /// Connectable discovery
+<     GAP_SCAN_TYPE_CONN_DISC,
+<     /// Selective connectable discovery
+<     GAP_SCAN_TYPE_SEL_CONN_DISC,
+< };
+< 
+< /// Scanning properties bit field bit value
+< enum gap_scan_prop
+< {
+<     /// Scan advertisement on the LE 1M PHY
+<     GAP_SCAN_PROP_PHY_1M_BIT       = (1 << 0),
+<     /// Scan advertisement on the LE Coded PHY
+<     GAP_SCAN_PROP_PHY_CODED_BIT    = (1 << 1),
+<     /// Active scan on LE 1M PHY (Scan Request PDUs may be sent)
+<     GAP_SCAN_PROP_ACTIVE_1M_BIT    = (1 << 2),
+<     /// Active scan on LE Coded PHY (Scan Request PDUs may be sent)
+<     GAP_SCAN_PROP_ACTIVE_CODED_BIT = (1 << 3),
+<     /// Accept directed advertising packets if we use a RPA and target address cannot be solved by the
+<     /// controller
+<     GAP_SCAN_PROP_ACCEPT_RPA_BIT   = (1 << 4),
+<     /// Filter truncated advertising or scan response reports
+<     GAP_SCAN_PROP_FILT_TRUNC_BIT   = (1 << 5),
+< };
+< 
+< /// Initiating Types
+< enum gap_init_type
+< {
+<     /// Direct connection establishment, establish a connection with an indicated device
+<     GAPM_INIT_TYPE_DIRECT_CONN_EST = 0,
+<     /// Automatic connection establishment, establish a connection with all devices whose address is
+<     /// present in the white list
+<     GAPM_INIT_TYPE_AUTO_CONN_EST,
+<     /// Name discovery, Establish a connection with an indicated device in order to read content of its
+<     /// Device Name characteristic. Connection is closed once this operation is stopped.
+<     GAPM_INIT_TYPE_NAME_DISC,
+< };
+< 
+< /// Initiating Properties
+< enum gap_init_prop
+< {
+<     /// Scan connectable advertisements on the LE 1M PHY. Connection parameters for the LE 1M PHY are provided
+<     GAPM_INIT_PROP_1M_BIT       = (1 << 0),
+<     /// Connection parameters for the LE 2M PHY are provided
+<     GAPM_INIT_PROP_2M_BIT       = (1 << 1),
+<     /// Scan connectable advertisements on the LE Coded PHY. Connection parameters for the LE Coded PHY are provided
+<     GAPM_INIT_PROP_CODED_BIT    = (1 << 2),
+< };
+< 
+< /// Advertising report information
+< enum gap_adv_report_info
+< {
+<     /// Report Type
+<     GAP_REPORT_INFO_REPORT_TYPE         = 0x07,
+<     /// Report is complete
+<     GAP_REPORT_INFO_COMPLETE            = (1 << 3),
+<     /// Connectable advertising
+<     GAP_REPORT_INFO_CONN_ADV            = (1 << 4),
+<     /// Scannable advertising
+<     GAP_REPORT_INFO_SCAN_ADV            = (1 << 5),
+<     /// Directed advertising
+<     GAP_REPORT_INFO_DIR_ADV             = (1 << 6),
+< };
+< 
+< /// Filtering policy for duplicated packets
+< enum gap_dup_filter_pol
+< {
+<     /// Disable filtering of duplicated packets
+<     GAP_DUP_FILT_DIS = 0,
+<     /// Enable filtering of duplicated packets
+<     GAP_DUP_FILT_EN,
+<     /// Enable filtering of duplicated packets, reset for each scan period
+<     GAP_DUP_FILT_EN_PERIOD,
+< };
+< 
+< /*
+<  * Masks for advertising properties
+<  ****************************************************************************************
+<  */
+< 
+< /// Advertising properties configurations for legacy advertising
+< enum gap_leg_adv_prop
+< {
+<     /// Non connectable non scannable advertising
+<     GAP_ADV_PROP_NON_CONN_NON_SCAN_MASK  = 0x0000,
+<     /// Broadcast non scannable advertising - Discovery mode must be Non Discoverable
+<     GAP_ADV_PROP_BROADCAST_NON_SCAN_MASK = GAP_ADV_PROP_NON_CONN_NON_SCAN_MASK,
+<     /// Non connectable scannable advertising
+<     GAP_ADV_PROP_NON_CONN_SCAN_MASK      = GAP_ADV_PROP_SCANNABLE_BIT,
+<     /// Broadcast non scannable advertising - Discovery mode must be Non Discoverable
+<     GAP_ADV_PROP_BROADCAST_SCAN_MASK     = GAP_ADV_PROP_NON_CONN_SCAN_MASK,
+<     /// Undirected connectable advertising
+<     GAP_ADV_PROP_UNDIR_CONN_MASK         = GAP_ADV_PROP_CONNECTABLE_BIT | GAP_ADV_PROP_SCANNABLE_BIT,
+<     /// Directed connectable advertising
+<     GAP_ADV_PROP_DIR_CONN_MASK           = GAP_ADV_PROP_DIRECTED_BIT | GAP_ADV_PROP_CONNECTABLE_BIT,
+<     /// Directed connectable with Low Duty Cycle
+<     GAP_ADV_PROP_DIR_CONN_LDC_MASK       = GAP_ADV_PROP_DIR_CONN_MASK,
+<     /// Directed connectable with High Duty Cycle
+<     GAP_ADV_PROP_DIR_CONN_HDC_MASK       = GAP_ADV_PROP_DIR_CONN_MASK | GAP_ADV_PROP_HDC_BIT,
+< };
+< 
+< /// Advertising properties configurations for extended advertising
+< enum gap_ext_adv_prop
+< {
+<     /// Non connectable non scannable extended advertising
+<     GAP_EXT_ADV_PROP_NON_CONN_NON_SCAN_MASK = 0x0000,
+<     /// Non connectable scannable extended advertising
+<     GAP_EXT_ADV_PROP_NON_CONN_SCAN_MASK     = GAP_ADV_PROP_SCANNABLE_BIT,
+<     /// Undirected connectable extended advertising
+<     GAP_EXT_ADV_PROP_UNDIR_CONN_MASK        = GAP_ADV_PROP_CONNECTABLE_BIT,
+<     /// Directed connectable extended advertising
+<     GAP_EXT_ADV_PROP_DIR_CONN_MASK          = GAP_ADV_PROP_CONNECTABLE_BIT | GAP_ADV_PROP_DIRECTED_BIT,
+---
+>     /// No preferred PHY
+>     GAP_PHY_ANY               = 0x00,
+>     /// LE 1M PHY preferred for an active link
+>     GAP_PHY_LE_1MBPS          = (1 << 0),
+>     /// LE 2M PHY preferred for an active link
+>     GAP_PHY_LE_2MBPS          = (1 << 1),
+>     /// LE Coded PHY preferred for an active link
+>     GAP_PHY_LE_CODED          = (1 << 2),
+> };
+> 
+> /// Enumeration of TX/RX PHY values
+> enum gap_phy_val
+> {
+>     /// LE 1M PHY (TX or RX)
+>     GAP_PHY_1MBPS        = 1,
+>     /// LE 2M PHY (TX or RX)
+>     GAP_PHY_2MBPS        = 2,
+>     /// LE Coded PHY (RX Only)
+>     GAP_PHY_CODED        = 3,
+>     /// LE Coded PHY with S=8 data coding (TX Only)
+>     GAP_PHY_125KBPS      = 3,
+>     /// LE Coded PHY with S=2 data coding (TX Only)
+>     GAP_PHY_500KBPS      = 4,
+> };
+> 
+> /// Modulation index
+> enum gap_modulation_idx
+> {
+>     /// Assume transmitter will have a standard modulation index
+>     GAP_MODULATION_STANDARD,
+>     /// Assume transmitter will have a stable modulation index
+>     GAP_MODULATION_STABLE,
+> };
+> 
+> /// Packet Payload type for test mode
+> enum gap_pkt_pld_type
+> {
+>     /// PRBS9 sequence "11111111100000111101..." (in transmission order)
+>     GAP_PKT_PLD_PRBS9,
+>     /// Repeated "11110000" (in transmission order)
+>     GAP_PKT_PLD_REPEATED_11110000,
+>     /// Repeated "10101010" (in transmission order)
+>     GAP_PKT_PLD_REPEATED_10101010,
+>     /// PRBS15 sequence
+>     GAP_PKT_PLD_PRBS15,
+>     /// Repeated "11111111" (in transmission order) sequence
+>     GAP_PKT_PLD_REPEATED_11111111,
+>     /// Repeated "00000000" (in transmission order) sequence
+>     GAP_PKT_PLD_REPEATED_00000000,
+>     /// Repeated "00001111" (in transmission order) sequence
+>     GAP_PKT_PLD_REPEATED_00001111,
+>     /// Repeated "01010101" (in transmission order) sequence
+>     GAP_PKT_PLD_REPEATED_01010101,
+> };
+> 
+> /// Constant Tone Extension type
+> enum gap_cte_type
+> {
+>     /// Allow AoA Constant Tone Extension Response
+>     GAP_CTE_AOA          = (1 << 0),
+>     /// Allow AoD Constant Tone Extension Response with 1 us slots
+>     GAP_CTE_AOD_1US_SLOT = (1 << 1),
+>     /// Allow AoD Constant Tone Extension Response with 2 us slots
+>     GAP_CTE_AOD_2US_SLOT = (1 << 2),
+758a633
+> /*@TRACE*/
+761,763c636,638
+<     /// name length
+<     uint16_t length;
+<     /// name value
+---
+>     /// Length of provided value
+>     uint16_t value_length;
+>     /// name value starting from offset to maximum length
+768c643,644
+< struct gap_slv_pref
+---
+> /*@TRACE*/
+> typedef struct gap_slv_pref
+778,786c654
+< };
+< 
+< ///BD Address structure
+< #define BLE_BD_ADDR_T
+< typedef struct
+< {
+<     ///6-byte array address value
+<     uint8_t  addr[GAP_BD_ADDR_LEN];
+< } bd_addr_t;
+---
+> } gap_slv_pref_t;
+788a657
+> /*@TRACE*/
+796a666
+> /*@TRACE*/
+803,824d672
+< ///Advertising report structure
+< typedef struct
+< {
+<     ///Event type:
+<     /// - ADV_CONN_UNDIR: Connectable Undirected advertising
+<     /// - ADV_CONN_DIR: Connectable directed advertising
+<     /// - ADV_DISC_UNDIR: Discoverable undirected advertising
+<     /// - ADV_NONCONN_UNDIR: Non-connectable undirected advertising
+<     uint8_t        evt_type;
+<     ///Advertising address type: public/random
+<     uint8_t        adv_addr_type;
+<     ///Advertising address value
+<     bd_addr_t      adv_addr;
+<     ///Data length in advertising packet
+<     uint8_t        data_len;
+<     ///Data of advertising packet
+<     uint8_t        data[GAP_ADV_DATA_LEN];
+<     ///RSSI value for advertising packet
+<     uint8_t        rssi;
+< } adv_report_t;
+< 
+< 
+833,839d680
+< /// P256 private key data format
+< typedef struct
+< {
+<     ///MSB->LSB
+<     uint8_t Secrt_key[GAP_P256_KEY_LEN];
+< } private_key_t;
+< 
+840a682,688
+> /// Bluetooth address
+> /*@TRACE*/
+> typedef struct gap_addr
+> {
+>     /// BD Address of device
+>     uint8_t addr[GAP_BD_ADDR_LEN];
+> } gap_addr_t;
+843c691,692
+< struct gap_bdaddr
+---
+> /*@TRACE*/
+> typedef struct gap_bdaddr
+846c695
+<     bd_addr_t addr;
+---
+>     uint8_t addr[GAP_BD_ADDR_LEN];
+849c698
+< };
+---
+> } gap_bdaddr_t;
+851,852c700,715
+< /// Resolving list device information
+< struct gap_ral_dev_info
+---
+> /// Connection parameters information
+> /*@TRACE*/
+> typedef struct gap_con_param
+> {
+>     /// Connection interval in 1.25ms unit
+>     uint16_t            con_interval;
+>     /// Connection latency value (in number of connection events)
+>     uint16_t            con_latency;
+>     /// Supervision timeout in 10ms unit
+>     uint16_t            sup_to;
+> } gap_con_param_t;
+> 
+> 
+> /// Periodic advertising address information
+> /*@TRACE*/
+> typedef struct gap_per_adv_bdaddr
+853a717,718
+>     /// BD Address of device
+>     uint8_t addr[GAP_BD_ADDR_LEN];
+856,857c721,732
+<     /// BD Address of device
+<     bd_addr_t addr;
+---
+>     /// Advertising SID
+>     uint8_t adv_sid;
+> } gap_per_adv_bdaddr_t;
+> 
+> /// Resolving list device information
+> /*@TRACE*/
+> struct gap_ral_dev_info
+> {
+>     /// Device identity
+>     gap_bdaddr_t addr;
+>     /// Privacy Mode
+>     uint8_t      priv_mode;
+865c740,741
+< struct gap_sec_key
+---
+> /*@TRACE*/
+> typedef struct gap_sec_key
+869c745
+< };
+---
+> } gap_sec_key_t;
+871,881c747,779
+< /// Configuration for advertising on primary channel
+< struct gap_adv_prim_cfg
+< {
+<     /// Minimum advertising interval (in unit of 625us). Must be greater than 20ms
+<     uint32_t adv_intv_min;
+<     /// Maximum advertising interval (in unit of 625us). Must be greater than 20ms
+<     uint32_t adv_intv_max;
+<     /// Bit field indicating the channel mapping
+<     uint8_t chnl_map;
+<     /// Indicate on which PHY primary advertising has to be performed (@see enum gap_phy_type)
+<     /// Note that LE 2M PHY is not allowed and that legacy advertising only support LE 1M PHY
+---
+> /// I/Q sample
+> /*@TRACE*/
+> struct gap_iq_sample
+> {
+>     /// I sample
+>     uint8_t i;
+>     /// Q sample
+>     uint8_t q;
+> };
+> 
+> /// BIG Info Report
+> /*@TRACE*/
+> typedef struct gap_big_info
+> {
+>     /// Value of the SDU interval in microseconds (Range 0x0000FF-0x0FFFFF)
+>     uint32_t  sdu_interval;
+>     /// Value of the ISO Interval (1.25 ms unit)
+>     uint16_t  iso_interval;
+>     /// Value of the maximum PDU size (Range 0x0000-0x00FB)
+>     uint16_t  max_pdu;
+>     /// VValue of the maximum SDU size (Range 0x0000-0x0FFF)
+>     uint16_t  max_sdu;
+>     /// Number of BIS present in the group (Range 0x01-0x1F)
+>     uint8_t   num_bis;
+>     /// Number of sub-events (Range 0x01-0x1F)
+>     uint8_t   nse;
+>     /// Burst number (Range 0x01-0x07)
+>     uint8_t   bn;
+>     /// Pre-transmit offset (Range 0x00-0x0F)
+>     uint8_t   pto;
+>     /// Initial retransmission count (Range 0x01-0x0F)
+>     uint8_t   irc;
+>     /// PHY used for transmission (0x01: 1M, 0x02: 2M, 0x03: Coded, All other values: RFU)
+883,1045c781,785
+< };
+< 
+< /// Configuration for advertising on secondary channel
+< struct gap_adv_second_cfg
+< {
+<     /// Maximum number of advertising events the controller can skip before sending the
+<     /// AUX_ADV_IND packets. 0 means that AUX_ADV_IND PDUs shall be sent prior each
+<     /// advertising events
+<     uint8_t max_skip;
+<     /// Indicate on which PHY secondary advertising has to be performed (@see enum gap_phy_type)
+<     uint8_t phy;
+<     /// Advertising SID
+<     uint8_t adv_sid;
+< };
+< 
+< /// Configuration for periodic advertising
+< struct gap_adv_period_cfg
+< {
+<     /// Minimum advertising interval (in unit of 1.25ms). Must be greater than 20ms
+<     uint16_t adv_intv_min;
+<     /// Maximum advertising interval (in unit of 1.25ms). Must be greater than 20ms
+<     uint16_t adv_intv_max;
+< };
+< 
+< /// Advertising parameters
+< struct gap_adv_param
+< {
+<     /// Advertising type (@see enum gap_adv_type)
+<     uint8_t type;
+<     /// Discovery mode (@see enum gap_adv_mode)
+<     uint8_t disc_mode;
+<     /// Bit field value provided advertising properties (@see enum gap_adv_prop for bit signification)
+<     uint16_t prop;
+<     /// Maximum power level at which the advertising packets have to be transmitted
+<     /// (between -127 and 126 dBm)
+<     int8_t max_tx_pwr;
+<     /// Advertising filtering policy
+<     uint8_t filter_pol;
+<     /// Peer address configuration (only used in case of directed advertising)
+<     struct gap_bdaddr peer_addr;
+<     /// Configuration for primary advertising
+<     struct gap_adv_prim_cfg prim_cfg;
+<     /// Configuration for secondary advertising (valid only if advertising type is
+<     /// GAPM_ADV_TYPE_EXTENDED or GAPM_ADV_TYPE_PERIODIC)
+<     struct gap_adv_second_cfg second_cfg;
+<     /// Configuration for periodic advertising (valid only if advertising type os
+<     /// GAPM_ADV_TYPE_PERIODIC)
+<     struct gap_adv_period_cfg period_cfg;
+< };
+< 
+< /// Additional advertising parameters
+< struct gap_adv_add_param
+< {
+<     /// Advertising duration (in unit of 10ms). 0 means that advertising continues
+<     /// until the host disable it
+<     uint16_t duration;
+<     /// Maximum number of extended advertising events the controller shall attempt to send prior to
+<     /// terminating the extending advertising
+<     /// Valid only if extended advertising
+<     uint8_t max_adv_evt;
+< };
+< 
+< /// Scan Window operation parameters
+< struct gap_scan_wd_op_param
+< {
+<     /// Scan interval
+<     uint16_t scan_intv;
+<     /// Scan window
+<     uint16_t scan_wd;
+< };
+< 
+< /// Scanning parameters
+< struct gap_scan_param
+< {
+<     /// Type of scanning to be started (@see enum gap_scan_type)
+<     uint8_t type;
+<     /// Properties for the scan procedure (@see enum gap_scan_prop for bit signification)
+<     uint8_t prop;
+<     /// Duplicate packet filtering policy
+<     uint8_t dup_filt_pol;
+<     /// Reserved for future use
+<     uint8_t rsvd;
+<     /// Scan window opening parameters for LE 1M PHY
+<     struct gap_scan_wd_op_param scan_param_1m;
+<     /// Scan window opening parameters for LE Coded PHY
+<     struct gap_scan_wd_op_param scan_param_coded;
+<     /// Scan duration (in unit of 10ms). 0 means that the controller will scan continuously until
+<     /// reception of a stop command from the application
+<     uint16_t duration;
+<     /// Scan period (in unit of 1.28s). Time interval betweem two consequent starts of a scan duration
+<     /// by the controller. 0 means that the scan procedure is not periodic
+<     uint16_t period;
+< };
+< 
+< /// Connection parameters
+< struct gap_conn_param
+< {
+<     /// Minimum value for the connection interval (in unit of 1.25ms). Shall be less than or equal to
+<     /// conn_intv_max value. Allowed range is 7.5ms to 4s.
+<     uint16_t conn_intv_min;
+<     /// Maximum value for the connection interval (in unit of 1.25ms). Shall be greater than or equal to
+<     /// conn_intv_min value. Allowed range is 7.5ms to 4s.
+<     uint16_t conn_intv_max;
+<     /// Slave latency. Number of events that can be missed by a connected slave device
+<     uint16_t conn_latency;
+<     /// Link supervision timeout (in unit of 10ms). Allowed range is 100ms to 32s
+<     uint16_t supervision_to;
+<     /// Recommended minimum duration of connection events (in unit of 625us)
+<     uint16_t ce_len_min;
+<     /// Recommended maximum duration of connection events (in unit of 625us)
+<     uint16_t ce_len_max;
+< };
+< 
+< /// Initiating parameters
+< struct gap_init_param
+< {
+<     /// Initiating type (@see enum gap_init_type)
+<     uint8_t type;
+<     /// Properties for the initiating procedure (@see enum gap_init_prop for bit signification)
+<     uint8_t prop;
+<     /// Timeout for automatic connection establishment (in unit of 10ms). Cancel the procedure if not all
+<     /// indicated devices have been connected when the timeout occurs. 0 means there is no timeout
+<     uint16_t conn_to;
+<     /// Scan window opening parameters for LE 1M PHY
+<     struct gap_scan_wd_op_param scan_param_1m;
+<     /// Scan window opening parameters for LE Coded PHY
+<     struct gap_scan_wd_op_param scan_param_coded;
+<     /// Connection parameters for LE 1M PHY
+<     struct gap_conn_param conn_param_1m;
+<     /// Connection parameters for LE 2M PHY
+<     struct gap_conn_param conn_param_2m;
+<     /// Connection parameters for LE Coded PHY
+<     struct gap_conn_param conn_param_coded;
+<     /// Address of peer device in case white list is not used for connection
+<     struct gap_bdaddr peer_addr;
+< };
+< 
+< /// Periodic advertising information
+< struct gap_period_adv_addr_cfg
+< {
+<     /// Advertiser address information
+<     struct gap_bdaddr addr;
+<     /// Advertising SID
+<     uint8_t adv_sid;
+< };
+< 
+< /// Periodic synchronization parameters
+< struct gap_period_sync_param
+< {
+<     /// Number of periodic advertising that can be skipped after a successful receive. Maximum authorized
+<     /// value is 499
+<     uint16_t skip;
+<     /// Synchronization timeout for the periodic advertising (in unit of 10ms between 100ms and 163.84s)
+<     uint16_t sync_to;
+<     /// Indicate if Periodic Advertiser List has to be used to determine which advertiser to listen to, else
+<     /// provided advertiser information are used
+<     uint8_t use_pal;
+<     /// Reserved for future used
+<     uint8_t rsvd;
+<     /// Address of advertiser with which synchronization has to be established (used only if use_pal is false)
+<     struct gap_period_adv_addr_cfg adv_addr;
+< };
+< 
+---
+>     /// Framing mode (0x00: Unframed, 0x01: Framed, All other values: RFU)
+>     uint8_t   framing;
+>     /// True if broadcast isochronous group is encrypted, False otherwise
+>     bool      encrypted;
+> } gap_big_info_t;

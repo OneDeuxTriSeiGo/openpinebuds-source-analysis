@@ -1,0 +1,72 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/scripts/build.mk
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/scripts/build.mk
+diff -sw local remote
+---
+
+0a1,12
+> # Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+> # Licensed under the Apache License, Version 2.0 (the "License");
+> # you may not use this file except in compliance with the License.
+> # You may obtain a copy of the License at
+> #
+> #     http://www.apache.org/licenses/LICENSE-2.0
+> #
+> # Unless required by applicable law or agreed to in writing, software
+> # distributed under the License is distributed on an "AS IS" BASIS,
+> # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+> # See the License for the specific language governing permissions and
+> # limitations under the License.
+121c133
+< buildobj-y += $(foreach m,$(multi-used-y),$(if $(filter $(cur_submods),$(call get_multi_objs,$m))),$m,)
+---
+> buildobj-y += $(foreach m,$(multi-used-y),$(if $(filter $(cur_submods),$(call get_multi_objs,$m)),$m,))
+173a186
+> buildobj-y	:= $(if $(filter-obj),$(filter-out $(filter-obj),$(buildobj-y)),$(buildobj-y))
+175a189,197
+> ifeq ($(LIB_BIN_IN_SRC_DIR),1)
+> archive-bin-path := $(srctree)/$(src)/lib
+> else ifeq ($(LIB_BIN_IN_TOP_WITH_SRC_DIR),1)
+> archive-bin-path := $(srctree)/lib/$(src)
+> else
+> LIB_BIN_DIR ?= $(BES_LIB_DIR)
+> archive-bin-path := $(srctree)/$(LIB_BIN_DIR)
+> endif
+> 
+179c201
+< archive-src-target := $(addprefix $(srctree)/$(src)/lib/,$(notdir $(archive-src-y)))
+---
+> archive-src-target := $(archive-src-y:$(obj)/%=$(archive-bin-path)/%)
+182c204
+< archive-custom-target := $(addprefix $(srctree)/$(src)/lib/,$(notdir $(archive-custom-valid)))
+---
+> archive-custom-target := $(archive-custom-valid:$(obj)/%=$(archive-bin-path)/%)
+304,322d325
+< # Archive command
+< 
+< ifeq ($(TOOLCHAIN),armclang)
+< archive-cmd = $(AR) --create --debug_symbols $@ $(1)
+< else
+< ifeq ($(WIN_PLAT),y)
+< archive-cmd = ( ( echo create $@ && \
+<   echo addmod $(subst $(space),$(comma),$(strip $(filter-out %.a,$(1)))) && \
+<   $(foreach o,$(filter %.a,$(1)),echo addlib $o && ) \
+<   echo save && \
+<   echo end ) | $(AR) -M )
+< else
+< # Command "/bin/echo -e" cannot work on Apple Mac machines, so we use "/usr/bin/printf" instead
+< archive-cmd = ( /usr/bin/printf 'create $@\n\
+<   addmod $(subst $(space),$(comma),$(strip $(filter-out %.a,$(1))))\n\
+<   $(foreach o,$(filter %.a,$(1)),addlib $o\n)save\nend' | $(AR) -M )
+< endif
+< endif
+< 
+333a337,341
+> $(foreach m, $(archive-src-y), \
+>     $(eval $(info $(m) :) \
+>     $(eval tmp_list=$(call get-archive-src,$(patsubst $(obj)/%,%,$(m)))) \
+>     $(eval $(foreach k, $(tmp_list), $(info $(empty)    $(k))))))
+> $(info )
+351c359
+< $(archive-bin-y): $(obj)/%: $(srctree)/$(src)/lib/% FORCE
+---
+> $(archive-bin-y): $(obj)/%: $(archive-bin-path)/% FORCE

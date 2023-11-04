@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/fpga1000.h
+remote: https://raw.githubusercontent.com/alibaba/AliOS-Things/a99f20706f9c666903a12a205edce13263b1fadb/hardware/chip/haas1000/drivers/platform/cmsis/inc/fpga1000.h
+diff -sw local remote
+---
+
+Files local and remote are identical

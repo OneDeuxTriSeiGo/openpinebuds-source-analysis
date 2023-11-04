@@ -1,0 +1,224 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/bt_if_enhanced/inc/a2dp_api.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/bt_if_enhanced/inc/a2dp_api.h
+diff -sw local remote
+---
+
+1,15c1,14
+< /***************************************************************************
+<  *
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+<  *
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+25,34c24,25
+< typedef enum{
+<     BTIF_DEVICE_ID_1 = 0,
+< #ifdef __BT_ONE_BRING_TWO__
+<     BTIF_DEVICE_ID_2,
+< #endif
+<     BTIF_DEVICE_NUM
+< }btif_dev_it_e;
+< 
+< typedef void a2dp_stream_t;
+< typedef void a2dp_callback_parms_t;
+---
+> typedef struct { /* empty */ } a2dp_stream_t; /* used to hold the pointer to struct a2dp_control_t */
+> typedef struct { /* empty */ } a2dp_callback_parms_t; /* used to hold the pointer to btif_a2dp_callback_parms_t */
+208a200,205
+> #define BTIF_A2DP_REMOTE_NOT_SUPPORT             30
+> 
+> #define BTIF_A2DP_EVENT_STREAM_OPEN_MOCK         31
+> 
+> #define BTIF_A2DP_EVENT_CODEC_INFO_MOCK          32
+> 
+219a217
+> 
+353c351
+< typedef void (*btif_a2dp_callback) (a2dp_stream_t * Stream, const a2dp_callback_parms_t * Info);
+---
+> typedef void (*btif_a2dp_callback)(uint8_t device_id, a2dp_stream_t * Stream, const a2dp_callback_parms_t * Info);
+367d364
+< 	uint8_t  subevt;
+371a369,370
+>     bool a2dp_closed_due_to_sdp_fail;
+>     bool start_stream_already_sent;
+389a389
+>     bt_bdaddr_t remote;
+398,400d397
+< #if defined(__TWS__)
+<     btif_avdtp_codec_t setconfig_codec;
+< #endif /*  */
+403a401
+>     btif_avdtp_codec_t *prev_conn_codec;
+414c412
+<     int a2dp_hid_init(void);
+---
+>     btif_a2dp_stream_t *btif_a2dp_alloc_sink_stream(void);
+416c414
+<     btif_a2dp_stream_t *btif_a2dp_alloc_stream(void);
+---
+>     btif_a2dp_stream_t *btif_a2dp_alloc_source_stream(void);
+421,425c419
+<     void btif_app_a2dp_avrcpadvancedpdu_mempool_init();
+< 
+<     void btif_app_a2dp_avrcpadvancedpdu_mempool_calloc(void **buf);
+< 
+<     void btif_app_a2dp_avrcpadvancedpdu_mempool_free(void *buf);
+---
+>     uint16_t btif_a2dp_stream_get_media_mtu(a2dp_stream_t *stream);
+430,440c424
+<     btif_avdtp_codec_type_t btif_a2dp_get_stream_register_codec_type(a2dp_stream_t *stream);
+< 
+<     bt_status_t btif_a2dp_register(a2dp_stream_t *Stream, 
+<                                    btif_a2dp_endpoint_type_t stream_type,
+<                                    btif_avdtp_codec_t *Codec,
+<                                    btif_avdtp_content_prot_t *Prot,                               
+<                                    uint8_t Priority,
+<                                    uint8_t Device_id,
+<                                    btif_a2dp_callback Callback);
+< 
+<     bt_status_t btif_a2dp_add_content_protection(a2dp_stream_t *Stream, btif_avdtp_content_prot_t *Prot);
+---
+>     void btif_a2dp_stream_init(btif_a2dp_stream_t *Stream, btif_a2dp_endpoint_type_t stream_type);
+442c426
+<     bt_status_t btif_a2dp_deregister(a2dp_stream_t * Stream);
+---
+>     void btif_a2dp_disable_aac_codec(uint32_t disable);
+444c428
+<     int8_t btif_a2dp_is_register_codec_same(a2dp_stream_t *src_stream, a2dp_stream_t *dst_stream);
+---
+>     void btif_a2dp_disable_vendor_codec(uint32_t disable);
+446,450c430,435
+<     void btif_a2dp_lhdc_config_tws_audio(const a2dp_callback_parms_t * info);
+< 
+<     void btif_a2dp_aac_config_tws_audio(const a2dp_callback_parms_t * info);
+< 
+<     void btif_a2dp_sbc_config_tws_audio(const a2dp_callback_parms_t * info);
+---
+>     bt_status_t btif_a2dp_register(btif_a2dp_stream_t *Stream,
+>                                    btif_a2dp_endpoint_type_t sep_type,
+>                                    btif_avdtp_codec_t *sep_codec,
+>                                    btif_avdtp_content_prot_t *sep_cp,                               
+>                                    uint8_t sep_priority,
+>                                    btif_a2dp_callback Callback);
+452c437
+<     void btif_a2dp_tws_set_mobile_codec_info(const a2dp_callback_parms_t * info);
+---
+>     bt_status_t btif_a2dp_deregister(btif_a2dp_stream_t *Stream, uint8_t codec_type);
+487,489c472
+<     bt_status_t btif_a2dp_open_stream(a2dp_stream_t * Stream, bt_bdaddr_t * Addr);
+< 
+<     bt_status_t btif_a2dp_disc_stream(a2dp_stream_t * Stream);
+---
+>     bt_status_t btif_a2dp_open_stream(btif_avdtp_codec_t *prev_conn_codec, bt_bdaddr_t * Addr);
+508a492,493
+>     void btif_a2dp_reconfig_codec_to_sbc(a2dp_stream_t *Stream);
+> 
+526,529d510
+<     uint8_t btif_a2dp_get_stream_loc_strmId(a2dp_stream_t * Stream);
+< 
+<     uint8_t btif_a2dp_get_stream_rem_strmId(a2dp_stream_t * Stream);
+< 
+534,535d514
+<     void btif_a2dp_reset_stream_state(a2dp_stream_t *stream);
+< 
+546,547d524
+<     void btif_a2dp_discover(a2dp_stream_t* Stream);
+< 
+551,552c528
+< 
+<     btif_avdtp_codec_t *btif_a2dp_get_stream_codecCfg(a2dp_stream_t * Stream);
+---
+>     btif_avdtp_codec_t *btif_a2dp_get_stream_codec_from_id(uint8_t device_id);
+558,559d533
+<     btif_avdtp_codec_t *btif_a2dp_get_avdtp_setconfig_codec(a2dp_stream_t * stream);
+< 
+565a540,545
+>     bt_status_t btif_a2dp_stream_send_aac_packet(a2dp_stream_t *stream,
+>                                                             btif_a2dp_sbc_packet_t *Packet,
+>                                                             btif_sbc_stream_info_short_t *StreamInfo);
+>     bt_status_t btif_a2dp_stream_send_lhdc_packet(a2dp_stream_t *stream,
+>             btif_a2dp_sbc_packet_t *Packet,
+>             btif_sbc_stream_info_short_t *StreamInfo);
+576,577d555
+<     uint8_t btif_a2dp_get_stream_codec_element(a2dp_stream_t * stream,uint8_t index);
+< 
+586,591c564
+<     int a2dp_codec_init(void);
+<     void  btif_a2dp_lock_same_deviceid_endpoint(a2dp_stream_t  * Stream,btif_remote_device_t   *remDev);
+<     void  btif_a2dp_unlock_same_deviceid_endpoint(a2dp_stream_t  * Stream,btif_remote_device_t   *remDev);
+<     void  btif_a2dp_unlock_the_connected_stream_byRemdev(btif_remote_device_t* RemDev);
+< 
+<     uint8_t btif_a2dp_trylock_the_other_id_by_configedid(btif_remote_device_t* RemDev);
+---
+>     bool btif_a2dp_is_disconnected(a2dp_stream_t *Stream);
+595,597c568
+<     void  btif_a2dp_lock_deviceid_endpoint(uint8_t id);
+< 
+<     void  btif_a2dp_unlock_deviceid_endpoint(uint8_t unused_id);
+---
+>     void btif_a2dp_accept_stream_request_command(bt_bdaddr_t* remote, uint8_t transaction, uint8_t signal_id);
+599,602c570
+<     bool btif_a2dp_is_disconnected(a2dp_stream_t *Stream);
+< 
+<     uint8_t btif_a2dp_get_avrcpadvancedpdu_trans_id(void* pdu);
+<     void btif_a2dp_set_avrcpadvancedpdu_trans_id(void* pdu, uint8_t trans_id);
+---
+>     void btif_a2dp_set_stream_command_accept_pack_callback(int (*cb)(void* remote, uint8_t transaction, uint8_t signal_id));
+607,608c575,580
+<     void btif_a2dp_set_codec_info_func(void (*func)(btif_dev_it_e dev_num, const uint8_t *codec));
+<     void btif_a2dp_get_codec_info_func(void (*func)(btif_dev_it_e dev_num, uint8_t *codec));
+---
+> 
+>     void btif_a2dp_register_multi_link_connect_not_allowed_callback(bool (*cb)(uint8_t device_id));
+> 
+>     void btif_a2dp_set_codec_info_func(void (*func)(uint8_t dev_num, const uint8_t *codec));
+>     void btif_a2dp_get_codec_info_func(void (*func)(uint8_t dev_num, uint8_t *codec));
+>     bool btif_a2dp_is_profile_initiator(bt_bdaddr_t* remote);
+611,616c583,584
+<     void btif_reset_app_bt_device_streaming(uint8_t bt_dev_idx, uint8_t rm_detbl_idx , uint8_t avd_ctx_device_idx);
+<     void btif_a2dp_set_codec_info(btif_dev_it_e dev_num, const uint8_t *codec);
+<     void btif_a2dp_get_codec_info(btif_dev_it_e dev_num, uint8_t *codec);
+< #endif
+< #if defined(IBRT)
+< #if defined(ENHANCED_STACK)
+---
+>     void btif_a2dp_set_codec_info(uint8_t dev_num, const uint8_t *codec);
+>     void btif_a2dp_get_codec_info(uint8_t dev_num, uint8_t *codec);
+618c586
+<     uint32_t btif_a2dp_profile_restore_ctx(uint8_t *buf, uint32_t buf_len);
+---
+>     uint32_t btif_a2dp_profile_restore_ctx(bt_bdaddr_t *bdaddr_p, uint8_t *buf, uint32_t buf_len);
+621c589
+< #endif /* *ENHANCED_STACK */
+---
+> void btif_a2dp_force_disconnect_a2dp_profile(uint8_t device_id,uint8_t reason);
+627,630d594
+< 
+< void btif_a2dp_get_info(uint8_t devIndex, btif_avdtp_codec_type_t* pCodec,
+<     uint8_t* pSampleRate, uint8_t* pSampleBit);
+< 

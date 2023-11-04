@@ -1,0 +1,951 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_timer.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_timer.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+17c16,21
+< #include "hal_timer.h"
+---
+> #ifdef CMU_FREE_TIMER
+> #include CHIP_SPECIFIC_HDR(reg_aoncmu)
+> #endif
+> #include "cmsis_nvic.h"
+> #include "hal_cmu.h"
+> #include "hal_location.h"
+19a24,26
+> #include "hal_timer_fast_irq.h"
+> #include "hal_timer_user_irq.h"
+> #include "hal_timer.h"
+21,25c28
+< #include "hal_location.h"
+< #include "hal_cmu.h"
+< #include "cmsis_nvic.h"
+< 
+< //#define ELAPSED_TIMER_ENABLED
+---
+> #include "hal_trace.h"
+31c34
+< #ifdef LOW_SYS_FREQ
+---
+> #if defined(TIMER1_BASE) && defined(LOW_SYS_FREQ) && defined(LOW_SYS_FREQ_6P5M)
+33c36,37
+<         defined(CHIP_BEST2300) || defined(CHIP_BEST2300P) || defined(CHIP_BEST2300A)
+---
+>         defined(CHIP_BEST2001) || defined(CHIP_BEST2003) || \
+>         defined(CHIP_BEST2300A) || defined(CHIP_BEST2300P)
+38,39c42,47
+< #if defined(__FPU_USED) && (__FPU_USED == 1)
+< //#define TIMER_USE_FPU
+---
+> #if !(defined(__FPU_USED) && (__FPU_USED == 1))
+> #undef TIMER_USE_FPU
+> #endif
+> 
+> #ifndef SLOW_TIMER_SUB_ID_WITH_IRQ
+> #define SLOW_TIMER_SUB_ID_WITH_IRQ  1
+49c57
+< #define MIN_CALIB_TICKS             (10 * (CONFIG_SYSTICK_HZ_NOMINAL / 1000))
+---
+> #define MIN_CALIB_TICKS             (30 * (CONFIG_SYSTICK_HZ_NOMINAL / 1000))
+53c61,67
+< static uint32_t BOOT_DATA_LOC sys_tick_hz = CONFIG_SYSTICK_HZ_NOMINAL;
+---
+> static
+> #ifdef TIMER_USE_FPU
+>     float
+> #else
+>     uint32_t
+> #endif
+>     BOOT_DATA_LOC sys_tick_hz = CONFIG_SYSTICK_HZ_NOMINAL;
+58c72,88
+< static struct DUAL_TIMER_T * const BOOT_RODATA_SRAM_LOC dual_timer0 = (struct DUAL_TIMER_T *)TIMER0_BASE;
+---
+> #ifdef FAST_TIMER_COMPENSATE
+> #ifndef TIMER1_BASE
+> #error "FAST_TIMER_COMPENSATE need timer1"
+> #endif
+> #if !(defined(__FPU_USED) && (__FPU_USED == 1))
+> #error "FAST_TIMER_COMPENSATE need FPU"
+> #endif
+> #ifdef FAST_TIMER_WORKAROUND
+> #error "FAST_TIMER_COMPENSATE conflicts with FAST_TIMER_WORKAROUND"
+> #endif
+> #define FAST_TICK_RATIO_NUM                 3
+> static float BOOT_BSS_LOC fast_tick_ratio_avg;
+> static float BOOT_BSS_LOC fast_tick_ratio[FAST_TICK_RATIO_NUM];
+> #endif
+> 
+> static struct DUAL_TIMER_T * const BOOT_RODATA_SRAM_LOC dual_timer[] = {
+>     (struct DUAL_TIMER_T *)TIMER0_BASE,
+60c90
+< static struct DUAL_TIMER_T * const BOOT_RODATA_SRAM_LOC dual_timer1 = (struct DUAL_TIMER_T *)TIMER1_BASE;
+---
+>     (struct DUAL_TIMER_T *)TIMER1_BASE,
+61a92,95
+> #ifdef TIMER2_BASE
+>     (struct DUAL_TIMER_T *)TIMER2_BASE,
+> #endif
+> };
+63c97,108
+< static HAL_TIMER_IRQ_HANDLER_T irq_handler = NULL;
+---
+> #ifdef CMU_FREE_TIMER
+> #ifndef TIMER1_BASE
+> #error "CMU_FREE_TIMER should work with TIMER1_BASE"
+> #endif
+> #ifdef CLOCK_SYNC_WORKAROUND
+> #error "CMU_FREE_TIMER conflicts with CLOCK_SYNC_WORKAROUND"
+> #endif
+> #ifdef FAST_TIMER_WORKAROUND
+> #error "CMU_FREE_TIMER conflicts with FAST_TIMER_WORKAROUND"
+> #endif
+> static struct AONCMU_T * const aoncmu = (struct AONCMU_T *)AON_CMU_BASE;
+> #endif
+65,66c110,122
+< //static uint32_t load_value = 0;
+< static uint32_t start_time;
+---
+> static IRQn_Type irq_num[ARRAY_SIZE(dual_timer)][2] = {
+>     { TIMER00_IRQn, TIMER01_IRQn, },
+> #ifdef TIMER1_BASE
+>     { INVALID_IRQn, TIMER11_IRQn, },
+> #endif
+> #ifdef TIMER2_BASE
+> #if defined(ASIC_SIMU)
+>     { INVALID_IRQn, INVALID_IRQn, },
+> #else
+>     { TIMER20_IRQn, TIMER21_IRQn, },
+> #endif
+> #endif
+> };
+68,69c124,129
+< static void POSSIBLY_UNUSED hal_timer00_irq_handler(void);
+< static void hal_timer01_irq_handler(void);
+---
+> static HAL_TIMER_IRQ_HANDLER_T irq_handler[ARRAY_SIZE(dual_timer)][2];
+> 
+> static uint32_t start_time[ARRAY_SIZE(dual_timer)][2];
+> 
+> static uint32_t hal_timer_common_get_elapsed_time(uint32_t id, uint32_t sub_id);
+> static int hal_timer_common_irq_pending(uint32_t id, uint32_t sub_id);
+118c178
+< __STATIC_FORCEINLINE void fast_timer_open(void)
+---
+> __STATIC_FORCEINLINE void fast_sys_timer_open(void)
+119a180,182
+> #ifdef CMU_FREE_TIMER
+>     hal_cmu_fast_timer_init();
+> #endif
+122c185,188
+<     dual_timer1->timer[0].Control = TIMER_CTRL_EN | TIMER_CTRL_PRESCALE_DIV_1 | TIMER_CTRL_SIZE_32_BIT;
+---
+>     dual_timer[1]->timer[0].Control = TIMER_CTRL_EN | TIMER_CTRL_PRESCALE_DIV_1 | TIMER_CTRL_SIZE_32_BIT;
+> #endif
+> #ifdef TIMER2_BASE
+>     hal_cmu_timer2_select_fast();
+127a194
+> #ifndef CMU_FREE_TIMER
+129,130c196,203
+<     dual_timer0->timer[0].Control = TIMER_CTRL_EN | TIMER_CTRL_PRESCALE_DIV_1 | TIMER_CTRL_SIZE_32_BIT;
+<     fast_timer_open();;
+---
+>     dual_timer[0]->timer[0].Control = TIMER_CTRL_EN | TIMER_CTRL_PRESCALE_DIV_1 | TIMER_CTRL_SIZE_32_BIT;
+> #endif
+>     fast_sys_timer_open();
+> #if defined(ASIC_SIMU)
+> #if defined(TIMER2_BASE)
+>     dual_timer[2]->timer[0].Control = TIMER_CTRL_EN | TIMER_CTRL_PRESCALE_DIV_1 | TIMER_CTRL_SIZE_32_BIT;
+> #endif
+> #endif
+136c209
+<     fast_timer_open();;
+---
+>     fast_sys_timer_open();
+142c215,228
+<     return -get_timer_value(&dual_timer0->timer[0], SLOW_TIMER_VAL_DELTA);
+---
+> #ifdef CMU_FREE_TIMER
+>     return aoncmu->FREE_TIMER;
+> #else
+>     return -get_timer_value(&dual_timer[0]->timer[0], SLOW_TIMER_VAL_DELTA);
+> #endif
+> }
+> 
+> uint32_t BOOT_TEXT_SRAM_LOC hal_aco_timer_get(void)
+> {
+> #if defined(TIMER2_BASE)
+>     return -get_timer_value(&dual_timer[2]->timer[0], SLOW_TIMER_VAL_DELTA);
+> #else
+>     return hal_sys_timer_get();
+> #endif
+148c234
+<     return -get_timer_value(&dual_timer0->timer[0], SLOW_TIMER_VAL_DELTA_SLEEP);
+---
+>     return -get_timer_value(&dual_timer[0]->timer[0], SLOW_TIMER_VAL_DELTA_SLEEP);
+156c242,246
+<     return -get_timer_value(&dual_timer0->timer[0], SLOW_TIMER_VAL_DELTA);
+---
+> #ifdef CMU_FREE_TIMER
+>     return aoncmu->FREE_TIMER;
+> #else
+>     return -get_timer_value(&dual_timer[0]->timer[0], SLOW_TIMER_VAL_DELTA);
+> #endif
+163a254,260
+> #ifdef TIMER1_BASE
+> __STATIC_FORCEINLINE uint32_t BOOT_TEXT_SRAM_LOC _real_fast_sys_timer_get(void)
+> {
+>     return -get_timer_value(&dual_timer[1]->timer[0], FAST_TIMER_VAL_DELTA);
+> }
+> #endif
+> 
+166d262
+< #ifdef TIMER1_BASE
+168d263
+<     if (hal_cmu_fast_timer_offline()) {
+174,176c269,270
+<     }
+< #endif // FAST_TIMER_WORKAROUND
+<     return -get_timer_value(&dual_timer1->timer[0], FAST_TIMER_VAL_DELTA);
+---
+> #elif defined(TIMER1_BASE)
+>     return _real_fast_sys_timer_get();
+214,223c308
+< #ifdef TIMER1_BASE
+< #ifdef FAST_TIMER_WORKAROUND
+<     if (hal_cmu_fast_timer_offline()) {
+<         uint32_t start = hal_sys_timer_get();
+<         uint32_t ticks = US_TO_TICKS(us);
+< 
+<         while (hal_sys_timer_get() - start < ticks);
+<     }
+< #endif // FAST_TIMER_WORKAROUND
+< 
+---
+> #if defined(TIMER1_BASE) && !defined(FAST_TIMER_WORKAROUND)
+259,268c344
+< #ifdef TIMER1_BASE
+< #ifdef FAST_TIMER_WORKAROUND
+<     if (hal_cmu_fast_timer_offline()) {
+<         uint32_t start = hal_sys_timer_get();
+<         uint32_t ticks = US_TO_TICKS((ns + (1000 - 1)) / 1000);
+< 
+<         while (hal_sys_timer_get() - start < ticks);
+<     }
+< #endif // FAST_TIMER_WORKAROUND
+< 
+---
+> #if defined(TIMER1_BASE) && !defined(FAST_TIMER_WORKAROUND)
+309c385
+<     t = dual_timer1;
+---
+>     t = dual_timer[1];
+313c389
+<         t = dual_timer0;
+---
+>         t = dual_timer[0];
+318c394
+<     t = dual_timer0;
+---
+>     t = dual_timer[0];
+411c487
+< void hal_sys_timer_calib_start(void)
+---
+> void BOOT_TEXT_SRAM_LOC hal_sys_timer_calib_start(void)
+417a494,496
+> #ifdef FAST_TIMER_WORKAROUND
+>     ASSERT(!hal_cmu_fast_timer_offline(), "%s: Cannot calib timer while fast timer offline", __func__);
+> #endif
+420c499,500
+<     fast = hal_fast_sys_timer_get();
+---
+>     __ISB();
+>     fast = _real_fast_sys_timer_get();
+427c507
+< int hal_sys_timer_calib_end(void)
+---
+> int BOOT_TEXT_SRAM_LOC hal_sys_timer_calib_end(void)
+434a515,517
+> #ifdef FAST_TIMER_WORKAROUND
+>     ASSERT(!hal_cmu_fast_timer_offline(), "%s: Cannot calib timer while fast timer offline", __func__);
+> #endif
+437c520,521
+<     fast = hal_fast_sys_timer_get();
+---
+>     __ISB();
+>     fast = _real_fast_sys_timer_get();
+453c537,550
+<     sys_tick_hz = (uint32_t)((float)CONFIG_FAST_SYSTICK_HZ / (fast - fast_val) * slow_diff);
+---
+>     sys_tick_hz = (float)CONFIG_FAST_SYSTICK_HZ / (fast - fast_val) * slow_diff;
+> #ifdef FAST_TIMER_COMPENSATE
+>     uint32_t i;
+>     for (i = FAST_TICK_RATIO_NUM-1; i >= 1; --i)
+>        fast_tick_ratio[i] = fast_tick_ratio[i-1];
+>     fast_tick_ratio[0] = (float)(fast - fast_val) / (float)slow_diff;
+>     fast_tick_ratio_avg = 0;
+>     for (i = 0; i < FAST_TICK_RATIO_NUM; ++i) {
+>         if (fast_tick_ratio[i] < 100.0)
+>             break;
+>         fast_tick_ratio_avg += fast_tick_ratio[i];
+>     }
+>     fast_tick_ratio_avg = fast_tick_ratio_avg / i;
+> #endif /*FAST_TIMER_COMPENSATE*/
+455a553
+>     uint32_t fast_diff;
+457c555,556
+<     mul = (uint64_t)CONFIG_FAST_SYSTICK_HZ * slow_diff;
+---
+>     fast_diff = fast - fast_val;
+>     mul = (uint64_t)CONFIG_FAST_SYSTICK_HZ * slow_diff + fast_diff / 2;
+459c558
+<         sys_tick_hz = (uint32_t)mul / (fast - fast_val);
+---
+>         sys_tick_hz = (uint32_t)mul / fast_diff;
+461c560
+<         sys_tick_hz = mul / (fast - fast_val);
+---
+>         sys_tick_hz = mul / fast_diff;
+472c571
+< void hal_sys_timer_calib(void)
+---
+> void BOOT_TEXT_SRAM_LOC hal_sys_timer_calib(void)
+480a580,588
+> #ifdef TIMER_USE_FPU
+>     return (uint32_t)(sys_tick_hz + 0.5);
+> #else
+>     return sys_tick_hz;
+> #endif
+> }
+> 
+> float BOOT_TEXT_SRAM_LOC hal_sys_timer_systick_hz_float(void)
+> {
+486,488d593
+<     if (ms <= (~0UL / MAX_CALIB_SYSTICK_HZ)) {
+<         return (ms * sys_tick_hz / 1000);
+<     } else {
+490c595
+<         return (uint32_t)((float)ms / 1000 * sys_tick_hz);
+---
+>     return (uint32_t)((float)ms / 1000 * sys_tick_hz + 0.99);
+492,493c597,600
+<         return ((uint64_t)ms * sys_tick_hz / 1000);
+< #endif
+---
+>     if (ms <= (~0UL / MAX_CALIB_SYSTICK_HZ)) {
+>         return ((ms * sys_tick_hz + 1000 - 1) / 1000);
+>     } else {
+>         return (((uint64_t)ms * sys_tick_hz + 1000 - 1) / 1000);
+494a602
+> #endif
+499,501c607,608
+<     if (us <= (~0UL / MAX_CALIB_SYSTICK_HZ)) {
+<         return ((us * sys_tick_hz / 1000 + 1000 - 1) / 1000 + 1);
+<     } else {
+---
+>     uint32_t ticks;
+> 
+503c610
+<         return (uint32_t)((float)us / (1000 * 1000) * sys_tick_hz + 1 + 1);
+---
+>     ticks = (uint32_t)((float)us / (1000 * 1000) * sys_tick_hz + 0.99);
+505c612,616
+<         return (((uint64_t)us * sys_tick_hz / 1000 + 1000 - 1) / 1000 + 1);
+---
+>     if (us <= (~0UL / MAX_CALIB_SYSTICK_HZ)) {
+>         ticks = ((us * sys_tick_hz / 1000 + 1000 - 1) / 1000);
+>     } else {
+>         ticks = (((uint64_t)us * sys_tick_hz / 1000 + 1000 - 1) / 1000);
+>     }
+506a618,620
+> 
+>     if (ticks <= 1) {
+>         ticks += 1;
+507a622
+>     return ticks;
+512,514d626
+<     if (tick <= (~0UL / 1000)) {
+<         return tick * 1000 / CONFIG_SYSTICK_HZ;
+<     } else {
+516c628
+<         return (uint32_t)((float)tick / CONFIG_SYSTICK_HZ * 1000);
+---
+>     return (uint32_t)((float)tick / sys_tick_hz * 1000 + 0.5);
+518,519c630,634
+<         return (uint64_t)tick * 1000 / CONFIG_SYSTICK_HZ;
+< #endif
+---
+>     uint32_t hz = sys_tick_hz;
+>     if (tick <= (~0UL / 1000)) {
+>         return (tick * 1000 + hz / 2) / hz;
+>     } else {
+>         return ((uint64_t)tick * 1000 + hz / 2) / hz;
+520a636
+> #endif
+525,527d640
+<     if (tick <= (~0UL / (1000 * 1000))) {
+<         return tick * (1000 * 1000) / CONFIG_SYSTICK_HZ;
+<     } else {
+529c642
+<         return (uint32_t)((float)tick / CONFIG_SYSTICK_HZ * (1000 * 1000));
+---
+>     return (uint32_t)((float)tick / sys_tick_hz * (1000 * 1000) + 0.5);
+531c644,649
+<         return (uint64_t)tick * (1000 * 1000) / CONFIG_SYSTICK_HZ;
+---
+>     uint32_t hz = sys_tick_hz;
+>     if (tick <= (~0UL / (1000 * 1000))) {
+>         return (tick * (1000 * 1000) + hz / 2) / hz;
+>     } else {
+>         return ((uint64_t)tick * (1000 * 1000) + hz / 2) / hz;
+>     }
+533a652,691
+> #endif
+> 
+> #ifdef FAST_TIMER_COMPENSATE
+> static uint32_t BOOT_BSS_LOC slow_timer_begin = 0;
+> static uint32_t BOOT_BSS_LOC fast_timer_begin = 0;
+> 
+> void BOOT_TEXT_SRAM_LOC hal_fast_timer_sleep()
+> {
+>     uint32_t slow, fast;
+>     uint32_t lock;
+> 
+>     lock = int_lock();
+>     slow = hal_sys_timer_get();
+>     while (hal_sys_timer_get() == slow);
+>     __ISB();
+>     fast = -_real_fast_sys_timer_get();
+>     fast_timer_begin = fast;
+>     slow_timer_begin = slow + 1;
+>     int_unlock(lock);
+> }
+> 
+> void BOOT_TEXT_SRAM_LOC hal_fast_timer_wakeup()
+> {
+>     uint32_t slow, fast;
+>     uint32_t load;
+>     uint32_t lock;
+>     float sleep_tick;
+> 
+>     lock = int_lock();
+>     slow = hal_sys_timer_get();
+>     while (hal_sys_timer_get() == slow);
+>     __ISB();
+>     fast = _real_fast_sys_timer_get();
+>     __ISB();
+>     sleep_tick = fast_tick_ratio_avg * (float)(slow + 1 - slow_timer_begin) + 0.9;
+>     load = fast_timer_begin - (uint32_t)sleep_tick;
+>     __ISB();
+>     load -= _real_fast_sys_timer_get() - fast;//float compute time
+>     set_timer_load(&dual_timer[1]->timer[0], load, FAST_TIMER_VAL_DELTA);
+>     int_unlock(lock);
+545c703,707
+< static void hal_timer00_irq_handler(void)
+---
+> //==========================================================
+> // Timer IRQ APIs
+> //==========================================================
+> 
+> __STATIC_FORCEINLINE int timer_is_slow(uint32_t id)
+547,548c709
+<     clear_timer_irq(&dual_timer0->timer[0]);
+<     dual_timer0->timer[0].Control &= ~TIMER_CTRL_INTEN;
+---
+>     return (id == 0);
+551c712,761
+< void hal_timer_setup(enum HAL_TIMER_TYPE_T type, HAL_TIMER_IRQ_HANDLER_T handler)
+---
+> static void hal_timer_common_irq_handler(uint32_t id, uint32_t sub_id)
+> {
+>     uint32_t elapsed;
+> 
+>     clear_timer_irq(&dual_timer[id]->timer[sub_id]);
+>     if (irq_handler[id][sub_id]) {
+>         elapsed = hal_timer_common_get_elapsed_time(id, sub_id);
+>         irq_handler[id][sub_id](elapsed);
+>     } else {
+>         dual_timer[id]->timer[sub_id].Control &= ~TIMER_CTRL_INTEN;
+>     }
+> }
+> 
+> static void hal_timer_slow_irq_handler(void)
+> {
+>     hal_timer_common_irq_handler(0, SLOW_TIMER_SUB_ID_WITH_IRQ);
+> }
+> 
+> #ifdef TIMER1_BASE
+> static void hal_timer11_irq_handler(void)
+> {
+>     hal_timer_common_irq_handler(1, 1);
+> }
+> #endif
+> 
+> #ifdef TIMER2_BASE
+> static void hal_timer2x_irq_handler(void)
+> {
+>     uint32_t sub_id;
+> 
+>     // NOTE: Some chips might combine time20 and time21 IRQ into one interrupt line
+>     for (sub_id = 0; sub_id < 2; sub_id++) {
+>         if (hal_timer_common_irq_pending(2, sub_id)) {
+>             hal_timer_common_irq_handler(2, sub_id);
+>         }
+>     }
+> }
+> #endif
+> 
+> static const uint32_t irq_entry[ARRAY_SIZE(dual_timer)][2] = {
+>     { (uint32_t)hal_timer_slow_irq_handler, (uint32_t)hal_timer_slow_irq_handler, },
+> #ifdef TIMER1_BASE
+>     { 0, (uint32_t)hal_timer11_irq_handler, },
+> #endif
+> #ifdef TIMER2_BASE
+>     { (uint32_t)hal_timer2x_irq_handler, (uint32_t)hal_timer2x_irq_handler, },
+> #endif
+> };
+> 
+> static void hal_timer_common_setup(uint32_t id, uint32_t sub_id, enum HAL_TIMER_TYPE_T type, HAL_TIMER_IRQ_HANDLER_T handler)
+553a764
+>     uint32_t irq_en;
+563c774
+<     irq_handler = handler;
+---
+>     irq_handler[id][sub_id] = handler;
+565,568c776,778
+<     clear_timer_irq(&dual_timer0->timer[1]);
+< #ifdef ELAPSED_TIMER_ENABLED
+<     dual_timer0->elapsed_timer[1].ElapsedCtrl = TIMER_ELAPSED_CTRL_CLR;
+< #endif
+---
+>     clear_timer_irq(&dual_timer[id]->timer[sub_id]);
+> 
+>     irq_en = (handler && irq_entry[id][sub_id]);
+570,574c780,784
+<     if (handler) {
+<         NVIC_SetVector(TIMER01_IRQn, (uint32_t)hal_timer01_irq_handler);
+<         NVIC_SetPriority(TIMER01_IRQn, IRQ_PRIORITY_NORMAL);
+<         NVIC_ClearPendingIRQ(TIMER01_IRQn);
+<         NVIC_EnableIRQ(TIMER01_IRQn);
+---
+>     if (irq_en) {
+>         NVIC_SetVector(irq_num[id][sub_id], irq_entry[id][sub_id]);
+>         NVIC_SetPriority(irq_num[id][sub_id], IRQ_PRIORITY_NORMAL);
+>         NVIC_ClearPendingIRQ(irq_num[id][sub_id]);
+>         NVIC_EnableIRQ(irq_num[id][sub_id]);
+577,578c787,788
+<     dual_timer0->timer[1].Control = mode |
+<                                    (handler ? TIMER_CTRL_INTEN : 0) |
+---
+>     dual_timer[id]->timer[sub_id].Control = mode |
+>                                    (irq_en ? TIMER_CTRL_INTEN : 0) |
+582a793,884
+> static void hal_timer_common_reload(uint32_t id, uint32_t sub_id, uint32_t load)
+> {
+>     uint32_t delta;
+> 
+>     delta = timer_is_slow(id) ? SLOW_TIMER_VAL_DELTA : FAST_TIMER_VAL_DELTA;
+>     if (load > HAL_TIMER_LOAD_DELTA) {
+>         load -= HAL_TIMER_LOAD_DELTA;
+>     } else {
+>         load = HAL_TIMER_LOAD_DELTA;
+>     }
+>     set_timer_load(&dual_timer[id]->timer[sub_id], load, delta);
+> }
+> 
+> POSSIBLY_UNUSED static uint32_t hal_timer_common_get_load(uint32_t id, uint32_t sub_id)
+> {
+>     return dual_timer[id]->timer[sub_id].Load + HAL_TIMER_LOAD_DELTA;
+> }
+> 
+> POSSIBLY_UNUSED static void hal_timer_common_bgload(uint32_t id, uint32_t sub_id, uint32_t load)
+> {
+>     if (load > HAL_TIMER_LOAD_DELTA) {
+>         load -= HAL_TIMER_LOAD_DELTA;
+>     } else {
+>         load = HAL_TIMER_LOAD_DELTA;
+>     }
+>     dual_timer[id]->timer[sub_id].BGLoad = load;
+> }
+> 
+> POSSIBLY_UNUSED static void hal_timer_common_pause(uint32_t id, uint32_t sub_id)
+> {
+>     dual_timer[id]->timer[sub_id].Control &= ~TIMER_CTRL_EN;
+> }
+> 
+> static void hal_timer_common_continue(uint32_t id, uint32_t sub_id)
+> {
+>     dual_timer[id]->timer[sub_id].Control |= TIMER_CTRL_EN;
+> }
+> 
+> static void hal_timer_common_start(uint32_t id, uint32_t sub_id, uint32_t load)
+> {
+>     start_time[id][sub_id] = timer_is_slow(id) ? hal_sys_timer_get() : hal_fast_sys_timer_get();
+>     hal_timer_common_reload(id, sub_id, load);
+>     hal_timer_common_continue(id, sub_id);
+> }
+> 
+> static void hal_timer_common_stop(uint32_t id, uint32_t sub_id)
+> {
+>     dual_timer[id]->timer[sub_id].Control &= ~TIMER_CTRL_EN;
+>     clear_timer_irq(&dual_timer[id]->timer[sub_id]);
+>     NVIC_ClearPendingIRQ(irq_num[id][sub_id]);
+> }
+> 
+> static int hal_timer_common_is_enabled(uint32_t id, uint32_t sub_id)
+> {
+>     return !!(dual_timer[id]->timer[sub_id].Control & TIMER_CTRL_EN);
+> }
+> 
+> static uint32_t hal_timer_common_get_raw_value(uint32_t id, uint32_t sub_id)
+> {
+>     uint32_t delta;
+> 
+>     delta = timer_is_slow(id) ? SLOW_TIMER_VAL_DELTA : FAST_TIMER_VAL_DELTA;
+>     return get_timer_value(&dual_timer[id]->timer[sub_id], delta);
+> }
+> 
+> static int hal_timer_common_irq_active(uint32_t id, uint32_t sub_id)
+> {
+>     return NVIC_GetActive(irq_num[id][sub_id]);
+> }
+> 
+> static int hal_timer_common_irq_pending(uint32_t id, uint32_t sub_id)
+> {
+>     return (dual_timer[id]->timer[sub_id].MIS & TIMER_MIS_MIS);
+> }
+> 
+> static uint32_t hal_timer_common_get_elapsed_time(uint32_t id, uint32_t sub_id)
+> {
+>     uint32_t time;
+> 
+>     time = timer_is_slow(id) ? hal_sys_timer_get() : hal_fast_sys_timer_get();
+>     return time - start_time[id][sub_id];
+> }
+> 
+> //----------------------------------------------------------
+> // Slow timer IRQ API
+> //----------------------------------------------------------
+> 
+> void hal_timer_setup(enum HAL_TIMER_TYPE_T type, HAL_TIMER_IRQ_HANDLER_T handler)
+> {
+>     hal_timer_common_setup(0, SLOW_TIMER_SUB_ID_WITH_IRQ, type, handler);
+> }
+> 
+585,587c887
+<     start_time = hal_sys_timer_get();
+<     hal_timer_reload(load);
+<     hal_timer_continue();
+---
+>     hal_timer_common_start(0, SLOW_TIMER_SUB_ID_WITH_IRQ, load);
+592,597c892
+<     dual_timer0->timer[1].Control &= ~TIMER_CTRL_EN;
+< #ifdef ELAPSED_TIMER_ENABLED
+<     dual_timer0->elapsed_timer[1].ElapsedCtrl = TIMER_ELAPSED_CTRL_CLR;
+< #endif
+<     clear_timer_irq(&dual_timer0->timer[1]);
+<     NVIC_ClearPendingIRQ(TIMER01_IRQn);
+---
+>     hal_timer_common_stop(0, SLOW_TIMER_SUB_ID_WITH_IRQ);
+602,605c897
+< #ifdef ELAPSED_TIMER_ENABLED
+<     dual_timer0->elapsed_timer[1].ElapsedCtrl = TIMER_ELAPSED_CTRL_EN | TIMER_ELAPSED_CTRL_CLR;
+< #endif
+<     dual_timer0->timer[1].Control |= TIMER_CTRL_EN;
+---
+>     hal_timer_common_continue(0, SLOW_TIMER_SUB_ID_WITH_IRQ);
+610c902
+<     return !!(dual_timer0->timer[1].Control & TIMER_CTRL_EN);
+---
+>     return hal_timer_common_is_enabled(0, SLOW_TIMER_SUB_ID_WITH_IRQ);
+615,622c907
+<     if (load > HAL_TIMER_LOAD_DELTA) {
+<         //load_value = load;
+<         load -= HAL_TIMER_LOAD_DELTA;
+<     } else {
+<         //load_value = HAL_TIMER_LOAD_DELTA + 1;
+<         load = 1;
+<     }
+<     set_timer_load(&dual_timer0->timer[1], load, SLOW_TIMER_VAL_DELTA);
+---
+>     hal_timer_common_reload(0, SLOW_TIMER_SUB_ID_WITH_IRQ, load);
+625c910
+< uint32_t hal_timer_get(void)
+---
+> uint32_t hal_timer_get_raw_value(void)
+627c912
+<     return get_timer_value(&dual_timer0->timer[1], SLOW_TIMER_VAL_DELTA);
+---
+>     return hal_timer_common_get_raw_value(0, SLOW_TIMER_SUB_ID_WITH_IRQ);
+632c917
+<     return NVIC_GetActive(TIMER01_IRQn);
+---
+>     return hal_timer_common_irq_active(0, SLOW_TIMER_SUB_ID_WITH_IRQ);
+637,638c922
+<     // Or NVIC_GetPendingIRQ(TIMER2_IRQn) ?
+<     return (dual_timer0->timer[1].MIS & TIMER_MIS_MIS);
+---
+>     return hal_timer_common_irq_pending(0, SLOW_TIMER_SUB_ID_WITH_IRQ);
+641c925
+< uint32_t hal_timer_get_overrun_time(void)
+---
+> uint32_t hal_timer_get_elapsed_time(void)
+643,644c927,928
+< #ifdef ELAPSED_TIMER_ENABLED
+<     uint32_t extra;
+---
+>     return hal_timer_common_get_elapsed_time(0, SLOW_TIMER_SUB_ID_WITH_IRQ);
+> }
+646,649c930,1002
+<     if (dual_timer0->elapsed_timer[1].ElapsedCtrl & TIMER_ELAPSED_CTRL_EN) {
+<         extra = dual_timer0->elapsed_timer[1].ElapsedVal;
+<     } else {
+<         extra = 0;
+---
+> //----------------------------------------------------------
+> // Fast timer IRQ API
+> //----------------------------------------------------------
+> 
+> #ifdef TIMER1_BASE
+> void hal_fast_timer_setup(enum HAL_TIMER_TYPE_T type, HAL_TIMER_IRQ_HANDLER_T handler)
+> {
+>     hal_timer_common_setup(1, 1, type, handler);
+> }
+> 
+> void hal_fast_timer_start(uint32_t load)
+> {
+>     hal_timer_common_start(1, 1, load);
+> }
+> 
+> void hal_fast_timer_stop(void)
+> {
+>     hal_timer_common_stop(1, 1);
+> }
+> 
+> void hal_fast_timer_pause(void)
+> {
+>     hal_timer_common_pause(1, 1);
+> }
+> 
+> void hal_fast_timer_continue(void)
+> {
+>     hal_timer_common_continue(1, 1);
+> }
+> 
+> int hal_fast_timer_is_enabled(void)
+> {
+>     return hal_timer_common_is_enabled(1, 1);
+> }
+> 
+> void hal_fast_timer_reload(uint32_t load)
+> {
+>     hal_timer_common_reload(1, 1, load);
+> }
+> 
+> void hal_fast_timer_bgload(uint32_t load)
+> {
+>     hal_timer_common_bgload(1, 1, load);
+> }
+> 
+> uint32_t hal_fast_timer_get_raw_value(void)
+> {
+>     return hal_timer_common_get_raw_value(1, 1);
+> }
+> 
+> int hal_fast_timer_irq_active(void)
+> {
+>     return hal_timer_common_irq_active(1, 1);
+> }
+> 
+> int hal_fast_timer_irq_pending(void)
+> {
+>     return hal_timer_common_irq_pending(1, 1);
+> }
+> 
+> uint32_t hal_fast_timer_get_elapsed_time(void)
+> {
+>     return hal_timer_common_get_elapsed_time(1, 1);
+> }
+> 
+> uint32_t hal_fast_timer_get_load(void)
+> {
+>     return hal_timer_common_get_load(1, 1);
+> }
+> 
+> uint32_t hal_fast_timer_get_count(void)
+> {
+>     return dual_timer[1]->timer[1].Load - get_timer_value(&dual_timer[1]->timer[1], FAST_TIMER_VAL_DELTA);
+652,654d1004
+<     return extra;
+< #else
+<     return 0;
+655a1006,1019
+> 
+> //----------------------------------------------------------
+> // User timer IRQ API
+> //----------------------------------------------------------
+> 
+> #ifdef TIMER2_BASE
+> static void hal_user_timer_clock_enable()
+> {
+>     if (hal_cmu_clock_get_status(HAL_CMU_MOD_O_TIMER2) == HAL_CMU_CLK_DISABLED) {
+>         hal_cmu_clock_enable(HAL_CMU_MOD_O_TIMER2);
+>         hal_cmu_clock_enable(HAL_CMU_MOD_P_TIMER2);
+>         hal_cmu_reset_clear(HAL_CMU_MOD_O_TIMER2);
+>         hal_cmu_reset_clear(HAL_CMU_MOD_P_TIMER2);
+>     }
+658c1022
+< uint32_t hal_timer_get_elapsed_time(void)
+---
+> void hal_user_timer0_setup(enum HAL_TIMER_TYPE_T type, HAL_TIMER_IRQ_HANDLER_T handler)
+660,661c1024,1025
+<     //return load_value + hal_timer_get_overrun_time();
+<     return hal_sys_timer_get() - start_time;
+---
+>     hal_user_timer_clock_enable();
+>     hal_timer_common_setup(2, 0, type, handler);
+664c1028
+< static void hal_timer01_irq_handler(void)
+---
+> void hal_user_timer0_start(uint32_t load)
+666c1030,1031
+<     uint32_t elapsed;
+---
+>     hal_timer_common_start(2, 0, load);
+> }
+668,673c1033,1055
+<     clear_timer_irq(&dual_timer0->timer[1]);
+<     if (irq_handler) {
+<         elapsed = hal_timer_get_elapsed_time();
+<         irq_handler(elapsed);
+<     } else {
+<         dual_timer0->timer[1].Control &= ~TIMER_CTRL_INTEN;
+---
+> void hal_user_timer0_stop(void)
+> {
+>     hal_timer_common_stop(2, 0);
+> }
+> 
+> void hal_user_timer0_continue(void)
+> {
+>     hal_timer_common_continue(2, 0);
+> }
+> 
+> int hal_user_timer0_is_enabled(void)
+> {
+>     return hal_timer_common_is_enabled(2, 0);
+> }
+> 
+> void hal_user_timer0_reload(uint32_t load)
+> {
+>     hal_timer_common_reload(2, 0, load);
+> }
+> 
+> uint32_t hal_user_timer0_get_raw_value(void)
+> {
+>     return hal_timer_common_get_raw_value(2, 0);
+674a1057,1086
+> 
+> int hal_user_timer0_irq_active(void)
+> {
+>     return hal_timer_common_irq_active(2, 0);
+> }
+> 
+> int hal_user_timer0_irq_pending(void)
+> {
+>     return hal_timer_common_irq_pending(2, 0);
+> }
+> 
+> uint32_t hal_user_timer0_get_elapsed_time(void)
+> {
+>     return hal_timer_common_get_elapsed_time(2, 0);
+> }
+> 
+> void hal_user_timer1_setup(enum HAL_TIMER_TYPE_T type, HAL_TIMER_IRQ_HANDLER_T handler)
+> {
+>     hal_user_timer_clock_enable();
+>     hal_timer_common_setup(2, 1, type, handler);
+> }
+> 
+> void hal_user_timer1_start(uint32_t load)
+> {
+>     hal_timer_common_start(2, 1, load);
+> }
+> 
+> void hal_user_timer1_stop(void)
+> {
+>     hal_timer_common_stop(2, 1);
+677c1089
+< uint32_t hal_timer_get_passed_ticks(uint32_t curr_ticks, uint32_t prev_ticks)
+---
+> void hal_user_timer1_continue(void)
+679,682c1091
+<     if(curr_ticks < prev_ticks)
+<         return ((0xffffffff  - prev_ticks + 1) + curr_ticks);
+<     else
+<         return (curr_ticks - prev_ticks);
+---
+>     hal_timer_common_continue(2, 1);
+683a1093,1124
+> 
+> int hal_user_timer1_is_enabled(void)
+> {
+>     return hal_timer_common_is_enabled(2, 1);
+> }
+> 
+> void hal_user_timer1_reload(uint32_t load)
+> {
+>     hal_timer_common_reload(2, 1, load);
+> }
+> 
+> uint32_t hal_user_timer1_get_raw_value(void)
+> {
+>     return hal_timer_common_get_raw_value(2, 1);
+> }
+> 
+> int hal_user_timer1_irq_active(void)
+> {
+>     return hal_timer_common_irq_active(2, 1);
+> }
+> 
+> int hal_user_timer1_irq_pending(void)
+> {
+>     return hal_timer_common_irq_pending(2, 1);
+> }
+> 
+> uint32_t hal_user_timer1_get_elapsed_time(void)
+> {
+>     return hal_timer_common_get_elapsed_time(2, 1);
+> }
+> 
+> #endif

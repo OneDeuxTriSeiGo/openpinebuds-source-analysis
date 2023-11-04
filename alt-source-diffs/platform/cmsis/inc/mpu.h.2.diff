@@ -1,0 +1,89 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/mpu.h
+remote: https://raw.githubusercontent.com/alibaba/AliOS-Things/a99f20706f9c666903a12a205edce13263b1fadb/hardware/chip/haas1000/drivers/platform/cmsis/inc/mpu.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+42,43d40
+< #define MPU_ID_CODE                 MPU_ID_4
+< #define MPU_ID_SRAM_TEXT            MPU_ID_5
+49a47,54
+> #define MPU_ID_CP_PERIPHERAL        MPU_ID_NULL_POINTER
+> #define MPU_ID_CP_SRAM              MPU_ID_1
+> #define MPU_ID_CP_SRAMX             MPU_ID_5
+> 
+> /*both mcu and cp section*/
+> #define MPU_ID_PSRAMUHS             MPU_ID_6
+> #define MPU_ID_PSRAMUHSX            MPU_ID_7
+> 
+61,86d65
+< #if defined(__ARM_ARCH_8M_MAIN__)
+< 
+< enum MAIR_ATTR_TYPE_T {
+<     MAIR_ATTR_FLASH,
+<     MAIR_ATTR_INT_SRAM,
+<     MAIR_ATTR_EXT_SRAM,
+<     MAIR_ATTR_DEVICE,
+<     MAIR_ATTR_4,
+<     MAIR_ATTR_5,
+<     MAIR_ATTR_6,
+<     MAIR_ATTR_7,
+< 
+<     MAIR_ATTR_QTY,
+< };
+< #endif
+< 
+< typedef struct
+< {
+<     uint32_t addr;
+<     uint32_t len;
+<     enum MPU_ATTR_T ap_attr;
+< #if defined(__ARM_ARCH_8M_MAIN__)
+<     enum MAIR_ATTR_TYPE_T mem_attr;
+< #endif
+< } mpu_regions_t;
+< 
+100,101c79,83
+< /*mpu setup for mcu */
+< int mpu_setup(void);
+---
+> int mpu_null_check_enable(void);
+> 
+> int mpu_fast_ram_protect(void);
+> 
+> void mpu_open_for_psramuhs();
+103,104c85
+< /*mpu setup for cp mcu */
+< int mpu_setup_cp(const mpu_regions_t *mpu_table, uint32_t region_num);
+---
+> int mpu_set_armv8_psramuhs(enum MPU_ID_T id, uint32_t addr, uint32_t len, enum MPU_ATTR_T attr);

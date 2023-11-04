@@ -1,0 +1,3539 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_trace.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_trace.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+24a24
+> #include "hal_bootmode.h"
+34a35
+> #include "pmu.h"
+38d38
+< #include "hal_bootmode.h"
+43a44,59
+> #if (defined(CHIP_BEST2001) || defined(CHIP_BEST2003)) && !defined(PROGRAMMER)
+> #include "transq_msg.h"
+> #ifdef __ARM_ARCH_ISA_ARM
+> #include "mcu_audio.h"
+> #endif
+> #endif
+> 
+> #if defined(NUTTX_BUILD)
+> #undef CP_BUILD
+> #undef CP_BOOT
+> #endif
+> 
+> #if defined(CP_BOOT) || defined(CP_BUILD)
+> #include "cp_ipc.h"
+> #endif
+> 
+45d60
+< extern void nv_record_flash_flush(void);
+53a69,72
+> #if (!(defined(ROM_BUILD) || defined(PROGRAMMER))) || defined(ROM_IN_FLASH) || defined(PROGRAMMER_INFLASH)
+> #define ASSERT_VERBOSE_DUMP
+> #endif
+> 
+57c76
+< #if !(defined(NO_TRACE_TIME_STAMP) || defined(AUDIO_DEBUG_V0_1_0))
+---
+> #if !(defined(NO_TRACE_TIME_STAMP) || defined(AUDIO_DEBUG))
+60c79
+< #if (defined(DUMP_LOG_ENABLE) || defined(DUMP_CRASH_ENABLE))
+---
+> #if (defined(DUMP_LOG_ENABLE) || defined(DUMP_CRASH_LOG) || defined(RESUME_MUSIC_AFTER_CRASH_REBOOT))
+63c82
+< #ifdef CHIP_HAS_CP
+---
+> #if defined(CHIP_HAS_CP) && !defined(CP_BOOT) && !defined(CP_BUILD) && !defined(CONFIG_SMP) && !defined(CONFIG_BES_DUALCORE_AMP) && !defined(I2C_PA_CHANNEL_SUPPORT)
+64a84,88
+> #define CP_MEMSC_TIMEOUT_CHECK
+> #endif
+> #else
+> #ifdef __ARM_ARCH_ISA_ARM
+> #define TRACE_TIME_STAMP
+75,77d98
+< #ifdef AUDIO_DEBUG
+< #define TRACE_BUF_SIZE                  (6 * 1024)
+< #else
+79a101,120
+> 
+> #ifdef AUDIO_DEBUG
+> // Fix baudrate and buffer size
+> #if TRACE_BAUD_RATE < 2000000
+> #undef TRACE_BAUD_RATE
+> #define TRACE_BAUD_RATE                 2000000
+> #endif
+> #if TRACE_BUF_SIZE < (16 * 1024)
+> #undef TRACE_BUF_SIZE
+> #define TRACE_BUF_SIZE                  (16 * 1024)
+> #endif
+> #endif
+> 
+> 
+> #ifndef TRACE_PRINTF_LEN
+> #define TRACE_PRINTF_LEN                (120)
+> #endif
+> 
+> #ifndef TRACE_DUMP_LEN
+> #define TRACE_DUMP_LEN                  (250)
+101a143,145
+> #define ASSERT_STACK_ARG_WORD           8
+> #define ASSERT_STACK_RESERVED           (STACK_DUMP_CNT_PREV + ASSERT_STACK_ARG_WORD)
+> 
+106,107d149
+< #define TRACE_CRLF 
+< 
+117,118d158
+< #define HAL_MEMSC_ID_TRACE              HAL_MEMSC_ID_0
+< 
+161a202
+>     uint32_t DFSR;
+166a208,219
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     uint32_t SFSR;
+>     uint32_t SFAR;
+>     uint32_t MSP_NS;
+>     uint32_t PSP_NS;
+>     uint32_t MSPLIM_NS;
+>     uint32_t PSPLIM_NS;
+>     uint8_t PRIMASK_NS;
+>     uint8_t FAULTMASK_NS;
+>     uint8_t BASEPRI_NS;
+>     uint8_t CONTROL_NS;
+> #endif
+170a224
+> bool carsh_occurs[2]={0};
+174a229,244
+> static uint32_t g_trace_onoff = 0;
+> 
+> int hal_trace_set_onoff(uint32_t onoff)
+> {
+>     if (onoff < 0) {
+>         return 1;
+>     }
+>     g_trace_onoff = onoff;
+>     return 0;
+> }
+> 
+> static int get_hal_trace_onoff()
+> {
+>     return g_trace_onoff;
+> }
+> 
+176a247
+> #if (TRACE_BUF_SIZE > 0)
+181,183d251
+< #if (TRACE_IDLE_OUTPUT == 0)
+<     unsigned short sends[2];
+< #endif
+188,204c256
+< };
+< 
+< STATIC_ASSERT(TRACE_BUF_SIZE < (1 << (8 * sizeof(((struct HAL_TRACE_BUF_T *)0)->wptr))), "TRACE_BUF_SIZE is too large to fit in wptr/rptr variable");
+< 
+< static const struct HAL_UART_CFG_T uart_cfg = {
+<     .parity = HAL_UART_PARITY_NONE,
+<     .stop = HAL_UART_STOP_BITS_1,
+<     .data = HAL_UART_DATA_BITS_8,
+<     .flow = HAL_UART_FLOW_CONTROL_NONE,//HAL_UART_FLOW_CONTROL_RTSCTS,
+<     .tx_level = HAL_UART_FIFO_LEVEL_1_2,
+<     .rx_level = HAL_UART_FIFO_LEVEL_1_2,
+<     .baud = TRACE_BAUD_RATE,
+< #ifdef HAL_TRACE_RX_ENABLE
+<     .dma_rx = true,
+< #else
+<     .dma_rx = false,
+< #endif
+---
+>     uint8_t pause_cnt;
+206,208c258,261
+<     .dma_tx = true,
+< #else
+<     .dma_tx = false,
+---
+>     unsigned short sends[2];
+> #endif
+> #if defined(CRASH_DUMP_ENABLE) && defined(TRACE_TO_APP) && defined(CP_TRACE_ENABLE)
+>     unsigned short app_rptr;
+210d262
+<     .dma_rx_stop_on_err = false,
+212a265,266
+> STATIC_ASSERT(TRACE_BUF_SIZE < (1 << (8 * sizeof(((struct HAL_TRACE_BUF_T *)0)->wptr))), "TRACE_BUF_SIZE is too large to fit in wptr/rptr variable");
+> 
+216c270
+< #if (CHIP_HAS_UART > 1)
+---
+> #if (CHIP_HAS_UART >= 2)
+219c273
+< #if (CHIP_HAS_UART > 2)
+---
+> #if (CHIP_HAS_UART >= 3)
+224c278,304
+< static const struct HAL_UART_CFG_T uart_rx_enable_cfg = {
+---
+> static struct HAL_DMA_CH_CFG_T dma_cfg;
+> //TRACE_BUF_LOC static struct HAL_DMA_DESC_T dma_desc[2];
+> #endif
+> 
+> #ifdef __ARM_ARCH_ISA_ARM
+> #ifdef A7_ALLOC_TRANSQ_BUF
+> TRACE_BUF_LOC static struct HAL_TRACE_BUF_T trace;
+> static struct HAL_TRACE_BUF_T *p_trace = &trace;
+> #else
+> static struct HAL_TRACE_BUF_T *p_trace = NULL;
+> #endif
+> #else
+> #if !defined(PROGRAMMER)
+> TRACE_BUF_LOC
+> #endif
+> static struct HAL_TRACE_BUF_T trace;
+> static struct HAL_TRACE_BUF_T *p_trace = &trace;
+> #endif
+> 
+> static const char discards_prefix[] = NEW_LINE_STR "LOST ";
+> static const uint32_t max_discards = 99999;
+> // 5 digits + "\r\n" = 7 chars
+> static char discards_buf[sizeof(discards_prefix) - 1 + 7];
+> static const unsigned char discards_digit_start = sizeof(discards_prefix) - 1;
+> #endif // TRACE_BUF_SIZE > 0
+> 
+> static const struct HAL_UART_CFG_T uart_cfg = {
+231a312
+> #ifndef CP_BUILD
+233d313
+< 
+239a320
+> #endif
+242c323,336
+< static struct HAL_DMA_CH_CFG_T dma_cfg;
+---
+> #if (TRACE_BUF_SIZE > 0) && (TRACE_IDLE_OUTPUT == 0)
+> #ifdef __ARM_ARCH_ISA_ARM
+> #ifdef A7_ALLOC_TRANSQ_BUF
+> TRACE_BUF_LOC static struct HAL_DMA_DESC_T dma_desc[2];
+> static struct HAL_DMA_DESC_T *p_dma_desc[2] = {&dma_desc[0], &dma_desc[1]};
+> #ifdef __A7_DSP_ENABLE__
+> TRACE_BUF_LOC static TRANSQ_MSG_T trace_transq_msg;
+> static TRANSQ_MSG_T *p_trace_transq_msg = &trace_transq_msg;
+> #endif
+> #else
+> static struct HAL_DMA_DESC_T *p_dma_desc[2] = {NULL, NULL};
+> static TRANSQ_MSG_T *p_trace_transq_msg = NULL;
+> #endif
+> #else
+243a338,342
+> static struct HAL_DMA_DESC_T *p_dma_desc[2] = {&dma_desc[0], &dma_desc[1]};
+> #if defined(__A7_DSP_ENABLE__)
+> TRACE_BUF_LOC static TRANSQ_MSG_T trace_transq_msg;
+> static TRANSQ_MSG_T *p_trace_transq_msg = &trace_transq_msg;
+> #endif
+245a345,348
+> #ifdef CP_BUILD
+> static CP_IPC_MSG_HDR cpipc_trace_msg;
+> #endif
+> #endif
+249,251d351
+< TRACE_BUF_LOC
+< static struct HAL_TRACE_BUF_T trace;
+< 
+255,262d354
+< static const char discards_prefix[] = NEW_LINE_STR "LOST ";
+< static const uint32_t max_discards = 99999;
+< // 5 digits + "\r\n" = 7 chars
+< static char discards_buf[sizeof(discards_prefix) - 1 + 7];
+< static const unsigned char discards_digit_start = sizeof(discards_prefix) - 1;
+< 
+< static bool crash_dump_onprocess = false;
+< 
+265c357
+< static bool crash_handling;
+---
+> static bool in_crash_dump = false;
+267,268c359,360
+< static HAL_TRACE_APP_NOTIFY_T app_notify_cb = NULL;
+< static HAL_TRACE_APP_OUTPUT_T app_output_cb = NULL;
+---
+> static HAL_TRACE_APP_NOTIFY_T app_notify_cb[HAL_TRACE_APP_REG_ID_QTY];
+> static HAL_TRACE_APP_OUTPUT_T app_output_cb[HAL_TRACE_APP_REG_ID_QTY];
+269a362
+> static bool app_output_cb_valid = false;
+271c364
+< #if defined(DUMP_LOG_ENABLE)
+---
+> #ifdef DUMP_LOG_ENABLE
+275a369,370
+> 
+> static void hal_trace_app_output_callback(const unsigned char *buf, unsigned int buf_len);
+277a373
+> 
+279c375,378
+< static HAL_TRACE_APP_NOTIFY_T cp_notify_cb = NULL;
+---
+> static uint8_t memsc_lock_cnt[2];
+> #ifdef CP_MEMSC_TIMEOUT_CHECK
+> static uint8_t memsc_timeout[2];
+> #endif
+280a380,387
+> static bool cp_buffer_cb_running;
+> #ifdef CRASH_DUMP_ENABLE
+> static HAL_TRACE_APP_NOTIFY_T cp_notify_cb = NULL;
+> #endif
+> #endif
+> 
+> #ifdef TRACE_GLOBAL_TAG
+> static HAL_TRACE_GLOBAL_TAG_CB_T gbl_tag_cb = NULL;
+283c390
+< #ifdef AUDIO_DEBUG_V0_1_0
+---
+> #ifdef AUDIO_DEBUG
+287,288c394,584
+< static enum LOG_LEVEL_T trace_max_level;
+< static uint32_t trace_mod_map[(LOG_MODULE_QTY + 31) / 32];
+---
+> static enum TR_LEVEL_T trace_max_level;
+> 
+> static uint32_t trace_mod_map[(TR_MODULE_QTY + 31) / 32];
+> 
+> #if (defined(CHIP_BEST2001) || defined(CHIP_BEST2003)) && defined(__A7_DSP_ENABLE__) && !defined(PROGRAMMER)
+> static bool hal_trace_is_transq_transport(enum HAL_TRACE_TRANSPORT_T transport)
+> {
+>     if (transport == HAL_TRACE_TRANSPORT_TRANSQ1) {
+>         return true;
+>     }
+>     return false;
+> }
+> 
+> #if (TRACE_IDLE_OUTPUT == 0)
+> static void hal_trace_transq_msg_send(uint32_t addr, uint32_t len)
+> {
+>     memset(p_trace_transq_msg, 0, sizeof(TRANSQ_MSG_T));
+>     p_trace_transq_msg->type = TRANSQ_MSG_TYPE_TRACE;
+>     p_trace_transq_msg->pri = HAL_TRANSQ_PRI_HIGH;
+>     p_trace_transq_msg->msg.trace.addr = addr;
+>     p_trace_transq_msg->msg.trace.len = len;
+>     transq_msg_tx(p_trace_transq_msg);
+> }
+> 
+> static void hal_trace_transq_send(void)
+> {
+>     uint32_t sends[2];
+>     uint32_t int_state;
+> 
+>     int_state = int_lock();
+> 
+>     // There is a race condition if we do not check s/w flag, but only check the h/w status.
+>     // [e.g., hal_gpdma_chan_busy(dma_cfg.ch)]
+>     // When the DMA is done, but DMA IRQ handler is still pending due to interrupt lock
+>     // or higher priority IRQ, it will have a chance to send the same content twice.
+>     if (p_trace->wptr != p_trace->rptr && !p_trace->sending) {
+>         p_trace->sending = true;
+> 
+>         if (p_trace->wptr > p_trace->rptr) {
+>             sends[0] = p_trace->wptr - p_trace->rptr;
+>         } else {
+>             sends[0] = TRACE_BUF_SIZE - p_trace->rptr;
+>         }
+>         p_trace->sends[0] = sends[0];
+>         hal_trace_transq_msg_send((uint32_t)&p_trace->buf[p_trace->rptr], sends[0]);
+>     }
+> 
+>     int_unlock(int_state);
+> }
+> 
+> static void hal_trace_transq_xfer_done(void *param)
+> {
+>     p_trace->rptr += p_trace->sends[0];
+>     if (p_trace->rptr >= TRACE_BUF_SIZE) {
+>         p_trace->rptr -= TRACE_BUF_SIZE;
+>     }
+>     p_trace->sends[0] = 0;
+>     p_trace->sends[1] = 0;
+>     p_trace->sending = false;
+> 
+>     if (p_trace->wptr != p_trace->rptr) {
+>         hal_trace_transq_send();
+>     }
+> }
+> #endif
+> #endif
+> 
+> #ifdef CP_BUILD
+> static bool hal_trace_is_cpipc_transport(enum HAL_TRACE_TRANSPORT_T transport)
+> {
+>     if (transport == HAL_TRACE_TRANSPORT_CPIPC) {
+>         return true;
+>     }
+>     return false;
+> }
+> 
+> #if (TRACE_IDLE_OUTPUT == 0)
+> #include "reg_uart.h"
+> static void hal_trace_cp_block_send(uint32_t addr, uint32_t len)
+> {
+>     int i;
+>     uint8_t *ptr;
+>     uint32_t int_state;
+>     int_state = int_lock();
+>     struct UART_T *base = (struct UART_T *)UART0_BASE;
+>     ptr = (uint8_t *)addr;
+>     for (i = 0; i < len; i++) {
+>         while ((base->UARTFR & (1 << 5)) != 0);
+>         base->UARTDR = ptr[i];
+>     }
+>     p_trace->rptr += p_trace->sends[0];
+>     if (p_trace->rptr >= TRACE_BUF_SIZE) {
+>         p_trace->rptr -= TRACE_BUF_SIZE;
+>     }
+>     p_trace->sends[0] = 0;
+>     p_trace->sends[1] = 0;
+>     p_trace->sending = false;
+>     int_unlock(int_state);
+> }
+> static void hal_trace_cpipc_msg_send(uint32_t addr, uint32_t len)
+> {
+>     cpipc_trace_msg.id = CP_IPC_MSG_TRACE;
+>     cpipc_trace_msg.len = len;
+>     cpipc_trace_msg.data = (void *)addr;
+>     cp_ipc_send(&cpipc_trace_msg);
+> }
+> static void hal_trace_cpipc_send(void)
+> {
+>     uint32_t sends[2];
+>     uint32_t int_state;
+>     int_state = int_lock();
+> 
+>     // There is a race condition if we do not check s/w flag, but only check the h/w status.
+>     // [e.g., hal_gpdma_chan_busy(dma_cfg.ch)]
+>     // When the DMA is done, but DMA IRQ handler is still pending due to interrupt lock
+>     // or higher priority IRQ, it will have a chance to send the same content twice.
+>     if (p_trace->wptr != p_trace->rptr && !p_trace->sending) {
+>         p_trace->sending = true;
+> 
+>         if (p_trace->wptr > p_trace->rptr) {
+>             sends[0] = p_trace->wptr - p_trace->rptr;
+>         } else {
+>             sends[0] = TRACE_BUF_SIZE - p_trace->rptr;
+>         }
+>         p_trace->sends[0] = sends[0];
+>         if (carsh_occurs[1])
+>             hal_trace_cp_block_send((uint32_t)&p_trace->buf[p_trace->rptr], sends[0]);
+>         else
+>             hal_trace_cpipc_msg_send((uint32_t)&p_trace->buf[p_trace->rptr], sends[0]);
+>     }
+> 
+>     int_unlock(int_state);
+> }
+> 
+> static void hal_trace_cpipc_xfer_done(void *param)
+> {
+>     p_trace->rptr += p_trace->sends[0];
+>     if (p_trace->rptr >= TRACE_BUF_SIZE) {
+>         p_trace->rptr -= TRACE_BUF_SIZE;
+>     }
+>     p_trace->sends[0] = 0;
+>     p_trace->sends[1] = 0;
+>     p_trace->sending = false;
+> 
+>     if (p_trace->wptr != p_trace->rptr)
+>         hal_trace_cpipc_send();
+> }
+> #endif
+> #endif
+> 
+> #ifdef CP_BOOT
+> #define CP_TRACE_TAG "CP:"
+> static HAL_TRACE_OUTPUT_HOOK_T _hal_trace_printf_cp_hook = NULL;
+> void hal_trace_register_cp_hook(HAL_TRACE_OUTPUT_HOOK_T hook)
+> {
+>     _hal_trace_printf_cp_hook = hook;
+> }
+> 
+> void hal_trace_unregister_cp_hook(HAL_TRACE_OUTPUT_HOOK_T hook)
+> {
+>     if (_hal_trace_printf_cp_hook == hook) {
+>         _hal_trace_printf_cp_hook = NULL;
+>     }
+> }
+> 
+> int hal_trace_printf_cp_hook(const char *tag, const char *fmt, uint32_t len)
+> {
+>     int ret = 0;
+>     if (_hal_trace_printf_cp_hook) {
+>         ret = _hal_trace_printf_cp_hook(tag, fmt, len);
+>     }
+>     return ret;
+> }
+> 
+> void hal_trace_cpipc_recv(void *param)
+> {
+>     CP_IPC_MSG_HDR *msg = param;
+> 
+>     if (msg && _hal_trace_printf_cp_hook &&
+>         _hal_trace_printf_cp_hook(NULL, (const char *)msg->data, msg->len))
+>         return;
+> 
+>     if (msg && (get_hal_trace_onoff() == 0) ) {
+>         unsigned char tag_cp[32];
+>         unsigned int timestamp = (unsigned)TICKS_TO_MS(hal_sys_timer_get());
+>         char len = sprintf((char *)tag_cp, "%s[%u]", CP_TRACE_TAG, timestamp);
+>         REL_LOG_RAW_OUTPUT(tag_cp, len);
+>         REL_LOG_RAW_OUTPUT(msg->data, msg->len);
+>     }
+> }
+> #endif
+293c589
+< #if (CHIP_HAS_UART > 1)
+---
+> #if (CHIP_HAS_UART >= 2)
+296c592
+< #if (CHIP_HAS_UART > 2)
+---
+> #if (CHIP_HAS_UART >= 3)
+305c601,636
+< #if (TRACE_IDLE_OUTPUT == 0)
+---
+> #if (TRACE_BUF_SIZE > 0)
+> #if (TRACE_IDLE_OUTPUT)
+> 
+> static void hal_trace_uart_idle_send(void)
+> {
+>     int i;
+>     uint32_t lock;
+>     unsigned short wptr, rptr;
+> 
+>     lock = int_lock();
+>     wptr = p_trace->wptr;
+>     rptr = p_trace->rptr;
+>     int_unlock(lock);
+> 
+>     if (wptr == rptr) {
+>         return;
+>     }
+> 
+>     if (wptr < rptr) {
+>         for (i = rptr; i < TRACE_BUF_SIZE; i++) {
+>             hal_uart_blocked_putc(trace_uart, p_trace->buf[i]);
+>         }
+>         rptr = 0;
+>     }
+> 
+>     for (i = rptr; i < wptr; i++) {
+>         hal_uart_blocked_putc(trace_uart, p_trace->buf[i]);
+>     }
+> 
+>     p_trace->rptr = wptr;
+>     if (p_trace->rptr >= TRACE_BUF_SIZE) {
+>         p_trace->rptr -= TRACE_BUF_SIZE;
+>     }
+> }
+> 
+> #else // TRACE_IDLE_OUTPUT
+315,316c646,647
+<     wptr = trace.wptr;
+<     rptr = trace.rptr;
+---
+>     wptr = p_trace->wptr;
+>     rptr = p_trace->rptr;
+319c650
+<     // [e.g., hal_gpdma_chan_busy(dma_cfg.ch)]
+---
+>     // [e.g., hal_dma_chan_busy(dma_cfg.ch)]
+322,323c653,654
+<     if (!trace.sending && wptr != rptr) {
+<         trace.sending = true;
+---
+>     if (!p_trace->sending && wptr != rptr) {
+>         p_trace->sending = true;
+342c673
+<         dma_cfg.src = (uint32_t)&trace.buf[rptr];
+---
+>         dma_cfg.src = (uint32_t)&p_trace->buf[rptr];
+345c676
+<             hal_gpdma_init_desc(&dma_desc[0], &dma_cfg, NULL, 1);
+---
+>             hal_dma_init_desc(p_dma_desc[0], &dma_cfg, NULL, 1);
+348c679
+<             hal_gpdma_init_desc(&dma_desc[0], &dma_cfg, &dma_desc[1], 0);
+---
+>             hal_dma_init_desc(p_dma_desc[0], &dma_cfg, p_dma_desc[1], 0);
+351c682
+<                 dma_cfg.src = (uint32_t)&trace.buf[rptr + sends[0]];
+---
+>                 dma_cfg.src = (uint32_t)&p_trace->buf[rptr + sends[0]];
+353c684
+<                 dma_cfg.src = (uint32_t)&trace.buf[0];
+---
+>                 dma_cfg.src = (uint32_t)&p_trace->buf[0];
+356c687
+<             hal_gpdma_init_desc(&dma_desc[1], &dma_cfg, NULL, 1);
+---
+>             hal_dma_init_desc(p_dma_desc[1], &dma_cfg, NULL, 1);
+358,359c689,690
+<         trace.sends[0] = sends[0];
+<         trace.sends[1] = sends[1];
+---
+>         p_trace->sends[0] = sends[0];
+>         p_trace->sends[1] = sends[1];
+361c692
+<         hal_gpdma_sg_start(&dma_desc[0], &dma_cfg);
+---
+>         hal_dma_sg_start(p_dma_desc[0], &dma_cfg);
+374,375c705,706
+<     sends[0] = trace.sends[0];
+<     sends[1] = trace.sends[1];
+---
+>     sends[0] = p_trace->sends[0];
+>     sends[1] = p_trace->sends[1];
+394,400c725,731
+<     trace.rptr += sends[0] + sends[1];
+<     if (trace.rptr >= TRACE_BUF_SIZE) {
+<         trace.rptr -= TRACE_BUF_SIZE;
+<     }
+<     trace.sends[0] = 0;
+<     trace.sends[1] = 0;
+<     trace.sending = false;
+---
+>     p_trace->rptr += sends[0] + sends[1];
+>     if (p_trace->rptr >= TRACE_BUF_SIZE) {
+>         p_trace->rptr -= TRACE_BUF_SIZE;
+>     }
+>     p_trace->sends[0] = 0;
+>     p_trace->sends[1] = 0;
+>     p_trace->sending = false;
+401a733
+>     if (p_trace->pause_cnt == 0) {
+402a735
+>     }
+407c740
+< static void hal_trace_send(void)
+---
+> static void hal_trace_uart_stop_dma_send(void)
+409,413c742,743
+< #ifdef CP_TRACE_ENABLE
+<     if (get_cpu_id()) {
+<         return;
+<     }
+< #endif
+---
+>     uint32_t lock;
+>     uint32_t remain;
+415,418c745
+<     if (hal_trace_is_uart_transport(trace_transport)) {
+<         hal_trace_uart_send();
+<     }
+< }
+---
+>     lock = int_lock();
+420c747,748
+< #else // TRACE_IDLE_OUTPUT
+---
+>     if (hal_dma_chan_busy(dma_cfg.ch)) {
+>         hal_dma_cancel(dma_cfg.ch);
+422,426c750,759
+< static void hal_trace_uart_idle_send(void)
+< {
+<     int i;
+<     uint32_t lock;
+<     unsigned short wptr, rptr;
+---
+>         remain = hal_dma_get_sg_remain_size(dma_cfg.ch);
+> 
+>         p_trace->rptr += remain;
+>         if (p_trace->rptr >= TRACE_BUF_SIZE) {
+>             p_trace->rptr -= TRACE_BUF_SIZE;
+>         }
+>         p_trace->sends[0] = 0;
+>         p_trace->sends[1] = 0;
+>         p_trace->sending = false;
+>     }
+428,430d760
+<     lock = int_lock();
+<     wptr = trace.wptr;
+<     rptr = trace.rptr;
+431a762
+> }
+433c764,769
+<     if (wptr == rptr) {
+---
+> #endif // TRACE_IDLE_OUTPUT
+> 
+> void hal_trace_send(void)
+> {
+> #ifdef CP_TRACE_ENABLE
+>     if (get_cpu_id()) {
+435a772
+> #endif
+437,441c774,775
+<     if (wptr < rptr) {
+<         for (i = rptr; i < TRACE_BUF_SIZE; i++) {
+<             hal_uart_blocked_putc(trace_uart, trace.buf[i]);
+<         }
+<         rptr = 0;
+---
+>     if (p_trace->pause_cnt) {
+>         return;
+444,445c778,780
+<     for (i = rptr; i < wptr; i++) {
+<         hal_uart_blocked_putc(trace_uart, trace.buf[i]);
+---
+> #if (defined(CHIP_BEST2001_DSP) || defined(CHIP_BEST2003_DSP)) && defined(__A7_DSP_ENABLE__) && !defined(PROGRAMMER)
+>     if (hal_trace_is_transq_transport(trace_transport)) {
+>         hal_trace_transq_send();
+446a782
+> #endif
+448,451c784,786
+<     trace.rptr = wptr;
+<     if (trace.rptr >= TRACE_BUF_SIZE) {
+<         trace.rptr -= TRACE_BUF_SIZE;
+<     }
+---
+> #ifdef CP_BUILD
+>     if (hal_trace_is_cpipc_transport(trace_transport)) {
+>         hal_trace_cpipc_send();
+452a788
+> #endif
+454,455d789
+< void hal_trace_idle_send(void)
+< {
+456a791
+> #if (TRACE_IDLE_OUTPUT)
+457a793,795
+> #else
+>         hal_trace_uart_send();
+> #endif
+461c799
+< #endif // TRACE_IDLE_OUTPUT
+---
+> #endif // TRACE_BUF_SIZE > 0
+463c801
+< int hal_trace_open(enum HAL_TRACE_TRANSPORT_T transport)
+---
+> static void hal_trace_output_linefeed(void)
+465,467c803,804
+<     int ret;
+< 
+<     crash_dump_onprocess = false;
+---
+>     hal_trace_output((const unsigned char *)newline, sizeof(newline) - 1);
+> }
+469c806,808
+< #if (CHIP_HAS_UART > 1)
+---
+> int hal_trace_open(enum HAL_TRACE_TRANSPORT_T transport)
+> {
+> #if (CHIP_HAS_UART >= 2)
+475c814
+< #if (CHIP_HAS_UART > 2)
+---
+> #if (CHIP_HAS_UART >= 3)
+489c828
+< 
+---
+> #if !defined(CONFIG_CONSOLE_USE_CHAR)
+494,498c833
+<     trace_max_level = LOG_LEVEL_INFO;
+<     for (int i = 0; i < ARRAY_SIZE(trace_mod_map); i++) {
+<         trace_mod_map[i] = ~0;
+<     }
+< 
+---
+> #if (TRACE_BUF_SIZE > 0)
+501,506c836,856
+<     trace.wptr = 0;
+<     trace.rptr = 0;
+<     trace.discards = 0;
+<     trace.sending = false;
+<     trace.in_trace = false;
+<     trace.wrapped = false;
+---
+>     p_trace->wptr = 0;
+>     p_trace->rptr = 0;
+>     p_trace->discards = 0;
+>     p_trace->sending = false;
+>     p_trace->in_trace = false;
+>     p_trace->wrapped = false;
+>     p_trace->pause_cnt = 0;
+> 
+> #ifdef __ARM_ARCH_ISA_ARM
+> #ifdef __A7_DSP_ENABLE__
+> #if !defined(NUTTX_BUILD)
+>     if (p_dma_desc[0] == NULL) {
+>         p_dma_desc[0] = (struct HAL_DMA_DESC_T *)a7_dsp_heap_alloc(sizeof(struct HAL_DMA_DESC_T));
+>         p_dma_desc[1] = (struct HAL_DMA_DESC_T *)a7_dsp_heap_alloc(sizeof(struct HAL_DMA_DESC_T));
+>     }
+>     if (p_trace_transq_msg == NULL) {
+>         p_trace_transq_msg = (TRANSQ_MSG_T *)a7_dsp_heap_alloc(sizeof(TRANSQ_MSG_T));
+>     }
+> #endif
+> #endif
+> #endif
+508a859,860
+>         int ret;
+> 
+516,518c868,870
+<         trace.sends[0] = 0;
+<         trace.sends[1] = 0;
+< 
+---
+>         if (uart_cfg.dma_tx) {
+>             p_trace->sends[0] = 0;
+>             p_trace->sends[1] = 0;
+530c882
+<         dma_cfg.ch = hal_gpdma_get_chan(dma_cfg.dst_periph, HAL_DMA_HIGH_PRIO);
+---
+>             dma_cfg.ch = hal_dma_get_chan(dma_cfg.dst_periph, HAL_DMA_HIGH_PRIO);
+532a885,888
+>         }
+> #endif
+>     }
+> #endif // TRACE_BUF_SIZE > 0
+533a890,900
+> 
+> #if (defined(CHIP_BEST2001) || defined(CHIP_BEST2003)) && defined(__A7_DSP_ENABLE__) && !defined(PROGRAMMER) && !defined(NUTTX_BUILD)
+>     if (hal_trace_is_transq_transport(transport)) {
+>         transq_msg_init();
+>         transq_msg_register(TRANSQ_MSG_TYPE_TRACE, hal_trace_transq_xfer_done, true);
+>     }
+> #endif
+> 
+> #ifdef CP_BUILD
+>     if (hal_trace_is_cpipc_transport(transport)) {
+>         cp_ipc_cb_set(CP_IPC_MSG_TRACE, hal_trace_cpipc_xfer_done, true);
+534a902,906
+> #endif
+> 
+> #ifdef CP_BOOT
+>     cp_ipc_cb_set(CP_IPC_MSG_TRACE, hal_trace_cpipc_recv, 0);
+> #endif
+538a911,912
+> #elif defined(CP_BUILD)
+>     NVIC_SetDefaultFaultHandler_cp(hal_trace_fault_handler);
+544c918,920
+<     trace_transport = transport;
+---
+> #ifdef CRASH_DUMP_ENABLE
+>     in_crash_dump = false;
+> #endif
+546,547c922,929
+< #ifdef HAL_TRACE_RX_ENABLE
+<     hal_trace_rx_open();
+---
+>     trace_max_level = TR_LEVEL_INFO;
+>     for (int i = 0; i < ARRAY_SIZE(trace_mod_map); i++) {
+>         trace_mod_map[i] = ~0;
+>     }
+> #if !defined(CONFIG_CONSOLE_USE_CHAR)
+>     trace_transport = transport;
+> #else
+>     trace_transport = HAL_TRACE_TRANSPORT_QTY;
+551,554c933,939
+<     static const char dbl_new_line[] = NEW_LINE_STR NEW_LINE_STR;
+<     hal_trace_output((unsigned char *)dbl_new_line, sizeof(dbl_new_line));
+<     hal_trace_output((unsigned char *)sys_build_info, strlen(sys_build_info)+1);
+< 
+---
+>     hal_trace_output_linefeed();
+>     hal_trace_output_linefeed();
+>     hal_trace_output((unsigned char *)sys_build_info, strlen(sys_build_info));
+> 
+> #if !(defined(CHIP_SUBSYS_DSP) || \
+>         defined(CHIP_SUBSYS_SENS) || \
+>         (defined(CHIP_SUBSYS_BTH) && defined(BTH_AS_MAIN_MCU)))
+560c945,946
+<     hal_trace_output((unsigned char *)buf, len+1);
+---
+>     hal_trace_output((unsigned char *)buf, len);
+> #endif
+567,568c953
+<     uint32_t POSSIBLY_UNUSED lock;
+<     int ret;
+---
+>     int ret = 0;
+570c955
+< #if (CHIP_HAS_UART > 1)
+---
+> #if (CHIP_HAS_UART >= 2)
+576c961
+< #if (CHIP_HAS_UART > 2)
+---
+> #if (CHIP_HAS_UART >= 3)
+597,599c982,983
+<     ret = 0;
+< 
+< #if (CHIP_HAS_UART > 1)
+---
+> #if (CHIP_HAS_UART >= 2)
+>     uint32_t lock;
+602a987
+> #if (TRACE_BUF_SIZE > 0)
+606c991
+<             hal_gpdma_cancel(dma_cfg.ch);
+---
+>             hal_dma_cancel(dma_cfg.ch);
+614a1000,1002
+>         if (dma_cfg.ch != HAL_DMA_CHAN_NONE)
+>             hal_dma_free_chan(dma_cfg.ch);
+>         if (uart_cfg.dma_tx) {
+616,617c1004,1007
+<         trace.sends[0] = 0;
+<         trace.sends[1] = 0;
+---
+>             dma_cfg.ch = hal_dma_get_chan(dma_cfg.dst_periph, HAL_DMA_HIGH_PRIO);
+>         }
+>         p_trace->sends[0] = 0;
+>         p_trace->sends[1] = 0;
+622c1012
+<             hal_gpdma_free_chan(dma_cfg.ch);
+---
+>             hal_dma_free_chan(dma_cfg.ch);
+630c1020,1021
+<     trace.sending = false;
+---
+>     p_trace->sending = false;
+> #endif // TRACE_BUF_SIZE > 0
+634c1025
+< _exit:
+---
+> _exit: POSSIBLY_UNUSED;
+636,637c1027
+< 
+< #endif // CHIP_HAS_UART > 1
+---
+> #endif // (CHIP_HAS_UART >= 2)
+643a1034
+> #if (TRACE_BUF_SIZE > 0)
+656,657c1047,1048
+<             hal_gpdma_cancel(dma_cfg.ch);
+<             hal_gpdma_free_chan(dma_cfg.ch);
+---
+>             hal_dma_cancel(dma_cfg.ch);
+>             hal_dma_free_chan(dma_cfg.ch);
+665a1057
+> #endif // TRACE_BUF_SIZE > 0
+670c1062,1071
+< int hal_trace_enable_log_module(enum LOG_MODULE_T module)
+---
+> enum HAL_TRACE_TRANSPORT_T hal_trace_get_transport(void)
+> {
+> #if (TRACE_BUF_SIZE > 0)
+>     return trace_transport;
+> #else
+>     return HAL_TRACE_TRANSPORT_QTY;
+> #endif
+> }
+> 
+> int hal_trace_enable_log_module(enum TR_MODULE_T module)
+672c1073
+<     if (module >= LOG_MODULE_QTY) {
+---
+>     if (module >= TR_MODULE_QTY) {
+680c1081
+< int hal_trace_disable_log_module(enum LOG_MODULE_T module)
+---
+> int hal_trace_disable_log_module(enum TR_MODULE_T module)
+682c1083
+<     if (module >= LOG_MODULE_QTY) {
+---
+>     if (module >= TR_MODULE_QTY) {
+705c1106
+< int hal_trace_set_log_level(enum LOG_LEVEL_T level)
+---
+> int hal_trace_set_log_level(enum TR_LEVEL_T level)
+707c1108
+<     if (level >= LOG_LEVEL_QTY) {
+---
+>     if (level >= TR_LEVEL_QTY) {
+715c1116
+< void hal_trace_get_history_buffer(const unsigned char **buf1, unsigned int *len1, const unsigned char **buf2, unsigned int *len2)
+---
+> void hal_trace_get_history_buffer(const uint8_t **buf1, uint32_t *len1, const uint8_t **buf2, uint32_t *len2)
+717d1117
+<     uint32_t lock;
+723a1124,1126
+> #if (TRACE_BUF_SIZE > 0)
+>     uint32_t lock;
+> 
+726,731c1129,1134
+<     if (TRACE_BUF_SIZE > trace.wptr) {
+<         if (trace.wrapped) {
+<             b1 = &trace.buf[trace.wptr];
+<             l1 = TRACE_BUF_SIZE - trace.wptr;
+<             b2 = &trace.buf[0];
+<             l2 = trace.wptr;
+---
+>     if (TRACE_BUF_SIZE > p_trace->wptr) {
+>         if (p_trace->wrapped) {
+>             b1 = &p_trace->buf[p_trace->wptr];
+>             l1 = TRACE_BUF_SIZE - p_trace->wptr;
+>             b2 = &p_trace->buf[0];
+>             l2 = p_trace->wptr;
+733,734c1136,1137
+<             b1 = &trace.buf[0];
+<             l1 = trace.wptr;
+---
+>             b1 = &p_trace->buf[0];
+>             l1 = p_trace->wptr;
+740a1144
+> #endif
+756c1160
+< static void hal_trace_print_discards(uint32_t discards)
+---
+> static uint32_t hal_trace_print_unsigned(char *buf, uint32_t len, uint32_t val)
+758,761c1162,1165
+<     static const uint8_t base = 10;
+<     char digit[5], *d, *out;
+<     uint16_t len;
+<     uint16_t size;
+---
+>     const uint8_t base = 10;
+>     char digit[10];
+>     char *d;
+>     uint32_t cnt = 0;
+763,764c1167,1168
+<     if (discards > max_discards) {
+<         discards = max_discards;
+---
+>     if (len == 0) {
+>         return 0;
+769,770c1173,1174
+<         *d++ = (discards % base) + '0';
+<     } while (discards /= base);
+---
+>         *d++ = (val % base) + '0';
+>     } while (val /= base);
+772d1175
+<     out = &discards_buf[discards_digit_start];
+774c1177,1180
+<         *out++ = *--d;
+---
+>         *buf++ = *--d;
+>         if (++cnt >= len) {
+>             break;
+>         }
+775a1182,1198
+> 
+>     return cnt;
+> }
+> 
+> #if (TRACE_BUF_SIZE > 0)
+> static void hal_trace_print_discards(uint32_t discards)
+> {
+>     char *out;
+>     uint16_t len;
+>     uint16_t size;
+> 
+>     if (discards > max_discards) {
+>         discards = max_discards;
+>     }
+> 
+>     len = hal_trace_print_unsigned(&discards_buf[discards_digit_start], 5, discards);
+>     out = &discards_buf[discards_digit_start + len];
+782c1205
+<     size = TRACE_BUF_SIZE - trace.wptr;
+---
+>     size = TRACE_BUF_SIZE - p_trace->wptr;
+786c1209
+<     memcpy(&trace.buf[trace.wptr], &discards_buf[0], size);
+---
+>     memcpy(&p_trace->buf[p_trace->wptr], &discards_buf[0], size);
+788c1211
+<         memcpy(&trace.buf[0], &discards_buf[size], len - size);
+---
+>         memcpy(&p_trace->buf[0], &discards_buf[size], len - size);
+790,792c1213,1215
+<     trace.wptr += len;
+<     if (trace.wptr >= TRACE_BUF_SIZE) {
+<         trace.wptr -= TRACE_BUF_SIZE;
+---
+>     p_trace->wptr += len;
+>     if (p_trace->wptr >= TRACE_BUF_SIZE) {
+>         p_trace->wptr -= TRACE_BUF_SIZE;
+794a1218
+> #endif
+796c1220
+< #ifdef AUDIO_DEBUG_V0_1_0
+---
+> #ifdef AUDIO_DEBUG
+804c1228
+<     size = TRACE_BUF_SIZE - trace.wptr;
+---
+>     size = TRACE_BUF_SIZE - p_trace->wptr;
+808c1232
+<     memcpy(&trace.buf[trace.wptr], &trace_head_buf[0], size);
+---
+>     memcpy(&p_trace->buf[p_trace->wptr], &trace_head_buf[0], size);
+810c1234
+<         memcpy(&trace.buf[0], &trace_head_buf[size], len - size);
+---
+>         memcpy(&p_trace->buf[0], &trace_head_buf[size], len - size);
+812,814c1236,1238
+<     trace.wptr += len;
+<     if (trace.wptr >= TRACE_BUF_SIZE) {
+<         trace.wptr -= TRACE_BUF_SIZE;
+---
+>     p_trace->wptr += len;
+>     if (p_trace->wptr >= TRACE_BUF_SIZE) {
+>         p_trace->wptr -= TRACE_BUF_SIZE;
+818a1243,1309
+> #ifdef CP_TRACE_ENABLE
+> static void hal_trace_cp_lock(uint8_t cpu_id)
+> {
+>     // Avoid CPU hangup when the function is re-entered due to hal_trace_app_output_callback()
+> #ifdef CP_MEMSC_TIMEOUT_CHECK
+>     uint32_t start_time;
+>     const uint32_t timeout = MS_TO_TICKS(500);
+> 
+>     if (memsc_lock_cnt[cpu_id] == 0 && memsc_timeout[cpu_id] == 0) {
+>         start_time = hal_sys_timer_get();
+>         while (hal_memsc_lock(HAL_MEMSC_ID_TRACE) == 0) {
+>             if (hal_sys_timer_get() - start_time >= timeout) {
+>                 memsc_timeout[cpu_id] = 1;
+>                 break;
+>             }
+>         }
+>     }
+> #else
+>     if (memsc_lock_cnt[cpu_id] == 0) {
+>         while (hal_memsc_lock(HAL_MEMSC_ID_TRACE) == 0);
+>     }
+> #endif
+>     memsc_lock_cnt[cpu_id]++;
+> }
+> 
+> static void hal_trace_cp_unlock(uint8_t cpu_id)
+> {
+>     memsc_lock_cnt[cpu_id]--;
+>     if (memsc_lock_cnt[cpu_id] == 0) {
+>         hal_memsc_unlock(HAL_MEMSC_ID_TRACE);
+>     }
+> }
+> 
+> static void hal_trace_cp_force_unlock(void)
+> {
+>     uint8_t cpu_id = get_cpu_id() ? 1 : 0;
+> 
+>     if (memsc_lock_cnt[cpu_id]) {
+>         memsc_lock_cnt[cpu_id] = 0;
+>         hal_memsc_unlock(HAL_MEMSC_ID_TRACE);
+>     }
+> }
+> #endif
+> 
+> static HAL_TRACE_OUTPUT_HOOK_T _hal_trace_output_hook = NULL;
+> void hal_trace_register_hook(HAL_TRACE_OUTPUT_HOOK_T hook)
+> {
+>     _hal_trace_output_hook = hook;
+> }
+> 
+> void hal_trace_unregister_hook(HAL_TRACE_OUTPUT_HOOK_T hook)
+> {
+>     if (_hal_trace_output_hook == hook) {
+>         _hal_trace_output_hook = NULL;
+>     }
+> }
+> 
+> int hal_trace_output_hook(const char *tag, const char *fmt, uint32_t len)
+> {
+>     int ret = 0;
+>     if (_hal_trace_output_hook) {
+>         ret = _hal_trace_output_hook(tag, fmt, len);
+>     }
+>     return ret;
+> }
+> 
+> bool crash_occurs[2];
+823,825c1314,1354
+<     uint32_t avail;
+<     uint32_t out_len;
+<     uint16_t size;
+---
+>     POSSIBLY_UNUSED uint32_t app_wptr = 0;
+> #ifdef CP_TRACE_ENABLE
+>     uint8_t cpu_id = get_cpu_id() ? 1 : 0;
+> #endif
+> #if defined(NUTTX_BUILD)
+> #ifdef CP_TRACE_ENABLE
+>     if (cpu_id == 0 && !hal_trace_is_uart_transport(trace_transport))
+> #else
+>     if (!hal_trace_is_uart_transport(trace_transport))
+> #endif
+>     {
+> #ifdef __ARM_ARCH_ISA_ARM
+> #if defined(CONFIG_BES_LPUART)
+>         hal_uart_output(buf,buf_len);
+> #else
+>         syslog(LOG_ERR,"%s\n",buf);
+> #endif
+> #else
+>         hal_uart_output(buf,buf_len);
+> #endif
+>         return buf_len;
+>     }
+> #endif
+> 
+> #ifdef CP_BUILD
+>     if (hal_trace_is_uart_transport(trace_transport)) {
+>         hal_uart_output(buf,buf_len);
+>         return buf_len;
+>     } else if (crash_occurs[1]) {
+>         /* exec trace redirect to uart0 */
+>         for (int i = 0; i < buf_len; i++) {
+>             hal_uart_blocked_putc(HAL_UART_ID_0, buf[i]);
+>         }
+>         return buf_len;
+>     }
+> #endif
+> 
+>     /* output trace by hook */
+>     if (hal_trace_output_hook(NULL, (const char *)buf, buf_len)) {
+>         return buf_len;
+>     }
+829a1359
+> 
+831c1361
+<     while (hal_memsc_lock(HAL_MEMSC_ID_TRACE) == 0);
+---
+>     hal_trace_cp_lock(cpu_id);
+833a1364
+> #if (TRACE_BUF_SIZE > 0)
+835,836c1366,1369
+<     if (!trace.in_trace) {
+<         trace.in_trace = true;
+---
+>     if (!p_trace->in_trace) {
+>         uint32_t avail;
+>         uint32_t out_len;
+>         uint16_t size;
+838,839c1371,1374
+<         if (trace.wptr >= trace.rptr) {
+<             avail = TRACE_BUF_SIZE - (trace.wptr - trace.rptr) - 1;
+---
+>         p_trace->in_trace = true;
+> 
+>         if (p_trace->wptr >= p_trace->rptr) {
+>             avail = TRACE_BUF_SIZE - (p_trace->wptr - p_trace->rptr) - 1;
+841c1376
+<             avail = (trace.rptr - trace.wptr) - 1;
+---
+>             avail = (p_trace->rptr - p_trace->wptr) - 1;
+845c1380
+< #ifdef AUDIO_DEBUG_V0_1_0
+---
+> #ifdef AUDIO_DEBUG
+848c1383
+<         if (trace.discards) {
+---
+>         if (p_trace->discards) {
+854,855c1389,1390
+<             if (trace.discards < (1 << (sizeof(trace.discards) * 8)) - 1) {
+<                 trace.discards++;
+---
+>             if (p_trace->discards < (1 << (sizeof(p_trace->discards) * 8)) - 1) {
+>                 p_trace->discards++;
+858a1394
+>             // CP might have filled up the whole buffer
+863c1399
+< #ifdef AUDIO_DEBUG_V0_1_0
+---
+> #ifdef AUDIO_DEBUG
+867,869c1403,1405
+<             if (trace.discards) {
+<                 hal_trace_print_discards(trace.discards);
+<                 trace.discards = 0;
+---
+>             if (p_trace->discards) {
+>                 hal_trace_print_discards(p_trace->discards);
+>                 p_trace->discards = 0;
+872c1408
+<             size = TRACE_BUF_SIZE - trace.wptr;
+---
+>             size = TRACE_BUF_SIZE - p_trace->wptr;
+876c1412
+<             memcpy(&trace.buf[trace.wptr], &buf[0], size);
+---
+>             memcpy(&p_trace->buf[p_trace->wptr], &buf[0], size);
+878c1414
+<                 memcpy(&trace.buf[0], &buf[size], buf_len - size);
+---
+>                 memcpy(&p_trace->buf[0], &buf[size], buf_len - size);
+880,883c1416,1419
+<             trace.wptr += buf_len;
+<             if (trace.wptr >= TRACE_BUF_SIZE) {
+<                 trace.wptr -= TRACE_BUF_SIZE;
+<                 trace.wrapped = true;
+---
+>             p_trace->wptr += buf_len;
+>             if (p_trace->wptr >= TRACE_BUF_SIZE) {
+>                 p_trace->wptr -= TRACE_BUF_SIZE;
+>                 p_trace->wrapped = true;
+889a1426,1427
+>         p_trace->in_trace = false;
+> 
+891,892c1429,1431
+<         if (get_cpu_id()) {
+<             if (cp_buffer_cb) {
+---
+>         if (cpu_id) {
+>             if (cp_buffer_cb && !cp_buffer_cb_running) {
+>                 cp_buffer_cb_running = true;
+897a1437
+>                 cp_buffer_cb_running = false;
+898a1439,1440
+>         } else {
+>             app_wptr = p_trace->wptr;
+900a1443,1444
+>     }
+> #endif // TRACE_BUF_SIZE > 0
+902c1446,1448
+<         trace.in_trace = false;
+---
+> #ifdef CP_TRACE_ENABLE
+>     hal_trace_cp_unlock(cpu_id);
+> #endif
+906,907c1452
+<         if (app_output_cb && app_output_enabled) {
+<             bool saved_output_state;
+---
+>     bool app_output;
+909,914c1454,1457
+<             saved_output_state = app_output_enabled;
+<             app_output_enabled = false;
+< 
+<             app_output_cb(buf, buf_len);
+< 
+<             app_output_enabled = saved_output_state;
+---
+>     app_output = app_output_cb_valid && app_output_enabled;
+> #ifdef CP_TRACE_ENABLE
+>     if (cpu_id) {
+>         app_output = false;
+916a1460,1473
+> 
+>     if (app_output) {
+>         app_output_enabled = false;
+> #if defined(CP_TRACE_ENABLE) && (TRACE_BUF_SIZE > 0)
+>         if (app_wptr < p_trace->app_rptr) {
+>             hal_trace_app_output_callback(&p_trace->buf[p_trace->app_rptr], TRACE_BUF_SIZE - p_trace->app_rptr);
+>             p_trace->app_rptr = 0;
+>         }
+>         if (app_wptr > p_trace->app_rptr) {
+>             hal_trace_app_output_callback(&p_trace->buf[p_trace->app_rptr], app_wptr - p_trace->app_rptr);
+>             p_trace->app_rptr = app_wptr;
+>         }
+> #else
+>         hal_trace_app_output_callback(buf, buf_len);
+917a1475
+>         app_output_enabled = true;
+918a1477,1478
+> #endif
+> #endif
+920,921c1480,1484
+< #ifdef CP_TRACE_ENABLE
+<     hal_memsc_unlock(HAL_MEMSC_ID_TRACE);
+---
+> #if defined(CP_TRACE_ENABLE) && defined(CP_MEMSC_TIMEOUT_CHECK)
+>     if (memsc_timeout[cpu_id] == 1) {
+>         memsc_timeout[cpu_id] = 2;
+>         ASSERT(false, "TRACE-%u: Wait memsc timeout", cpu_id);
+>     }
+922a1486
+> 
+926a1491,1500
+> 
+> int hal_raw_trace_output(const unsigned char *buf, unsigned int buf_len)
+> {
+>     if (get_hal_trace_onoff() == 1)
+>     {
+>         return 0;
+>     }
+>     return hal_trace_output(buf, buf_len);
+> }
+> 
+928c1502
+< //define USE_CRC_CHECK
+---
+> //#define USE_CRC_CHECK
+930a1505,1506
+> #define TRACE_ID_MAX_ARG_NUM                15
+> 
+935c1511,1512
+<     uint32_t addr:17; //127 KB trace space support
+---
+>     uint32_t rfu:17;    //!< reserved for future use
+>     uint32_t addr;      //!< enough for trace string address
+950c1527,1530
+< extern const char *unkonw_str;
+---
+> struct PACKED LOG_BODY_T {
+>     LOG_DATA_T hdr;
+>     uint32_t arg[TRACE_ID_MAX_ARG_NUM];
+> };
+953a1534
+> 
+991c1572
+< static int hal_trace_format_id(uint32_t attr, char *buf, uint32_t size, const char *fmt, va_list ap)
+---
+> static int hal_trace_format_id(uint32_t attr, struct LOG_BODY_T *log, const char *fmt, va_list ap)
+994,995d1574
+<     unsigned int value[10];
+<     LOG_DATA_T trace;
+997,1003c1576,1578
+<     if (size < sizeof(trace) + sizeof(value)) {
+<         return -1;
+<     }
+< 
+<     num = GET_BITFIELD(attr, LOG_ATTR_ARG_NUM);
+<     if (num > 10) {
+<         num = 10;
+---
+>     num = GET_BITFIELD(attr, TR_ATTR_ARG_NUM);
+>     if (num > TRACE_ID_MAX_ARG_NUM) {
+>         num = TRACE_ID_MAX_ARG_NUM;
+1006c1581
+<         value[i] = va_arg(ap, unsigned long);
+---
+>         log->arg[i] = va_arg(ap, unsigned long);
+1009,1014c1584,1592
+<     //memset(buf, 0, size);
+< 
+<     trace.trace_info.count = num;
+<     trace.trace_info.addr = (uint32_t)fmt-(uint32_t)0xFFFC0000;//(uint32_t)fmt-(uint32_t)__trc_str_start__;
+<     trace.trace_info.tskid = osGetThreadIntId();
+<     trace.trace_info.crc = 0x2A;
+---
+>     log->hdr.trace_info.count = num;
+>     log->hdr.trace_info.addr = (uint32_t)fmt-(uint32_t)0xFFFC0000; //(uint32_t)fmt-(uint32_t)__trc_str_start__;
+>     log->hdr.trace_info.tskid =
+> #ifdef RTOS
+>         osGetThreadIntId();
+> #else
+>         0;
+> #endif
+>     log->hdr.trace_info.crc = 0x2A;
+1016c1594
+<     trace.trace_head.timestamp = TICKS_TO_MS(hal_sys_timer_get());
+---
+>     log->hdr.trace_head.timestamp = TICKS_TO_MS(hal_sys_timer_get());
+1018c1596
+<     trace.trace_head.crc = crc8(((uint8_t *)&trace)+1,7);
+---
+>     log->hdr.trace_head.crc = crc8(((uint8_t *)&log->hdr) + 1, 7);
+1020c1598
+<     trace.trace_head.crc = 0xBE;
+---
+>     log->hdr.trace_head.crc = 0xBE;
+1023c1601
+<     trace.trace_info.crc = crc6(((uint8_t *)&trace)+1,3);
+---
+>     log->hdr.trace_info.crc = crc6(((uint8_t *)&log->hdr) + 1, 3);
+1025,1028d1602
+<     memcpy(buf, &trace, sizeof(trace));
+<     if (num != 0) {
+<         memcpy(buf + sizeof(trace), value, 4*num);
+<     }
+1030c1604
+<     return sizeof(trace) + 4*num;
+---
+>     return sizeof(log->hdr) + sizeof(log->arg[0]) * num;
+1032c1606
+< #endif
+---
+> #endif // USE_TRACE_ID
+1034c1608
+< static int hal_trace_print_time(enum LOG_LEVEL_T level, enum LOG_MODULE_T module, char *buf, unsigned int size)
+---
+> static int hal_trace_print_time(enum TR_LEVEL_T level, enum TR_MODULE_T module, char *buf, unsigned int size)
+1036a1611,1616
+> #ifdef CONFIG_SMP
+> #define PRINT_CPU_ID
+> #else
+> #define PRINT_MODE_LEVEL
+> #endif
+> #ifdef PRINT_MODE_LEVEL
+1037a1618,1620
+>     const char *mod_name;
+>     int i;
+> #endif
+1040,1041d1622
+<     int i;
+<     const char *mod_name;
+1044c1625
+<     if (crash_handling) {
+---
+>     if (in_crash_dump) {
+1048a1630,1682
+>     len = 0;
+>     len += snprintf(&buf[len], size - len, "%9u/", (unsigned)__SLIM_TICKS_TO_MS(hal_sys_timer_get()));
+> #ifdef TRACE_GLOBAL_TAG
+>     if (gbl_tag_cb && size > len) {
+> #if defined(CP_TRACE_ENABLE) && !defined(CONFIG_SMP)
+>         if (get_cpu_id() == 0)
+> #endif
+>         {
+>             len += gbl_tag_cb(&buf[len], size - len);
+>         }
+>     }
+> #endif
+> #if defined(ARM_CMNS) || defined(ARM_CMSE)
+>     if (size > len) {
+> #if defined(ARM_CMNS)
+>         len += snprintf(&buf[len], size - len, "NS/");
+> #elif defined(ARM_CMSE)
+>         len += snprintf(&buf[len], size - len, "SE/");
+> #endif
+>     }
+> #endif
+> #ifdef PRINT_MODE_LEVEL
+>     if (size > len + 2) {
+>         buf[len++] = level_ch[level];
+>         buf[len++] = '/';
+>     }
+>     if (size > len + 7) {
+>         mod_name = hal_trace_get_log_module_desc(module);
+>         if (mod_name) {
+>             for (i = 0; i < 6; i++) {
+>                 if (mod_name[i] == '\0') {
+>                     break;
+>                 }
+>                 buf[len++] = mod_name[i];
+>             }
+>         } else {
+>             buf[len++] = 'M';
+>             i = hal_trace_print_unsigned(&buf[len], 5, module);
+>             len += i;
+>             i++;
+>         }
+>         for (; i < 6; i++) {
+>             buf[len++] = ' ';
+>         }
+>         buf[len++] = '/';
+>     }
+> #endif
+> #ifdef PRINT_CPU_ID
+>     if (size > len) {
+>         len += snprintf(&buf[len], size - len, "cpu%d/", get_cpu_id());
+>     }
+> #endif
+>     if (size > len) {
+1050c1684
+< #ifdef CP_TRACE_ENABLE
+---
+> #if defined(CP_TRACE_ENABLE) && !defined(CONFIG_SMP)
+1058,1061c1692,1697
+<         len = snprintf(ctx, sizeof(ctx), "%2d", (int8_t)NVIC_GetCurrentActiveIRQ());
+<         if (len + 1 < ARRAY_SIZE(ctx)) {
+<             ctx[len] = 'E';
+<             ctx[len + 1] = '\0';
+---
+>             uint32_t ctx_len;
+> 
+>             ctx_len = snprintf(ctx, sizeof(ctx), "%2d", (int8_t)NVIC_GetCurrentActiveIRQ());
+>             if (ctx_len + 1 < ARRAY_SIZE(ctx)) {
+>                 ctx[ctx_len] = 'E';
+>                 ctx[ctx_len + 1] = '\0';
+1068,1074c1704,1706
+< #ifdef KERNEL_RTX5
+<         /* const char *thread_name = osGetThreadName(); */
+<         /* snprintf(ctx, sizeof(ctx), "%.9s", thread_name ? (char *)thread_name : "NULL"); */
+<         ctx[0] = ' ';
+<         ctx[1] = ' ';
+<         ctx[2] = 't';
+<         ctx[3] = '\0';
+---
+> #if defined(KERNEL_RHINO) || defined(KERNEL_RTX5)
+>             const char *thread_name = osGetThreadName();
+>             snprintf(ctx, sizeof(ctx), "%.9s", thread_name ? (char *)thread_name : "NULL");
+1077a1710
+> 
+1086,1104d1718
+<     len = 0;
+<     len += snprintf(&buf[len], size - len, "%9u/", (unsigned)TICKS_TO_MS(hal_sys_timer_get()));
+<     if (size > len + 2) {
+<         buf[len++] = level_ch[level];
+<         buf[len++] = '/';
+<     }
+<     if (size > len + 7) {
+<         mod_name = hal_trace_get_log_module_desc(module);
+<         for (i = 0; i < 6; i++) {
+<             if (mod_name[i] == '\0') {
+<                 break;
+<             }
+<             buf[len++] = mod_name[i];
+<         }
+<         for (; i < 6; i++) {
+<             buf[len++] = ' ';
+<         }
+<         buf[len++] = '/';
+<     }
+1105a1720
+>     }
+1117c1732
+<     if ((attr & LOG_ATTR_NO_LF) == 0) {
+---
+>     if ((attr & TR_ATTR_NO_LF) == 0) {
+1132c1747,1769
+< static int hal_trace_printf_internal(uint32_t attr, const char *fmt, va_list ap)
+---
+> static HAL_TRACE_PRINTF_HOOK_T _hal_trace_printf_hook = NULL;
+> void hal_trace_printf_register_hook(HAL_TRACE_PRINTF_HOOK_T hook)
+> {
+>     _hal_trace_printf_hook = hook;
+> }
+> 
+> void hal_trace_printf_unregister_hook(HAL_TRACE_PRINTF_HOOK_T hook)
+> {
+>     if (_hal_trace_printf_hook == hook) {
+>         _hal_trace_printf_hook = NULL;
+>     }
+> }
+> 
+> int hal_trace_printf_hook(const char *tag, const char *fmt, va_list ap)
+> {
+>     int ret = 0;
+>     if (_hal_trace_printf_hook) {
+>         ret = _hal_trace_printf_hook(tag, fmt, ap);
+>     }
+>     return ret;
+> }
+> 
+> int hal_trace_printf_internal(uint32_t attr, const char *fmt, va_list ap)
+1134a1772,1776
+>     struct PACKED LOG_CONTAINER_T {
+>         char prefix[4];
+>         struct LOG_BODY_T body;
+>     };
+>     union LOG_BUF_T {
+1135a1778,1783
+>         struct LOG_CONTAINER_T container;
+>         uint32_t align;
+>     };
+> 
+>     union LOG_BUF_T log_buf;
+>     char *buf = (char *)&log_buf;
+1137c1785
+<     char buf[120];
+---
+>     char buf[TRACE_PRINTF_LEN];
+1138a1787,1798
+>     if (get_hal_trace_onoff()){
+>         return 0;
+>     }
+> 
+> #ifndef __ARM_ARCH_ISA_ARM
+>     if (!in_isr()) {
+>         if (hal_trace_printf_hook(NULL, fmt, ap)) {
+>             return 1;
+>         }
+>     }
+> #endif
+> 
+1140,1141c1800,1801
+<     enum LOG_LEVEL_T level;
+<     enum LOG_MODULE_T module;
+---
+>     enum TR_LEVEL_T level;
+>     enum TR_MODULE_T module;
+1143,1144c1803,1814
+<     level = GET_BITFIELD(attr, LOG_ATTR_LEVEL);
+<     module = GET_BITFIELD(attr, LOG_ATTR_MOD);
+---
+>     level = GET_BITFIELD(attr, TR_ATTR_LEVEL);
+>     module = GET_BITFIELD(attr, TR_ATTR_MOD);
+> #if defined(NUTTX_BUILD) && !defined(CONFIG_ARCH_CHIP_DEBUG_H)
+>     bool is_nolf = attr & TR_ATTR_NO_LF;
+>     //if (!is_nolf)
+>     {
+>         len = snprintf(buf, TRACE_PRINTF_LEN,"%s\n", fmt);
+>         fmt = buf;
+>     }
+>     vsyslog(level+1, fmt , ap);
+>     return len;
+> #else
+1147c1817
+<     if (!crash_handling)
+---
+>     if (!in_crash_dump)
+1153c1823
+<         if (level > LOG_LEVEL_CRITICAL && (trace_mod_map[module >> 5] & (1 << (module & 0x1F))) == 0) {
+---
+>         if (level > TR_LEVEL_CRITICAL && (trace_mod_map[module >> 5] & (1 << (module & 0x1F))) == 0) {
+1159c1829,1834
+<     if ((attr & LOG_ATTR_NO_ID) || (len = hal_trace_format_id(attr, buf, sizeof(buf), fmt, ap)) < 0)
+---
+>     if ((attr & TR_ATTR_NO_ID) == 0 && (len = hal_trace_format_id(attr, &log_buf.container.body, fmt, ap)) > 0) {
+>         buf = &log_buf.container.prefix[3];
+>         buf[0] = '\0';
+>         len += 1;
+>     }
+>     else
+1163c1838
+<         if ((attr & LOG_ATTR_NO_TS) == 0) {
+---
+>         if ((attr & TR_ATTR_NO_TS) == 0) {
+1169a1845
+> #endif
+1177c1853
+<     if (attr & LOG_ATTR_IMM) {
+---
+>     if (attr & TR_ATTR_IMM) {
+1185c1861
+<     if (attr & LOG_ATTR_IMM) {
+---
+>     if (attr & TR_ATTR_IMM) {
+1191a1868,1893
+> int hal_trace_printf_without_crlf_ts(const char *fmt, ...)
+> {
+>     int ret;
+>     uint32_t attr = TR_ATTR_NO_LF|TR_ATTR_NO_TS|TR_ATTR_NO_ID;
+>     va_list ap;
+> 
+>     va_start(ap, fmt);
+>     ret = hal_trace_printf_internal(attr, fmt, ap);
+>     va_end(ap);
+> 
+>     return ret;
+> }
+> 
+> int hal_trace_printf_without_crlf(const char *fmt, ...)
+> {
+>     int ret;
+>     uint32_t attr = TR_ATTR_NO_LF|TR_ATTR_NO_ID;
+>     va_list ap;
+> 
+>     va_start(ap, fmt);
+>     ret = hal_trace_printf_internal(attr, fmt, ap);
+>     va_end(ap);
+> 
+>     return ret;
+> }
+> 
+1194c1896
+<     char buf[255]={0};
+---
+>     char buf[TRACE_DUMP_LEN];
+1209c1911
+<                     len += snprintf(&buf[len], sizeof(buf) - len, fmt, *(int16_t *)((int16_t *)buffer+i));
+---
+>                     len += snprintf(&buf[len], sizeof(buf) - len, fmt, *(uint16_t *)((uint16_t *)buffer+i));
+1232c1934,1938
+<     n = hal_trace_output((unsigned char *)buf, len+1);
+---
+>     if (get_hal_trace_onoff() == 1){
+>         return len;
+>     }
+> 
+>     n = hal_trace_output((unsigned char *)buf, len);
+1238a1945
+> #if (TRACE_BUF_SIZE > 0)
+1246a1954
+> #endif
+1251a1960,1965
+> #if (TRACE_BUF_SIZE > 0)
+>     int ret = 0;
+>     uint32_t lock;
+> 
+>     lock = int_lock();
+>     if (p_trace->pause_cnt == 0) {
+1253c1967,1970
+<         return hal_uart_pause(trace_uart);
+---
+> #if (TRACE_IDLE_OUTPUT == 0)
+>             hal_trace_uart_stop_dma_send();
+> #endif
+>             hal_uart_pause(trace_uart, HAL_UART_XFER_TYPE_TX);
+1255c1972,1983
+<     return 1;
+---
+>     }
+>     p_trace->pause_cnt++;
+>     if (p_trace->pause_cnt == 0) {
+>         p_trace->pause_cnt--;
+>         ret = 1;
+>     }
+>     int_unlock(lock);
+> 
+>     return ret;
+> #else
+>     return 0;
+> #endif
+1259a1988,1997
+> #if (TRACE_BUF_SIZE > 0)
+>     int ret = 0;
+>     uint32_t lock;
+> 
+>     lock = int_lock();
+>     if (p_trace->pause_cnt == 0) {
+>         ret = 1;
+>     } else {
+>         p_trace->pause_cnt--;
+>         if (p_trace->pause_cnt == 0) {
+1261c1999
+<         return hal_uart_continue(trace_uart);
+---
+>                 hal_uart_continue(trace_uart, HAL_UART_XFER_TYPE_TX);
+1263c2001,2027
+<     return 1;
+---
+> #if (TRACE_IDLE_OUTPUT == 0)
+>             hal_trace_send();
+> #endif
+>         }
+>     }
+>     int_unlock(lock);
+> 
+>     return ret;
+> #else
+>     return 0;
+> #endif
+> }
+> 
+> static void hal_trace_force_continue(void)
+> {
+> #if (TRACE_BUF_SIZE > 0)
+>     if (p_trace->pause_cnt) {
+>         // Allow to flush buffer
+>         p_trace->pause_cnt = 0;
+>         if (hal_trace_is_uart_transport(trace_transport)) {
+>             hal_uart_continue(trace_uart, HAL_UART_XFER_TYPE_TX);
+>         }
+> #if (TRACE_IDLE_OUTPUT == 0)
+>         hal_trace_send();
+> #endif
+>     }
+> #endif
+1267a2032,2033
+> #if (TRACE_BUF_SIZE > 0)
+>     int ret = 0;
+1270c2036
+<     int ret;
+---
+> #if (TRACE_IDLE_OUTPUT == 0)
+1271a2038
+> #endif
+1273c2040
+<     if (!hal_trace_is_uart_transport(trace_transport)) {
+---
+>     if (trace_transport >= HAL_TRACE_TRANSPORT_QTY)  {
+1286,1287d2052
+<     hal_uart_continue(trace_uart);
+< 
+1289a2055
+>     if (p_trace->pause_cnt == 0) {
+1291,1292c2057,2058
+<     while (trace.wptr != trace.rptr &&
+<             hal_sys_timer_get() - time < TRACE_FLUSH_TIMEOUT) {
+---
+>         while (p_trace->wptr != p_trace->rptr &&
+>                 (hal_sys_timer_get() - time) < TRACE_FLUSH_TIMEOUT) {
+1294,1295c2060,2071
+<         while (hal_gpdma_chan_busy(dma_cfg.ch));
+<         dma_ret = hal_gpdma_irq_run_chan(dma_cfg.ch);
+---
+> #if (defined(CHIP_BEST2001_DSP) || defined(CHIP_BEST2003_DSP)) && !defined(PROGRAMMER) && defined(RTOS)
+>             if (trace_transport == HAL_TRACE_TRANSPORT_TRANSQ1) {
+>                 if (p_trace->sending) {
+>                     while (hal_transq_tx_busy(HAL_TRANSQ_ID_1));
+>                     hal_transq_local_irq_handler_body(HAL_TRANSQ_ID_1);
+>                 }
+>                 hal_trace_send();
+>             } else
+> #endif
+>             {
+>                 while (hal_dma_chan_busy(dma_cfg.ch));
+>                 dma_ret = hal_dma_irq_run_chan(dma_cfg.ch);
+1298a2075
+>             }
+1300c2077
+<         hal_trace_idle_send();
+---
+>             hal_trace_send();
+1303,1304c2080,2081
+< 
+<     ret = (trace.wptr == trace.rptr) ? 0 : 1;
+---
+>         ret = (p_trace->wptr == p_trace->rptr) ? 0 : 1;
+>     }
+1308a2086,2111
+> #else
+>     return 0;
+> #endif
+> }
+> 
+> int hal_trace_flush_output(void)
+> {
+> #if (TRACE_BUF_SIZE > 0)
+>     uint32_t lock;
+>     uint32_t time;
+>     int ret;
+>     int busy;
+> 
+>     lock = int_lock();
+> 
+>     ret = hal_trace_flush_buffer();
+> 
+>     time = hal_sys_timer_get();
+>     while ((busy = hal_trace_busy()) && (hal_sys_timer_get() - time) < TRACE_FLUSH_TIMEOUT);
+> 
+>     int_unlock(lock);
+> 
+>     return (ret || busy);
+> #else
+>     return 0;
+> #endif
+1344a2148,2153
+> #if defined(NUTTX_BUILD)
+>     extern uint32_t _mmu_text_start[];
+>     extern uint32_t _mmu_text_end[];
+>     if (addr >= _mmu_text_start && addr <= _mmu_text_end)
+>         return addr;
+> #else
+1347a2157
+> #endif
+1353c2163
+< void hal_trace_print_special_stack_registers(void)
+---
+> void hal_trace_print_special_stack_registers(uint32_t msp, uint32_t psp)
+1357c2167
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline) - 1);
+---
+>     hal_trace_output_linefeed();
+1359c2169
+<     len = snprintf(crash_buf, sizeof(crash_buf), "MSP=%08X, PSP=%08X" NEW_LINE_STR, (unsigned)__get_MSP(), (unsigned)__get_PSP());
+---
+>     len = snprintf(crash_buf, sizeof(crash_buf), "MSP   =%08X, PSP   =%08X" NEW_LINE_STR, (unsigned)msp, (unsigned)psp);
+1366a2177,2191
+> 
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+> void hal_trace_print_special_stack_registers_ns(uint32_t msp_ns, uint32_t psp_ns)
+> {
+>     int len;
+> 
+>     hal_trace_output_linefeed();
+> 
+>     len = snprintf(crash_buf, sizeof(crash_buf), "MSP_NS   =%08X, PSP_NS   =%08X" NEW_LINE_STR, (unsigned)msp_ns, (unsigned)psp_ns);
+>     hal_trace_output((unsigned char *)crash_buf, len);
+> 
+>     len = snprintf(crash_buf, sizeof(crash_buf), "MSPLIM_NS=%08X, PSPLIM_NS=%08X" NEW_LINE_STR, (unsigned)__TZ_get_MSPLIM_NS(), (unsigned)__TZ_get_PSPLIM_NS());
+>     hal_trace_output((unsigned char *)crash_buf, len);
+> }
+> #endif
+1375c2200
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline) - 1);
+---
+>     hal_trace_output_linefeed();
+1402c2227,2236
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline) - 1);
+---
+> #ifndef DUMP_SECURE_STACK
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     // don't dump secure stack
+>     if (RAM_BASE < addr && addr < RAM_BASE + RAM_SIZE) {
+>         return;
+>     }
+> #endif
+> #endif
+> 
+>     hal_trace_output_linefeed();
+1445,1446c2279,2280
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+<     hal_trace_output((const unsigned char *)bt_title, sizeof(bt_title));
+---
+>     hal_trace_output_linefeed();
+>     hal_trace_output((const unsigned char *)bt_title, sizeof(bt_title) - 1);
+1454a2289,2291
+>  #if defined(NUTTX_BUILD)
+>             len = snprintf(crash_buf, sizeof(crash_buf), "%8X ", (unsigned)call_addr);
+>  #else
+1456c2293,2294
+<             hal_trace_output((unsigned char *)crash_buf, len+1);
+---
+>  #endif
+>             hal_trace_output((unsigned char *)crash_buf, len);
+1461a2300,2304
+> uint32_t hal_trace_get_id(void)
+> {
+>     return trace_uart;
+> }
+> 
+1463a2307
+> #if (TRACE_BUF_SIZE > 0)
+1464a2309,2311
+> #else
+>     return 0;
+> #endif
+1467c2314
+< bool hal_trace_crash_dump_onprocess(void)
+---
+> bool hal_trace_in_crash_dump(void)
+1469c2316,2320
+<     return crash_dump_onprocess;
+---
+> #ifdef CRASH_DUMP_ENABLE
+>     return in_crash_dump;
+> #else
+>     return false;
+> #endif
+1481,1482c2332
+< #ifdef CRASH_DUMP_ENABLE
+< static void hal_trace_crash_dump_callback(void)
+---
+> void hal_trace_crash_dump_callback(void)
+1483a2334
+> #ifdef CRASH_DUMP_ENABLE
+1486c2337
+<     crash_handling = true;
+---
+>     in_crash_dump = true;
+1492a2344,2371
+> #endif
+> }
+> 
+> #ifdef CRASH_DUMP_ENABLE
+> #ifdef TRACE_TO_APP
+> void hal_trace_app_notify_callback(enum HAL_TRACE_STATE_T state)
+> {
+>     if (state == HAL_TRACE_STATE_CRASH_ASSERT_START) {
+>         app_output_enabled = true;
+>     } else if (state == HAL_TRACE_STATE_CRASH_FAULT_START) {
+>         if (app_crash_custom_cb == NULL) {
+>             app_output_enabled = true;
+>         }
+>     }
+>     for (int i = 0; i < HAL_TRACE_APP_REG_ID_QTY; i++) {
+>         if (app_notify_cb[i]) {
+>             app_notify_cb[i](state);
+>         }
+>     }
+> }
+> 
+> static void hal_trace_app_output_callback(const unsigned char *buf, unsigned int buf_len)
+> {
+>     for (int i = 0; i < HAL_TRACE_APP_REG_ID_QTY; i++) {
+>         if (app_output_cb[i]) {
+>             app_output_cb[i](buf, buf_len);
+>         }
+>     }
+1494a2374
+> #endif
+1496c2376
+< void hal_trace_app_register(HAL_TRACE_APP_NOTIFY_T notify_cb, HAL_TRACE_APP_OUTPUT_T output_cb)
+---
+> int hal_trace_app_register(enum HAL_TRACE_APP_REG_ID_T id, HAL_TRACE_APP_NOTIFY_T notify_cb, HAL_TRACE_APP_OUTPUT_T output_cb)
+1497a2378,2380
+>     if (id >= HAL_TRACE_APP_REG_ID_QTY) {
+>         return 1;
+>     }
+1499,1500c2382,2398
+<     app_notify_cb = notify_cb;
+<     app_output_cb = output_cb;
+---
+>     bool output_valid = false;
+>     uint32_t lock;
+> 
+>     lock = int_lock();
+> 
+>     app_notify_cb[id] = notify_cb;
+>     app_output_cb[id] = output_cb;
+> 
+>     for (int i = 0; i < HAL_TRACE_APP_REG_ID_QTY; i++) {
+>         if (app_output_cb[i]) {
+>             output_valid = true;
+>             break;
+>         }
+>     }
+>     app_output_cb_valid = output_valid;
+> 
+>     int_unlock(lock);
+1501a2400
+>     return 0;
+1507c2406
+<     hal_trace_app_register(notify_cb, output_cb);
+---
+>     hal_trace_app_register(HAL_TRACE_APP_REG_ID_0, notify_cb, output_cb);
+1512c2411,2418
+< void hal_trace_cp_register(HAL_TRACE_APP_NOTIFY_T notify_cb, HAL_TRACE_BUF_CTRL_T buf_cb)
+---
+> void hal_trace_global_tag_register(HAL_TRACE_GLOBAL_TAG_CB_T tag_cb)
+> {
+> #ifdef TRACE_GLOBAL_TAG
+>     gbl_tag_cb = tag_cb;
+> #endif
+> }
+> 
+> int hal_trace_open_cp(HAL_TRACE_BUF_CTRL_T buf_cb, HAL_TRACE_APP_NOTIFY_T notify_cb)
+1515d2420
+<     cp_notify_cb = notify_cb;
+1516a2422,2427
+> #ifdef CRASH_DUMP_ENABLE
+>     cp_notify_cb = notify_cb;
+> #endif
+> #ifdef FAULT_DUMP
+>     NVIC_SetDefaultFaultHandler_cp(hal_trace_fault_handler);
+> #endif
+1517a2429,2444
+> 
+>     return 0;
+> }
+> 
+> int hal_trace_close_cp(void)
+> {
+> #ifdef CP_TRACE_ENABLE
+>     cp_buffer_cb = NULL;
+> #ifdef CRASH_DUMP_ENABLE
+>     cp_notify_cb = NULL;
+> #endif
+>     // Force to unlock CP trace memsc
+>     hal_memsc_unlock(HAL_MEMSC_ID_TRACE);
+> #endif
+> 
+>     return 0;
+1537,1546d2463
+< int hal_trace_open_cp(void)
+< {
+< #ifdef CP_TRACE_ENABLE
+< #ifdef FAULT_DUMP
+<     NVIC_SetDefaultFaultHandler_cp(hal_trace_fault_handler);
+< #endif
+< #endif
+<     return 0;
+< }
+< 
+1552c2469
+< #ifdef PSRAM_BASE
+---
+> #if defined(PSRAM_BASE) && (PSRAM_SIZE > 0)
+1557c2474
+< #ifdef PSRAM_NC_BASE
+---
+> #if defined(PSRAM_NC_BASE) && (PSRAM_SIZE > 0)
+1562c2479
+< #ifdef PSRAMUHS_BASE
+---
+> #if defined(PSRAMUHS_BASE) && (PSRAMUHS_SIZE > 0)
+1567c2484
+< #ifdef PSRAMUHS_NC_BASE
+---
+> #if defined(PSRAMUHS_NC_BASE) && (PSRAMUHS_SIZE > 0)
+1572c2489
+< #ifdef RAMRET_BASE
+---
+> #if defined(RAMRET_BASE) && (RAMRET_SIZE > 0)
+1577c2494
+< #ifdef RAMCP_BASE
+---
+> #if defined(RAMCP_BASE) && (RAMCP_SIZE > 0)
+1581a2499,2511
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     if (RAM_NS_BASE < addr && addr < RAM_NS_BASE + RAM_NS_SIZE) {
+>         return 1;
+>     }
+> #endif
+> 
+> #if defined(CONFIG_BES_DUALCORE_AMP)
+> #ifdef PSRAMCP_BASE
+>     if (PSRAMCP_BASE < addr && addr < PSRAMCP_BASE + PSRAMCP_SIZE) {
+>         return 1;
+>     }
+> #endif
+> #endif
+1587,1589d2516
+< // Avoid reading out of valid memory region when parsing instruction content
+< #define X_ADDR_OFFSET                   0x10
+< 
+1593a2521,2524
+> 
+> // Avoid reading out of valid memory region when parsing instruction content
+> #define X_ADDR_OFFSET                   0x10
+> 
+1595c2526
+<     if (RAMX_BASE + X_ADDR_OFFSET < addr && addr < RAMX_BASE + RAM_SIZE) {
+---
+>     if ((RAMX_BASE + X_ADDR_OFFSET) < addr && addr < (RAMX_BASE + RAM_SIZE)) {
+1598c2529,2530
+<     if (FLASHX_BASE + X_ADDR_OFFSET < addr && addr < FLASHX_BASE + FLASH_SIZE) {
+---
+> #if defined(PSRAMX_BASE) && (PSRAM_SIZE > 0)
+>     if ((PSRAMX_BASE + X_ADDR_OFFSET) < addr && addr < (PSRAMX_BASE + PSRAM_SIZE)) {
+1601,1602c2533,2535
+< #ifdef PSRAMX_BASE
+<     if (PSRAMX_BASE + X_ADDR_OFFSET < addr && addr < PSRAMX_BASE + PSRAM_SIZE) {
+---
+> #endif
+> #if defined(PSRAMUHSX_BASE) && (PSRAMUHS_SIZE > 0)
+>     if ((PSRAMUHSX_BASE + X_ADDR_OFFSET) < addr && addr < (PSRAMUHSX_BASE + PSRAMUHS_SIZE)) {
+1606,1607c2539,2540
+< #ifdef PSRAMUHSX_BASE
+<     if (PSRAMUHSX_BASE + X_ADDR_OFFSET < addr && addr < PSRAMUHSX_BASE + PSRAMUHS_SIZE) {
+---
+> #if defined(RAMXRET_BASE) && (RAMRET_SIZE > 0)
+>     if ((RAMXRET_BASE + X_ADDR_OFFSET) < addr && addr < (RAMXRET_BASE + RAMRET_SIZE)) {
+1611,1612c2544,2558
+< #ifdef RAMXRET_BASE
+<     if (RAMXRET_BASE < addr && addr < RAMXRET_BASE + RAMRET_SIZE) {
+---
+> 
+>     // Check flash location
+> #ifndef NO_FLASH_BASE_ACCESS
+> #ifdef OTA_CODE_OFFSET
+> #define FLASH_EXEC_START                    (FLASHX_BASE + OTA_CODE_OFFSET)
+> #define FLASH_EXEC_SIZE                     (FLASH_SIZE - OTA_CODE_OFFSET)
+> #else
+> #define FLASH_EXEC_START                    (FLASHX_BASE)
+> #define FLASH_EXEC_SIZE                     (FLASH_SIZE)
+> #endif
+> #ifdef FLASH_REGION_SIZE
+> #undef FLASH_EXEC_SIZE
+> #define FLASH_EXEC_SIZE                     (FLASH_REGION_SIZE)
+> #endif
+>     if ((FLASH_EXEC_START + X_ADDR_OFFSET) < addr && addr < (FLASH_EXEC_START + FLASH_EXEC_SIZE)) {
+1616a2563,2577
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     if ((RAMX_NS_BASE + X_ADDR_OFFSET) < addr && addr < (RAMX_NS_BASE + RAM_NS_SIZE)) {
+>         return 1;
+>     }
+>     if ((FLASHX_BASE + NS_APP_START_OFFSET + X_ADDR_OFFSET) < addr && addr < (FLASHX_BASE + FLASH_SIZE)) {
+>         return 1;
+>     }
+> #endif
+> #if defined(CONFIG_BES_DUALCORE_AMP)
+> #ifdef PSRAMCPX_BASE
+>     if (PSRAMCPX_BASE + X_ADDR_OFFSET < addr && addr < PSRAMCPX_BASE + PSRAMCP_SIZE) {
+>         return 1;
+>     }
+> #endif
+> #endif
+1619,1620c2580,2583
+< #ifndef USED_ROM_SIZE
+< #define USED_ROM_SIZE                   ROM_SIZE
+---
+> #ifdef ROM_EXT_SIZE
+> #define ROM_TOTAL_SIZE                      (ROM_SIZE + ROM_EXT_SIZE)
+> #else
+> #define ROM_TOTAL_SIZE                      (ROM_SIZE)
+1622c2585
+<     if (ROM_BASE + (NVIC_USER_IRQ_OFFSET * 4) < addr && addr < ROM_BASE + USED_ROM_SIZE) {
+---
+>     if ((ROMX_BASE + (NVIC_USER_IRQ_OFFSET * 4)) < addr && addr < (ROMX_BASE + ROM_TOTAL_SIZE)) {
+1659c2622
+< #ifdef PSRAM_NC_BASE
+---
+> #if defined(PSRAM_NC_BASE) && (PSRAM_SIZE > 0)
+1664c2627
+< #ifdef PSRAMUHS_NC_BASE
+---
+> #if defined(PSRAMUHS_NC_BASE) && (PSRAMUHS_SIZE > 0)
+1675c2638
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output_linefeed();
+1682,1687d2644
+< #ifndef PROGRAMMER
+< #ifndef __BES_OTA_MODE__
+<     nv_record_flash_flush();
+< #endif
+< #endif
+< #ifdef CRASH_REBOOT
+1688a2646,2647
+> #ifndef IN_SUBSYS
+> #ifdef CRASH_REBOOT
+1690c2649
+<     hal_cmu_sys_reboot();
+---
+>     pmu_reboot();
+1695a2655
+> #endif
+1719c2679,2682
+<     // MUST SAVE REGISTERS FIRST!
+---
+>     crash_occurs[get_cpu_id()] = true;
+> 
+>     int_lock_global();
+> 
+1724,1725c2687,2690
+< 
+<     int_lock_global();
+---
+> #ifndef __ARM_ARCH_ISA_ARM
+>     info.MSP = p_regs[ARRAY_SIZE(info.R)];
+>     info.PSP = p_regs[ARRAY_SIZE(info.R) + 1];
+> #endif
+1750,1751d2714
+<     info.MSP = __get_MSP();
+<     info.PSP = __get_PSP();
+1781a2745,2751
+> #ifdef CP_TRACE_ENABLE
+>     // Release all the possible trace locks
+>     hal_trace_cp_force_unlock();
+> #endif
+>     // Continue the trace
+>     hal_trace_force_continue();
+> 
+1796,1799c2766
+<         if (app_notify_cb) {
+<             app_notify_cb(HAL_TRACE_STATE_CRASH_ASSERT_START);
+<         }
+<         app_output_enabled = true;
+---
+>         hal_trace_app_notify_callback(HAL_TRACE_STATE_CRASH_ASSERT_START);
+1801,1807d2767
+< 
+<         crash_dump_onprocess = true;
+<         for (uint8_t i = 0; i < 10; i++){
+<             REL_TRACE_IMM(0,"                                                                        ");
+<             REL_TRACE_IMM(0,"                                                                        " NEW_LINE_STR);
+<             hal_sys_timer_delay(MS_TO_TICKS(50));
+<         }
+1815c2775
+<     len = hal_trace_print_time(LOG_LEVEL_CRITICAL, LOG_MODULE_NONE, &crash_buf[0], sizeof(crash_buf));
+---
+>     len = hal_trace_print_time(TR_LEVEL_CRITICAL, TR_MODULE_NONE, &crash_buf[0], sizeof(crash_buf));
+1817c2777
+<         hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>         hal_trace_output_linefeed();
+1832,1834c2792,2794
+<     hal_trace_output((const unsigned char *)desc_file, sizeof(desc_file));
+<     hal_trace_output((const unsigned char *)file, strlen(file)+1);
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output((const unsigned char *)desc_file, sizeof(desc_file) - 1);
+>     hal_trace_output((const unsigned char *)file, strlen(file));
+>     hal_trace_output_linefeed();
+1838,1840c2798,2800
+<     hal_trace_output((const unsigned char *)desc_func, sizeof(desc_func));
+<     hal_trace_output((const unsigned char *)func, strlen(func)+!);
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output((const unsigned char *)desc_func, sizeof(desc_func) - 1);
+>     hal_trace_output((const unsigned char *)func, strlen(func));
+>     hal_trace_output_linefeed();
+1843c2803
+<     hal_trace_output((const unsigned char *)desc_line, sizeof(desc_func));
+---
+>     hal_trace_output((const unsigned char *)desc_line, sizeof(desc_func) - 1);
+1846c2806
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output_linefeed();
+1848c2808
+<     hal_trace_output((unsigned char *)separate_line, sizeof(separate_line));
+---
+>     hal_trace_output((unsigned char *)separate_line, sizeof(separate_line) - 1);
+1860a2821
+> #ifdef ASSERT_VERBOSE_DUMP
+1862c2823
+<     hal_trace_print_special_stack_registers();
+---
+>     hal_trace_print_special_stack_registers(info.MSP, info.PSP);
+1868c2829
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output_linefeed();
+1870a2832
+> #endif
+1879c2841,2870
+<         AssertCatcher_Entry();
+---
+>         {
+>             static CrashCatcherAssertRegisters regs;
+> 
+>             regs.msp = info.MSP;
+>             regs.psp = info.PSP;
+>             regs.assertPSR = __get_xPSR();
+>             regs.R.r0 = info.R[0];
+>             regs.R.r1 = info.R[1];
+>             regs.R.r2 = info.R[2];
+>             regs.R.r3 = info.R[3];
+>             regs.R.r4 = info.R[4];
+>             regs.R.r5 = info.R[5];
+>             regs.R.r6 = info.R[6];
+>             regs.R.r7 = info.R[7];
+>             regs.R.r8 = info.R[8];
+>             regs.R.r9 = info.R[9];
+>             regs.R.r10 = info.R[10];
+>             regs.R.r11 = info.R[11];
+>             regs.R.r12 = info.R[12];
+>             regs.R.sp = info.R[13];
+>             regs.R.lr = info.R[14];
+>             /*
+>              * ASSERT's pc is not important, but who calling it is more important,
+>              * and just setting it to lr as normal assert dump.
+>              */
+>             regs.R.pc = info.R[14];
+>             regs.R.psr = regs.assertPSR;
+> 
+>             AssertCatcher_Entry(&regs);
+>         }
+1884,1886c2875
+<         if (app_notify_cb) {
+<             app_notify_cb(HAL_TRACE_STATE_CRASH_END);
+<         }
+---
+>         hal_trace_app_notify_callback(HAL_TRACE_STATE_CRASH_END);
+1905c2894
+< void NORETURN NAKED hal_trace_assert_dump(ASSERT_DUMP_ARGS)
+---
+> void NORETURN NAKED WEAK hal_trace_assert_dump(ASSERT_DUMP_ARGS)
+1906a2896,2907
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) && !defined(DEBUG)
+>     // No way to read out the debug information. Just stop here
+>     SAFE_PROGRAM_STOP();
+> #endif
+> 
+> #if defined(CHIP_BEST1501SIMU) || defined(CHIP_BEST1600SIMU)
+>     hal_cmu_simu_set_val(0xffffffff);
+> #ifdef FPGA
+>     while(1);
+> #endif
+> #endif
+> 
+1908,1910c2909,2918
+<         "subs sp, sp, #4*" TO_STRING(STACK_DUMP_CNT_PREV) ";"
+<         ".cfi_def_cfa_offset 4*" TO_STRING(STACK_DUMP_CNT_PREV) ";"
+<         "push {r0, r1};"
+---
+>         "sub sp, sp, #4*(2+" TO_STRING(ASSERT_STACK_RESERVED) ");"
+>         ".cfi_def_cfa_offset 4*(2+" TO_STRING(ASSERT_STACK_RESERVED) ");"
+>         "push {r0-r5};"
+>         ".cfi_adjust_cfa_offset 4*6;"
+>         ".cfi_offset r0, -(4*(6+2+" TO_STRING(ASSERT_STACK_RESERVED) "));"
+>         ".cfi_offset r1, -(4*(5+2+" TO_STRING(ASSERT_STACK_RESERVED) "));"
+>         ".cfi_offset r2, -(4*(4+2+" TO_STRING(ASSERT_STACK_RESERVED) "));"
+>         ".cfi_offset r3, -(4*(3+2+" TO_STRING(ASSERT_STACK_RESERVED) "));"
+>         ".cfi_offset r4, -(4*(2+2+" TO_STRING(ASSERT_STACK_RESERVED) "));"
+>         ".cfi_offset r5, -(4*(1+2+" TO_STRING(ASSERT_STACK_RESERVED) "));"
+1913,1915c2921,2923
+<         "str r1, [r0], 4;"
+<         "ldr r1, [sp, 4];"
+<         "str r1, [r0], 4;"
+---
+>         "str r1, [r0], #4;"
+>         "ldr r1, [sp, #4];"
+>         "str r1, [r0], #4;"
+1917,1921c2925,2960
+<         "add r1, sp, #4*(2+" TO_STRING(STACK_DUMP_CNT_PREV) ");"
+<         "str r1, [r0], 4;"
+<         "str lr, [r0], 4;"
+<         "pop {r0, r1};"
+<         "b.w hal_trace_assert_dump_internal;"
+---
+>         "add r1, sp, #4*(6+2+" TO_STRING(ASSERT_STACK_RESERVED) ");"
+>         "movs r5, r1;"
+>         "str r1, [r0], #4;"
+>         "str lr, [r0], #4;"
+> #ifndef __ARM_ARCH_ISA_ARM
+>         // Check CONTROL.SPSEL (bit[1])
+>         "mrs r3, control;"
+>         "tst r3, #0x02;"
+>         "itte ne;"
+>         // r1 is still the original SP
+>         "movne r2, r1;"
+>         "mrsne r1, msp;"
+>         "mrseq r2, psp;"
+> #endif
+>         "str r1, [r0], #4;"
+>         "str r2, [r0], #4;"
+> #if (ASSERT_STACK_ARG_WORD != 8)
+> #error "Bad ASSERT_STACK_ARG_WORD: should be 8"
+> #endif
+>         // Save assert arguments in stack (ASSERT_STACK_ARG_WORD)
+>         "add r4, sp, #4*6;"
+>         "ldmia r5!, {r0-r3};"
+>         "stmia r4!, {r0-r3};"
+>         "ldmia r5!, {r0-r3};"
+>         "stmia r4!, {r0-r3};"
+>         "str lr, [r4];"
+>         ".cfi_offset lr, -(4*(2+" TO_STRING(STACK_DUMP_CNT_PREV) "));"
+>         "pop {r0-r5};"
+>         ".cfi_restore r5;"
+>         ".cfi_restore r4;"
+>         ".cfi_restore r3;"
+>         ".cfi_restore r2;"
+>         ".cfi_restore r1;"
+>         ".cfi_restore r0;"
+>         ".cfi_adjust_cfa_offset -4*6;"
+>         "bl hal_trace_assert_dump_internal;"
+1935c2974
+<     info->MSP = __get_MSP();
+---
+>     info->MSP = regs[18];
+1937,1940c2976,2979
+<     info->PRIMASK = regs[17];
+<     info->FAULTMASK = __get_FAULTMASK();
+<     info->BASEPRI = __get_BASEPRI();
+<     info->CONTROL = __get_CONTROL();
+---
+>     info->PRIMASK = (regs[17] & 0xFF);
+>     info->FAULTMASK = ((regs[17] >> 8) & 0xFF);
+>     info->BASEPRI = ((regs[17] >> 16) & 0xFF);
+>     info->CONTROL = ((regs[17] >> 24) & 0xFF);
+1948a2988
+>     info->DFSR = SCB->DFSR;
+1953a2994,3005
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     info->SFSR = SAU->SFSR;
+>     info->SFAR = SAU->SFAR;
+>     info->MSP_NS = __TZ_get_MSP_NS();
+>     info->PSP_NS = __TZ_get_PSP_NS();
+>     info->MSPLIM_NS = __TZ_get_MSPLIM_NS();
+>     info->PSPLIM_NS = __TZ_get_PSPLIM_NS();
+>     info->PRIMASK_NS = __TZ_get_PRIMASK_NS();
+>     info->FAULTMASK_NS = __TZ_get_FAULTMASK_NS();
+>     info->BASEPRI_NS = __TZ_get_BASEPRI_NS();
+>     info->CONTROL_NS = __TZ_get_CONTROL_NS();
+> #endif
+2021,2022c3073,3074
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output_linefeed();
+>     hal_trace_output_linefeed();
+2039d3090
+<     uint32_t primask;
+2042d3092
+<     primask = regs[17];
+2047c3097
+<         len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, ", ThreadMode" NEW_LINE_STR);
+---
+>         len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, ", ThreadMode");
+2049c3099
+<         len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, ", ExceptionNumber=%d" NEW_LINE_STR, (int)val - 16);
+---
+>         len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, ", ExceptionNumber=D'%d", (int)val - 16);
+2050a3101
+>     len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, ", EXC_RETURN=%08X" NEW_LINE_STR, regs[19]);
+2054,2056c3105,3109
+<     hal_trace_print_special_stack_registers();
+< 
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_print_special_stack_registers(info->MSP, info->PSP);
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     hal_trace_print_special_stack_registers_ns(info->MSP_NS, info->PSP_NS);
+> #endif
+>     hal_trace_output_linefeed();
+2059c3112
+<         (unsigned)primask, (unsigned)__get_FAULTMASK(), (unsigned)__get_BASEPRI(), (unsigned)__get_CONTROL());
+---
+>         (unsigned)info->PRIMASK, (unsigned)info->FAULTMASK, (unsigned)info->BASEPRI, (unsigned)info->CONTROL);
+2060a3114,3120
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     len = snprintf(crash_buf, sizeof(crash_buf), "PRIMASK_NS=%02X, FAULTMASK_NS=%02X, BASEPRI_NS=%02X, CONTROL_NS=%02X" NEW_LINE_STR,
+>         (unsigned)info->PRIMASK_NS, (unsigned)info->FAULTMASK_NS, (unsigned)info->BASEPRI_NS, (unsigned)info->CONTROL_NS);
+>     hal_trace_output((unsigned char *)crash_buf, len);
+> #endif
+>     hal_trace_output_linefeed();
+> 
+2069,2070c3129,3130
+<     val = regs[16] & 0xFF;
+<     len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, ", EPSR=%08X, IPSR=%02X", (unsigned)(regs[16] & 0x0700FC00), (unsigned)val);
+---
+>     val = regs[16] & 0x1FF;
+>     len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, ", EPSR=%08X, IPSR=%03X", (unsigned)(regs[16] & 0x0700FC00), (unsigned)val);
+2075,2076c3135,3136
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output_linefeed();
+>     hal_trace_output_linefeed();
+2088c3148
+<     len = snprintf(crash_buf, sizeof(crash_buf), "MMFAR=%08X, BFAR =%08X" NEW_LINE_STR, (unsigned)info->MMFAR, (unsigned)info->BFAR);
+---
+>     len = snprintf(crash_buf, sizeof(crash_buf), "DFSR =%08X", (unsigned)info->DFSR);
+2089a3150,3164
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     len = snprintf(crash_buf, sizeof(crash_buf), ", SFSR =%08X", (unsigned)info->SFSR);
+>     hal_trace_output((unsigned char *)crash_buf, len);
+> #endif
+>     hal_trace_output_linefeed();
+> 
+>     len = snprintf(crash_buf, sizeof(crash_buf), "MMFAR=%08X, BFAR =%08X",
+>         (unsigned)info->MMFAR, (unsigned)info->BFAR);
+>     hal_trace_output((unsigned char *)crash_buf, len);
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     len = snprintf(crash_buf, sizeof(crash_buf), ", SFAR =%08X", (unsigned)info->SFAR);
+>     hal_trace_output((unsigned char *)crash_buf, len);
+> #endif
+>     hal_trace_output_linefeed();
+>     hal_trace_output_linefeed();
+2097c3172
+<     if ((info->SHCSR & 0x3F) == 0) {
+---
+>     if ((info->SHCSR & 0x13F) == 0) {
+2121a3197,3199
+>         if (info->SHCSR & (1 << 8)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Monitor)");
+>         }
+2124c3202
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output_linefeed();
+2206c3284,3343
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output_linefeed();
+> 
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>     len = snprintf(crash_buf, sizeof(crash_buf), "SecFaultCause:");
+>     if (info->SFSR == 0) {
+>         len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (None)");
+>     } else {
+>         if (info->SFSR & (1 << 0)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Invalid entry point)");
+>         }
+>         if (info->SFSR & (1 << 1)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Invalid integrity signature)");
+>         }
+>         if (info->SFSR & (1 << 2)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Invalid excpetion return)");
+>         }
+>         if (info->SFSR & (1 << 3)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Attribution unit violation)");
+>         }
+>         if (info->SFSR & (1 << 4)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Invalid transition)");
+>         }
+>         if (info->SFSR & (1 << 5)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Lazy floating-point state preservation error)");
+>         }
+>         if (info->SFSR & (1 << 6)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (SFAR valid)");
+>         }
+>         if (info->SFSR & (1 << 7)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Lazy state error)");
+>         }
+>     }
+>     hal_trace_output((unsigned char *)crash_buf, len);
+>     hal_trace_output_linefeed();
+> #endif
+> 
+>     len = snprintf(crash_buf, sizeof(crash_buf), "DebugEvent   :");
+>     if (info->DFSR == 0) {
+>         len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (None)");
+>     } else {
+>         if (info->DFSR & (1 << 0)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Halted)");
+>         }
+>         if (info->DFSR & (1 << 2)) {
+>             len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Data Watchpoint Match)");
+>         }
+>         /*scan the all dwt functions*/
+>         volatile uint32_t *func = &DWT->FUNCTION0;
+>         uint32_t func_num = (DWT->CTRL >> 28) & 0xf;
+> 
+>         for (int i = 0; i < func_num; i++) {
+>             if (*func & DWT_FUNCTION_MATCHED_Msk) {
+>                 len += snprintf(&crash_buf[len], sizeof(crash_buf) - len, " (Function %d matched)", i);
+>             }
+>             func += 4;
+>         }
+>     }
+> 
+>     hal_trace_output((unsigned char *)crash_buf, len);
+>     hal_trace_output_linefeed();
+2223a3361,3365
+>     crash_occurs[get_cpu_id()] = true;
+> #if defined(CHIP_BEST1501SIMU) || defined(CHIP_BEST1600SIMU)
+>     hal_cmu_simu_set_val(0xdddddddd);
+> #endif
+> 
+2234a3377,3383
+> #ifdef CP_TRACE_ENABLE
+>     // Release all the possible trace locks
+>     hal_trace_cp_force_unlock();
+> #endif
+>     // Continue the trace
+>     hal_trace_force_continue();
+> 
+2249,2254c3398
+<         if (app_notify_cb) {
+<             app_notify_cb(HAL_TRACE_STATE_CRASH_FAULT_START);
+<         }
+<         if (app_crash_custom_cb == NULL) {
+<             app_output_enabled = true;
+<         }
+---
+>         hal_trace_app_notify_callback(HAL_TRACE_STATE_CRASH_FAULT_START);
+2256,2262d3399
+< 
+<         crash_dump_onprocess = true;
+<         for (uint8_t i = 0; i < 10; i++) {
+<             REL_TRACE_IMM(0,"                                                                        ");
+<             REL_TRACE_IMM(0,"                                                                        " NEW_LINE_STR);
+<             hal_sys_timer_delay(MS_TO_TICKS(50));
+<         }
+2270c3407
+<     len = hal_trace_print_time(LOG_LEVEL_CRITICAL, LOG_MODULE_NONE, &crash_buf[0], sizeof(crash_buf));
+---
+>     len = hal_trace_print_time(TR_LEVEL_CRITICAL, TR_MODULE_NONE, &crash_buf[0], sizeof(crash_buf));
+2272c3409
+<         hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>         hal_trace_output_linefeed();
+2275c3412
+<     hal_trace_output((unsigned char *)title, sizeof(title));
+---
+>     hal_trace_output((unsigned char *)title, sizeof(title) - 1);
+2285c3422
+<     hal_trace_output((const unsigned char *)newline, sizeof(newline));
+---
+>     hal_trace_output_linefeed();
+2297a3435
+>             uint32_t *stack;
+2324c3462
+<             eregs.exceptionLR = regs[14];
+---
+>             eregs.exceptionLR = regs[19];
+2331,2333c3469
+<         if (app_notify_cb) {
+<             app_notify_cb(HAL_TRACE_STATE_CRASH_END);
+<         }
+---
+>         hal_trace_app_notify_callback(HAL_TRACE_STATE_CRASH_END);
+2355c3491,3495
+<     // TODO: Save FP registers (and check lazy Floating-point context preservation)
+---
+>     // TODO: Save FP registers (and check lazy floating-point context preservation)
+> 
+>     // Registers saved in SP
+>     // R0-R15 PSR SPECIAL_REGS MSP EXC_RETURN
+> 
+2357,2358c3497,3526
+<         // Check EXC_RETURN.SPSEL (bit[2])
+<         "tst lr, #0x04;"
+---
+>         // Get special_regs(primask/faultmask/basepri/control)
+>         "mrs r0, primask;"
+>         "mrs r1, faultmask;"
+>         "mrs r2, basepri;"
+>         "mrs r3, control;"
+>         "bfi r12, r0, #0, #8;"
+>         "bfi r12, r1, #8, #8;"
+>         "bfi r12, r2, #16, #8;"
+>         "bfi r12, r3, #24, #8;"
+> #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>         // Check EXC_RETURN.S (bit[6])
+>         "tst lr, #0x40;"
+>         "bne _get_sec_sp;"
+>         // EXC_RETURN.ES must be 1 here
+>         // Check EXC_RETURN.MODE (bit[3]) and CONTROL.SPSEL (bit[1])
+>         "ubfx r3, lr, #3, #1;"
+>         "mrs r2, control_ns;"
+>         "ubfx r2, r2, #1, #1;"
+>         "ands r3, r2;"
+>         "ite ne;"
+>         // Using PSP_NS
+>         "mrsne r3, psp_ns;"
+>         // Using MSP_NS
+>         "mrseq r3, msp_ns;"
+>         "b _save_msp_lr;"
+>         "_get_sec_sp:;"
+> #endif
+>         // Check EXC_RETURN.MODE (bit[3]) and EXC_RETURN.SPSEL (bit[2])
+>         "and r3, lr, #0x0C;"
+>         "teq r3, #0x0C;"
+2360,2361d3527
+<         // Using MSP
+<         "mrseq r3, msp;"
+2363c3529,3579
+<         "mrsne r3, psp;"
+---
+>         "mrseq r3, psp;"
+>         // Using MSP
+>         "mrsne r3, msp;"
+>         "_save_msp_lr:;"
+>         // Save original MSP and current exception lr
+>         "mrs r0, msp;"
+>         "push {r0, lr};"
+>         ".cfi_def_cfa_offset 4*2;"
+>         ".cfi_rel_offset lr, 4*1;"
+> #ifdef ARM_CMNS
+>         // -- Check EXC_RETURN.S (bit[6])
+>         "tst lr, #0x40;"
+>         "beq _check_fp_cntx;"
+>         // Save special_regs(primask/faultmask/basepri/control)
+>         "str r12, [sp, #-4]!;"
+>         // Save 0 as psr
+>         "mov r1, 0;"
+>         "str r1, [sp, #-4]!;"
+>         // Save 0 as pc
+>         "str r1, [sp, #-4]!;"
+>         // Save 0 as lr
+>         "str r1, [sp, #-4]!;"
+>         // Save sp
+>         "str r0, [sp, #-4]!;"
+>         // Save 0 as r0-12
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "str r1, [sp, #-4]!;"
+>         "b _call_fault_handler;"
+> #elif defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+>         // -- Check EXC_RETURN.DCRS (bit[5])
+>         "tst lr, #0x20;"
+>         "beq _get_callee_saved_regs;"
+>         // -- Check EXC_RETURN.ES (bit[0])
+>         "tst lr, #0x01;"
+>         "bne _check_fp_cntx;"
+>         "_get_callee_saved_regs:;"
+>         "add r3, #4*2;"
+>         "ldm r3!, {r4-r11};"
+> #endif
+>         "_check_fp_cntx:;"
+2371,2391c3587,3589
+< #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+<         "mov, r0, #0;"
+<         // -- Check EXC_RETURN.S (bit[6])
+<         "tst lr, #0x40;"
+<         "beq _done_sec_cntx;"
+<         // -- Check EXC_RETURN.ES (bit[0])
+<         "tst lr, #0x01;"
+<         "bne _done_sec_cntx;"
+<         // -- Check EXC_RETURN.DCRS (bit[5])
+<         "tst lr, #0x20;"
+<         "bne _done_sec_cntx;"
+<         "mov, r0, #1;"
+<         "push {r4-r11};"
+<         "add r3, #2*4;"
+<         "ldm r3!, {r4-r11};"
+<         "_done_sec_cntx:;"
+<         "push {r0};"
+< #endif
+<         // Make room for r0-r15,psr,primask
+<         "sub sp, #18*4;"
+<         ".cfi_def_cfa_offset 18*4;"
+---
+>         // Make room for r0-r15,psr,special_regs(primask/faultmask/basepri/control)
+>         "sub sp, #4*18;"
+>         ".cfi_adjust_cfa_offset 4*18;"
+2395,2402c3593,3600
+<         ".cfi_offset r4, -14*4;"
+<         ".cfi_offset r5, -13*4;"
+<         ".cfi_offset r6, -12*4;"
+<         ".cfi_offset r7, -11*4;"
+<         ".cfi_offset r8, -10*4;"
+<         ".cfi_offset r9, -9*4;"
+<         ".cfi_offset r10, -8*4;"
+<         ".cfi_offset r11, -7*4;"
+---
+>         ".cfi_rel_offset r4, 4*4;"
+>         ".cfi_rel_offset r5, 4*5;"
+>         ".cfi_rel_offset r6, 4*6;"
+>         ".cfi_rel_offset r7, 4*7;"
+>         ".cfi_rel_offset r8, 4*8;"
+>         ".cfi_rel_offset r9, 4*9;"
+>         ".cfi_rel_offset r10, 4*10;"
+>         ".cfi_rel_offset r11, 4*11;"
+2406,2409c3604,3607
+<         ".cfi_offset r0, -18*4;"
+<         ".cfi_offset r1, -17*4;"
+<         ".cfi_offset r2, -16*4;"
+<         ".cfi_offset r3, -15*4;"
+---
+>         ".cfi_rel_offset r0, 4*0;"
+>         ".cfi_rel_offset r1, 4*1;"
+>         ".cfi_rel_offset r2, 4*2;"
+>         ".cfi_rel_offset r3, 4*3;"
+2412,2413c3610,3611
+<         "str r0, [sp, #12*4];"
+<         ".cfi_offset r12, -6*4;"
+---
+>         "str r0, [sp, #4*12];"
+>         ".cfi_rel_offset r12, 4*12;"
+2417c3615
+<         "addeq r0, r3, #8*4;"
+---
+>         "addeq r0, r3, #4*8;"
+2419,2430c3617
+<         "add r0, r3, #(8+18)*4;"
+< #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+<         // -- Check EXC_RETURN.S (bit[6])
+<         "tst lr, #0x40;"
+<         "beq _done_stack_frame;"
+<         // -- Check FPCCR_S.TS (bit[26])
+<         "ldr r4, =0xE000EF34;"
+<         "ldr r4, [r4];"
+<         "tst r4, #(1 << 26);"
+<         "it ne;"
+<         "addne r3, #16*4;"
+< #endif
+---
+>         "add r0, r3, #4*(8+18);"
+2433c3620
+<         "ldr r4, [r3, #7*4];"
+---
+>         "ldr r4, [r3, #4*7];"
+2437c3624
+<         "str r0, [sp, #13*4];"
+---
+>         "str r0, [sp, #4*13];"
+2439,2440c3626,3627
+<         "ldr r0, [r3, #5*4];"
+<         "str r0, [sp, #14*4];"
+---
+>         "ldr r0, [r3, #4*5];"
+>         "str r0, [sp, #4*14];"
+2442,2443c3629,3630
+<         "ldr r0, [r3, #6*4];"
+<         "str r0, [sp, #15*4];"
+---
+>         "ldr r0, [r3, #4*6];"
+>         "str r0, [sp, #4*15];"
+2445,2452c3632,3636
+<         "ldr r0, [r3, #7*4];"
+<         "str r0, [sp, #16*4];"
+<         // Save primask
+<         "mrs r0, primask;"
+<         "str r0, [sp, #17*4];"
+<         // Save current exception lr
+<         "mov r4, lr;"
+<         ".cfi_register lr, r4;"
+---
+>         "ldr r0, [r3, #4*7];"
+>         "str r0, [sp, #4*16];"
+>         // Save special_regs(primask/faultmask/basepri/control)
+>         "str r12, [sp, #4*17];"
+>         "_call_fault_handler:;"
+2455,2458c3639,3642
+<         "ldr r2, =hal_trace_fault_dump;"
+<         "blx r2;"
+<         // Restore current exception lr
+<         "mov lr, r4;"
+---
+>         "mov r1, 0;"
+>         "mov r2, 0;"
+>         "ldr r3, =hal_trace_fault_dump;"
+>         "blx r3;"
+2462d3645
+<         "mov r0, r3;"
+2465,2470c3648,3652
+< #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+<         "pop {r0};"
+<         "cmp r0, #1;"
+<         "it eq;"
+<         "popeq {r4-r11};"
+< #endif
+---
+>         ".cfi_adjust_cfa_offset -4*18;"
+>         "pop {r0, lr};"
+>         ".cfi_adjust_cfa_offset -4*2;"
+>         ".cfi_restore lr;"
+>         ".cfi_def_cfa_offset 0;"
+2478,2485c3660,3662
+< #define HAL_TRACE_RX_HEAD_SIZE   4
+< #define HAL_TRACE_RX_NAME_SIZE   20
+< #define HAL_TRACE_RX_BUF_SIZE    1024
+< #define HAL_TRACE_RX_ROLE_NUM    6
+< 
+< #define HAL_TRACE_RX_HEAD       '['
+< #define HAL_TRACE_RX_END        ']'
+< #define HAL_TRACE_RX_SEPARATOR  ','
+---
+> //==============================================================================
+> // TRACE RX
+> //==============================================================================
+2487d3663
+< //static struct HAL_DMA_CH_CFG_T dma_cfg_rx;
+2489,2490d3664
+< static struct HAL_DMA_DESC_T dma_desc_rx;
+< #endif
+2492,2501c3666,3670
+< typedef struct{
+<     char *name;
+<     uint32_t len;
+<     uint8_t  *buf;
+< }HAL_TRACE_RX_CFG_T;
+< 
+< typedef struct{
+<     char name[HAL_TRACE_RX_NAME_SIZE];
+<     HAL_TRACE_RX_CALLBACK_T callback;
+< }HAL_TRACE_RX_LIST_T;
+---
+> enum HAL_TRACE_RX_STATE_T {
+>     HAL_TRACE_RX_STATE_CLOSED = 0,
+>     HAL_TRACE_RX_STATE_OPENED,
+>     HAL_TRACE_RX_STATE_SLEEP,
+> };
+2503,2505c3672,3675
+< typedef struct{
+<     uint32_t list_num;
+<     HAL_TRACE_RX_LIST_T list[HAL_TRACE_RX_ROLE_NUM];
+---
+> static enum HAL_TRACE_RX_STATE_T trace_rx_state;
+> static uint8_t *trace_rx_buf;
+> static uint32_t trace_rx_len;
+> static HAL_TRACE_RX_CALLBACK_T trace_rx_cb;
+2507,2510c3677,3682
+<     uint32_t rx_enable;
+<     uint32_t pos;
+<     uint8_t  buf[HAL_TRACE_RX_BUF_SIZE];
+< }HAL_TRACE_RX_T;
+---
+> static void hal_trace_rx_start(void)
+> {
+>     uint32_t desc_cnt = 1;
+>     union HAL_UART_IRQ_T mask;
+>     struct HAL_DMA_DESC_T dma_desc_rx;
+>     int ret;
+2512,2514c3684,3689
+< #if defined(_AUTO_TEST_)
+< extern int auto_test_prase(uint8_t *cmd);
+< #endif
+---
+>     mask.reg = 0;
+>     mask.BE = 0;
+>     mask.FE = 0;
+>     mask.OE = 0;
+>     mask.PE = 0;
+>     mask.RT = 1;
+2516c3691,3694
+< HAL_TRACE_RX_T hal_trace_rx;
+---
+>     // TODO: Use stream mode
+>     ret = hal_uart_dma_recv_mask(trace_uart, trace_rx_buf, trace_rx_len, &dma_desc_rx, &desc_cnt, &mask);
+>     ASSERT(ret == 0, "%s: Failed to start dma rx: %d", __func__, ret);
+> }
+2518,2520c3696
+< int hal_trace_rx_dump_list(void)
+< {
+<     for(int i=0;i<HAL_TRACE_RX_ROLE_NUM;i++)
+---
+> static void hal_trace_rx_stop(void)
+2522,2524c3698,3703
+<         TRACE(2,"%d: %s", i, hal_trace_rx.list[i].name);
+<     }
+<     return 0;
+---
+>     union HAL_UART_IRQ_T mask;
+> 
+>     hal_uart_stop_dma_recv(trace_uart);
+> 
+>     mask.reg = 0;
+>     hal_uart_irq_set_mask(trace_uart, mask);
+2527,2529c3706
+< int hal_trace_rx_is_in_list(const char *name)
+< {
+<     for(int i=0;i<HAL_TRACE_RX_ROLE_NUM;i++)
+---
+> static void hal_trace_rx_irq_handler(uint32_t xfer_size, int dma_error, union HAL_UART_IRQ_T status)
+2531,2533c3708,3711
+<         if(!strcmp(hal_trace_rx.list[i].name, name))
+<         {
+<             return i;
+---
+>     POSSIBLY_UNUSED int res = 0;
+> 
+>     if (trace_rx_cb == NULL) {
+>         return;
+2534a3713,3716
+> 
+>     if (xfer_size) {
+>         res = trace_rx_cb(trace_rx_buf, xfer_size);
+>         //TRACE(0, "%s: trace_rx_cb (%p) prase data error: %d", __func__, trace_rx_cb, res);
+2536,2542c3718,3720
+<     hal_trace_rx_dump_list();
+<     // TRACE(1,"%s", hal_trace_rx.list[0].name);
+<     // TRACE(1,"%s", name);
+<     // TRACE(1,"%d", strlen(hal_trace_rx.list[0].name));
+<     // TRACE(1,"%d", strlen(name));
+<     // TRACE(1,"%d", strcmp(hal_trace_rx.list[0].name, name));
+<     return -1;
+---
+>     if (xfer_size || status.RT) {
+>         if (trace_rx_state == HAL_TRACE_RX_STATE_OPENED) {
+>             hal_trace_rx_start();
+2544,2554d3721
+< 
+< int hal_trace_rx_add_item_to_list(const char *name, HAL_TRACE_RX_CALLBACK_T callback)
+< {
+<     for(int i=0;i<HAL_TRACE_RX_ROLE_NUM;i++)
+<     {
+<         if(hal_trace_rx.list[i].name[0] == 0)
+<         {
+<             memcpy(hal_trace_rx.list[i].name, name, strlen(name));
+<             hal_trace_rx.list[i].callback = callback;
+<             hal_trace_rx.list_num++;
+<             return 0;
+2557a3725,3727
+> int hal_trace_rx_open(unsigned char *buf, unsigned int len, HAL_TRACE_RX_CALLBACK_T rx_callback)
+> {
+>     if (buf == NULL || len == 0 || rx_callback == NULL) {
+2561,2567c3731,3732
+< int hal_trace_rx_del_item_to_list(int id)
+< {
+<     memset(hal_trace_rx.list[id].name, 0, sizeof(hal_trace_rx.list[id].name));
+<     hal_trace_rx.list[id].callback = NULL;
+<     hal_trace_rx.list_num--;
+< 
+<     return 0;
+---
+>     if (!hal_trace_is_uart_transport(trace_transport)) {
+>         return 2;
+2570,2581c3735,3741
+< int hal_trace_rx_register(const char *name, HAL_TRACE_RX_CALLBACK_T callback)
+< {
+<     TRACE(2,"[%s] Add %s", __func__, name);
+<     if(hal_trace_rx_is_in_list(name) == -1)
+<     {
+<         hal_trace_rx_add_item_to_list(name, callback);
+<         return 0;
+<     }
+<     else
+<     {
+<         return 0;
+<     }
+---
+> #if (TRACE_BUF_SIZE <= 0)
+>     int ret;
+> 
+>     trace_uart = HAL_UART_ID_0 + (trace_transport - HAL_TRACE_TRANSPORT_UART0);
+>     ret = hal_uart_open(trace_uart, &uart_cfg);
+>     if (ret) {
+>         return ret;
+2582a3743
+> #endif
+2584,2586c3745,3747
+< int hal_trace_rx_deregister(const char *name)
+< {
+<     int id = 0;
+---
+>     trace_rx_buf = buf;
+>     trace_rx_len = len;
+>     trace_rx_cb = rx_callback;
+2588c3749,3754
+<     id = hal_trace_rx_is_in_list(name);
+---
+>     hal_uart_irq_set_dma_handler(trace_uart, hal_trace_rx_irq_handler, NULL);
+> 
+>     if (trace_rx_state != HAL_TRACE_RX_STATE_OPENED) {
+>         trace_rx_state = HAL_TRACE_RX_STATE_OPENED;
+>         hal_trace_rx_start();
+>     }
+2590,2592d3755
+<     if(id != -1)
+<     {
+<         hal_trace_rx_del_item_to_list(id);
+2595c3758,3759
+<     else
+---
+> 
+> int hal_trace_rx_close(void)
+2597,2598c3761,3764
+<         return 1;
+<     }
+---
+>     uint32_t lock;
+> 
+>     if (!hal_trace_is_uart_transport(trace_transport)) {
+>         return 2;
+2601,2603c3767,3770
+< #if (defined(DEBUG) || defined(REL_TRACE_ENABLE))
+< static int hal_trace_rx_reset(void)
+< {
+---
+>     lock = int_lock();
+>     hal_trace_rx_stop();
+>     trace_rx_state = HAL_TRACE_RX_STATE_CLOSED;
+>     int_unlock(lock);
+2605,2606c3772,3774
+<     hal_trace_rx.pos = 0;
+<     memset(hal_trace_rx.buf, 0, HAL_TRACE_RX_BUF_SIZE);
+---
+>     trace_rx_buf = NULL;
+>     trace_rx_len = 0;
+>     trace_rx_cb = NULL;
+2608,2609c3776,3777
+<     return 0;
+< }
+---
+> #if (TRACE_BUF_SIZE <= 0)
+>     hal_uart_close(trace_uart);
+2611,2616d3778
+< // [test,12,102.99]
+< static int hal_trace_rx_parse(int8_t *buf, HAL_TRACE_RX_CFG_T *cfg)
+< {
+<     // TRACE(1,"[%s] Start...", __func__);
+<     int pos = 0;
+<     int len = 0;
+2618,2624c3780
+<     for(; pos<HAL_TRACE_RX_HEAD_SIZE; pos++)
+<     {
+<         if(buf[pos] == HAL_TRACE_RX_HEAD)
+<         {
+<             buf[pos] = 0;
+<             break;
+<         }
+---
+>     return 0;
+2627c3783
+<     if(pos == HAL_TRACE_RX_HEAD_SIZE)
+---
+> int hal_trace_rx_sleep(void)
+2629c3785,3788
+<         return 3;
+---
+>     uint32_t lock;
+> 
+>     if (trace_rx_state != HAL_TRACE_RX_STATE_OPENED) {
+>         return 1;
+2632c3791,3794
+<     pos++;
+---
+>     lock = int_lock();
+>     hal_trace_rx_stop();
+>     trace_rx_state = HAL_TRACE_RX_STATE_SLEEP;
+>     int_unlock(lock);
+2634,2641c3796
+<     cfg->name = (char *)(buf+pos);
+<     for(; pos<HAL_TRACE_RX_NAME_SIZE+HAL_TRACE_RX_HEAD_SIZE; pos++)
+<     {
+<         if(buf[pos] == HAL_TRACE_RX_SEPARATOR)
+<         {
+<             buf[pos] = 0;
+<             break;
+<         }
+---
+>     return 0;
+2644,2647c3799
+<     // TRACE(1,"Step1: %s", cfg->name);
+<     // TRACE(1,"%d", strlen(cfg->name));
+< 
+<     if(pos == HAL_TRACE_RX_NAME_SIZE)
+---
+> int hal_trace_rx_wakeup(void)
+2648a3801
+>     if (trace_rx_state != HAL_TRACE_RX_STATE_SLEEP) {
+2652,2667c3805
+<     pos++;
+< 
+<     len = 0;
+<     cfg->buf = (uint8_t*)(buf+pos);
+<     for(; pos<HAL_TRACE_RX_BUF_SIZE; pos++)
+<     {
+<         if(buf[pos] == HAL_TRACE_RX_END)
+<         {
+<             buf[pos] = 0;
+<             break;
+<         }
+<         len++;
+<     }
+<     cfg->len = len;
+<     if(pos == HAL_TRACE_RX_BUF_SIZE)
+<     {
+---
+>     if (trace_rx_buf == NULL || trace_rx_len == 0 || trace_rx_cb == NULL) {
+2670a3809,3811
+>     trace_rx_state = HAL_TRACE_RX_STATE_OPENED;
+>     hal_trace_rx_start();
+> 
+2674,2676d3814
+< #if defined(IBRT)
+< void app_ibrt_peripheral_automate_test(const char* ibrt_cmd, uint32_t cmd_len);
+< void app_ibrt_peripheral_perform_test(const char* ibrt_cmd);
+2679c3817,3818
+< int hal_trace_rx_process(uint8_t *buf, uint32_t len)
+---
+> #ifdef TOTA_CRASH_DUMP_TOOL_ENABLE
+> int hal_trace_crash_dump_printf(uint32_t attr, const char *fmt, ...)
+2681,2683c3820,3825
+<     HAL_TRACE_RX_CFG_T cfg;
+<     int id = 0;
+<     int res = 0;
+---
+>     int ret;
+>     va_list ap;
+>     char buf[120];
+>     int len = 0;
+>     enum TR_LEVEL_T level;
+>     enum TR_MODULE_T module;
+2685,2693c3827,3828
+< #if defined(IBRT)
+<     if(buf && strlen((char*)buf) >= 10 &&((strncmp((char*)buf, "auto_test:", 10) == 0)||(strncmp((char*)buf, "ibrt_test:", 10) == 0)))
+<     {
+< #ifdef BES_AUTOMATE_TEST
+<         app_ibrt_peripheral_automate_test((char*)(buf + 10), len - 10);
+< #else
+<         app_ibrt_peripheral_perform_test((char*)(buf + 10));
+< #endif
+<         return 0;
+---
+>     if (attr & TR_ATTR_IMM) {
+>         hal_trace_flush_buffer();
+2695d3829
+< #endif
+2697c3831,3834
+<     res = hal_trace_rx_parse((int8_t*)buf, &cfg);
+---
+>     va_start(ap, fmt);
+> 
+>     level = GET_BITFIELD(attr, TR_ATTR_LEVEL);
+>     module = GET_BITFIELD(attr, TR_ATTR_MOD);
+2699c3836,3838
+<     if(res)
+---
+> #ifdef CRASH_DUMP_ENABLE
+>     if (!in_crash_dump)
+> #endif
+2701,2702c3840,3841
+<         TRACE(1,"ERROR: hal_trace_rx_parse %d", res);
+<         return 1;
+---
+>         if (level > get_hal_trace_log_level()) {
+>             return 0;
+2704,2706c3843,3844
+<     else
+<     {
+<         // TRACE(1,"%s rx OK", cfg.name);
+---
+>         if (level > TR_LEVEL_CRITICAL && (trace_mod_map[module >> 5] & (1 << (module & 0x1F))) == 0) {
+>             return 0;
+2708,2714d3845
+< 
+<     id = hal_trace_rx_is_in_list(cfg.name);
+< 
+<     if(id == -1)
+<     {
+<         TRACE(1,"%s is invalid", cfg.name);
+<         return -1;
+2717,2721c3848,3849
+<     if(hal_trace_rx.list[id].callback)
+<     {
+<         hal_trace_rx.list[id].callback(cfg.buf, cfg.len);
+<     }
+<     else
+---
+>     len = 0;
+>     if ((attr & TR_ATTR_NO_TS) == 0)
+2723c3851
+<         TRACE(1,"%s has not callback", hal_trace_rx.list[id].name);
+---
+>         len += hal_trace_print_time(level, module, &buf[len], sizeof(buf) - len);
+2724a3853,3855
+>     len += hal_trace_format_va(attr, &buf[len], sizeof(buf) - len, fmt, ap);
+>     ret = hal_trace_output((unsigned char *)buf, len);
+>     va_end(ap);
+2726c3857,3858
+<     return 0;
+---
+>     if (attr & TR_ATTR_IMM) {
+>         hal_trace_flush_buffer();
+2728,2732d3859
+< #if (defined(DEBUG) || defined(REL_TRACE_ENABLE))
+< void hal_trace_rx_start(void)
+< {
+<     uint32_t desc_cnt = 1;
+<     union HAL_UART_IRQ_T mask;
+2734,2741c3861
+<     mask.reg = 0;
+<     mask.BE = 0;
+<     mask.FE = 0;
+<     mask.OE = 0;
+<     mask.PE = 0;
+<     mask.RT = 1;
+< 
+<     hal_uart_dma_recv_mask(trace_uart, hal_trace_rx.buf, HAL_TRACE_RX_BUF_SIZE, &dma_desc_rx, &desc_cnt, &mask);
+---
+>     return ret;
+2742a3863
+> #endif
+2744,2749c3865,3877
+< void hal_trace_rx_irq_handler(uint32_t xfer_size, int dma_error, union HAL_UART_IRQ_T status)
+< {
+<     int res;
+<     // TRACE(4,"[%s] %d, %d, %d", __func__, xfer_size, dma_error, status);
+< 
+<     if (xfer_size)
+---
+> #if (TRACE_BUF_SIZE > 0)
+> #define UART_CRLF "\r\n"
+> #define UART_LFCR "\n\r"
+> #define UART_CR "\r"
+> #define UART_LF "\n"
+> #define UART_MAX_TEMP  128
+> int hal_trace_output_crlf(const unsigned char *buf, unsigned int len,bool block_flag)
+> {
+>     char p_str[UART_MAX_TEMP];
+>     char *p_data;
+>     uint32_t j;
+>     uint32_t str_len = len;
+>     if (buf == NULL)
+2751,2754c3879,3883
+<         hal_trace_rx.buf[xfer_size] = 0;
+<  #if defined(_AUTO_TEST_)
+<         res = auto_test_prase(hal_trace_rx.buf);
+<         if(res)
+---
+>         return -1;
+>     }
+>     uint32_t lock;
+>     uint32_t avail = 0;
+>     if (block_flag)
+2756c3885,3889
+<             TRACE(2,"%s:auto_test_prase prase data error, err_code = %d", __func__, res);
+---
+>         lock = int_lock();
+>         if (p_trace->wptr >= p_trace->rptr) {
+>             avail = TRACE_BUF_SIZE - (p_trace->wptr - p_trace->rptr) - 1;
+>         } else {
+>             avail = (p_trace->rptr - p_trace->wptr) - 1;
+2758,2761c3891,3911
+<  #else
+<         //TRACE(2,"[%s] RX = %s", __func__, hal_trace_rx.buf);
+<         res = hal_trace_rx_process(hal_trace_rx.buf, xfer_size);
+<         if(res)
+---
+>         int_unlock(lock);
+>         if (avail < (len+1024)) {
+>             hal_trace_flush_buffer();
+>         }
+>     }
+>     p_data = (char *)buf;
+>     j=0;
+>     for(int i =0;i<str_len;i++){
+> 	    p_str[j++] = p_data[i];
+> 	    if(p_data[i]=='\r' && p_data[i+1]!='\n'){
+> 		    p_str[j]='\n';
+>             j++;
+> 		    continue;
+> 	    }
+> 	    if(p_data[i]=='\n'){
+> 		    p_str[j-1] = '\r';
+> 		    p_str[j] = '\n';
+>             j++;
+> 		    continue;
+> 	    }
+> 	    if(j<UART_MAX_TEMP)
+2763c3913
+<             TRACE(2,"%s:hal_trace_rx_process prase data error, err_code = %d",__func__, res);
+---
+> 		    continue;
+2765,2767c3915,3917
+<  #endif
+<         hal_trace_rx_reset();
+<         hal_trace_rx_start();
+---
+>         if(j>0){
+>             hal_trace_output((const unsigned char *)p_str,j);
+>             j=0;
+2770,2771c3920,3926
+< 
+< uint32_t app_test_callback(unsigned char *buf, uint32_t len)
+---
+>     if(j>0){
+>         hal_trace_output((const unsigned char *)p_str,j);
+>         j = 0;
+>     }
+>     return len;
+> }
+> int hal_trace_output_block(const unsigned char *buf, unsigned int len)
+2773,2781c3928,3939
+<     TRACE(2,"[%s] len = %d", __func__, len);
+< 
+<     // Process string
+<     int num_int = 0;
+<     int num_float = 0.0;
+<     TRACE(2,"[%s] %s", __func__, buf);
+<     hal_trace_rx_parser((char*)buf, "%d,%d", &num_int, &num_float);
+< 
+<     TRACE(3,"[%s] %d:%d", __func__, num_int, num_float);
+---
+>     uint32_t lock;
+>     uint32_t avail = 0;
+>     lock = int_lock();
+>     if (p_trace->wptr >= p_trace->rptr) {
+>         avail = TRACE_BUF_SIZE - (p_trace->wptr - p_trace->rptr) - 1;
+>     } else {
+>         avail = (p_trace->rptr - p_trace->wptr) - 1;
+>     }
+>     int_unlock(lock);
+>     if (avail < (len+1024)) {
+>         hal_trace_flush_buffer();
+>     }
+2783c3941
+<     return 0;
+---
+>     return hal_trace_output((unsigned char *)buf, len);
+2784a3943
+> #endif
+2786c3945,3948
+< int hal_trace_rx_open()
+---
+> #ifndef __ARM_ARCH_ISA_ARM
+> #define A7_TRACE_TAG "A7_TRACE:"
+> int _print_a7_flush = 0;
+> void hal_trace_print_a7_flush(int onoff)
+2788,2793c3950,3951
+<     hal_uart_irq_set_dma_handler(trace_uart, hal_trace_rx_irq_handler, NULL);
+<     hal_trace_rx_start();
+< 
+<     hal_trace_rx_register("test", (HAL_TRACE_RX_CALLBACK_T)app_test_callback);
+< 
+<     return 0;
+---
+>     _print_a7_flush = onoff;
+>     TRACE(0, "%s onoff=%d", __FUNCTION__, onoff);
+2796c3954,3957
+< int hal_trace_rx_reopen()
+---
+> void hal_trace_print_a7(const unsigned char *buf, unsigned int buf_len)
+> {
+>     /* check platform trace on/off */
+>     if (get_hal_trace_onoff() == 1)
+2798,2799c3959,3960
+<     hal_uart_reopen(trace_uart, &uart_rx_enable_cfg);
+<     hal_trace_rx_open();
+---
+>         return;
+>     }
+2801c3962,3970
+< 	return 0;
+---
+>     /* output trace by local driver */
+>     if (buf && (buf_len > 0)) {
+>         if (_print_a7_flush == 0) // don't add A7_TRACE_TAG for A7 crashdump
+>             hal_trace_output((const unsigned char *)A7_TRACE_TAG, sizeof(A7_TRACE_TAG));
+>         hal_trace_output(buf, buf_len);
+>         if (_print_a7_flush) {
+>             hal_trace_flush_buffer();
+>         }
+>     }

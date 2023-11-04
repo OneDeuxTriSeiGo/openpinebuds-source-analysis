@@ -1,0 +1,108 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/bt_app/app_bt_trace.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/bt_app/app_bt_trace.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+23,26c22,24
+< //LOG_DEBUG(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][MGR][DBG]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_MGR_I(str, ...) LOG_INFO(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][MGR]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_MGR_W(str, ...) LOG_WARN(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][MGR][WARN]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_MGR_E(str, ...) LOG_ERROR(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][MGR][ERR]"str, ##__VA_ARGS__)
+---
+> #define TRACE_AUD_MGR_I(str, ...) TR_INFO(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][MGR]"str, ##__VA_ARGS__)
+> #define TRACE_AUD_MGR_W(str, ...) TR_WARN(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][MGR][WARN]"str, ##__VA_ARGS__)
+> #define TRACE_AUD_MGR_E(str, ...) TR_ERROR(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][MGR][ERR]"str, ##__VA_ARGS__)
+29,32c27,29
+< //LOG_DEBUG(LOG_MOD(AUDFLG),    "[AUD][MGR][DBG]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_MGR_I(str, ...) LOG_INFO(LOG_MOD(AUDFLG),     "[AUD][MGR]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_MGR_W(str, ...) LOG_WARN(LOG_MOD(AUDFLG),     "[AUD][MGR][WARN]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_MGR_E(str, ...) LOG_ERROR(LOG_MOD(AUDFLG),    "[AUD][MGR][ERR]"str, ##__VA_ARGS__)
+---
+> #define TRACE_AUD_MGR_I(str, ...) TR_INFO(TR_MOD(AUDFLG),     str, ##__VA_ARGS__)
+> #define TRACE_AUD_MGR_W(str, ...) TR_WARN(TR_MOD(AUDFLG),     str, ##__VA_ARGS__)
+> #define TRACE_AUD_MGR_E(str, ...) TR_ERROR(TR_MOD(AUDFLG),    str, ##__VA_ARGS__)
+37,40c34,36
+< //LOG_DEBUG(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][HDL][DBG]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_HDL_I(str, ...) LOG_INFO(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][HDL]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_HDL_W(str, ...) LOG_WARN(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][HDL][WARN]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_HDL_E(str, ...) LOG_ERROR(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][HDL][ERR]"str, ##__VA_ARGS__)
+---
+> #define TRACE_AUD_HDL_I(str, ...) TR_INFO(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][HDL]"str, ##__VA_ARGS__)
+> #define TRACE_AUD_HDL_W(str, ...) TR_WARN(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][HDL][WARN]"str, ##__VA_ARGS__)
+> #define TRACE_AUD_HDL_E(str, ...) TR_ERROR(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][HDL][ERR]"str, ##__VA_ARGS__)
+43,46c39,41
+< //LOG_DEBUG(LOG_MOD(AUDFLG),    "[AUD][HDL][DBG]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_HDL_I(str, ...) LOG_INFO(LOG_MOD(AUDFLG),     "[AUD][HDL]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_HDL_W(str, ...) LOG_WARN(LOG_MOD(AUDFLG),     "[AUD][HDL][WARN]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_HDL_E(str, ...) LOG_ERROR(LOG_MOD(AUDFLG),    "[AUD][HDL][ERR]"str, ##__VA_ARGS__)
+---
+> #define TRACE_AUD_HDL_I(str, ...) TR_INFO(TR_MOD(AUDFLG),     str, ##__VA_ARGS__)
+> #define TRACE_AUD_HDL_W(str, ...) TR_WARN(TR_MOD(AUDFLG),     str, ##__VA_ARGS__)
+> #define TRACE_AUD_HDL_E(str, ...) TR_ERROR(TR_MOD(AUDFLG),    str, ##__VA_ARGS__)
+51,54c46,48
+< //LOG_DEBUG(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][STRM][DBG]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_STREAM_I(str, ...) LOG_INFO(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][STRM]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_STREAM_W(str, ...) LOG_WARN(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][STRM][WARN]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_STREAM_E(str, ...) LOG_ERROR(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][STRM][ERR]"str, ##__VA_ARGS__)
+---
+> #define TRACE_AUD_STREAM_I(str, ...) TR_INFO(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     str, ##__VA_ARGS__)
+> #define TRACE_AUD_STREAM_W(str, ...) TR_WARN(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     str, ##__VA_ARGS__)
+> #define TRACE_AUD_STREAM_E(str, ...) TR_ERROR(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    str, ##__VA_ARGS__)
+57,60c51,53
+< //LOG_DEBUG(LOG_MOD(AUDFLG),    "[AUD][STRM][DBG]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_STREAM_I(str, ...) LOG_INFO(LOG_MOD(AUDFLG),     "[AUD][STRM]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_STREAM_W(str, ...) LOG_WARN(LOG_MOD(AUDFLG),     "[AUD][STRM][WARN]"str, ##__VA_ARGS__)
+< #define TRACE_AUD_STREAM_E(str, ...) LOG_ERROR(LOG_MOD(AUDFLG),    "[AUD][STRM][ERR]"str, ##__VA_ARGS__)
+---
+> #define TRACE_AUD_STREAM_I(str, ...) TR_INFO(TR_MOD(AUDFLG),     str, ##__VA_ARGS__)
+> #define TRACE_AUD_STREAM_W(str, ...) TR_WARN(TR_MOD(AUDFLG),     str, ##__VA_ARGS__)
+> #define TRACE_AUD_STREAM_E(str, ...) TR_ERROR(TR_MOD(AUDFLG),    str, ##__VA_ARGS__)
+65,68c58,60
+< //LOG_DEBUG(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][STRM][DBG]"str, ##__VA_ARGS__)
+< #define TRACE_MEDIA_PLAYESTREAM_I(str, ...) LOG_INFO(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][STRM]"str, ##__VA_ARGS__)
+< #define TRACE_MEDIA_PLAYESTREAM_W(str, ...) LOG_WARN(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     "[AUD][STRM][WARN]"str, ##__VA_ARGS__)
+< #define TRACE_MEDIA_PLAYESTREAM_E(str, ...) LOG_ERROR(LOG_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    "[AUD][STRM][ERR]"str, ##__VA_ARGS__)
+---
+> #define TRACE_MEDIA_PLAYESTREAM_I(str, ...) TR_INFO(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     str, ##__VA_ARGS__)
+> #define TRACE_MEDIA_PLAYESTREAM_W(str, ...) TR_WARN(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),     str, ##__VA_ARGS__)
+> #define TRACE_MEDIA_PLAYESTREAM_E(str, ...) TR_ERROR(TR_ATTR_ARG_NUM(COUNT_ARG_NUM(unused, ##__VA_ARGS__)),    str, ##__VA_ARGS__)
+71,74c63,65
+< //LOG_DEBUG(LOG_MOD(AUDFLG),    "[AUD][STRM][DBG]"str, ##__VA_ARGS__)
+< #define TRACE_MEDIA_PLAYESTREAM_I(str, ...) LOG_INFO(LOG_MOD(AUDFLG),     "[AUD][STRM]"str, ##__VA_ARGS__)
+< #define TRACE_MEDIA_PLAYESTREAM_W(str, ...) LOG_WARN(LOG_MOD(AUDFLG),     "[AUD][STRM][WARN]"str, ##__VA_ARGS__)
+< #define TRACE_MEDIA_PLAYESTREAM_E(str, ...) LOG_ERROR(LOG_MOD(AUDFLG),    "[AUD][STRM][ERR]"str, ##__VA_ARGS__)
+---
+> #define TRACE_MEDIA_PLAYESTREAM_I(str, ...) TR_INFO(TR_MOD(AUDFLG),     str, ##__VA_ARGS__)
+> #define TRACE_MEDIA_PLAYESTREAM_W(str, ...) TR_WARN(TR_MOD(AUDFLG),     str, ##__VA_ARGS__)
+> #define TRACE_MEDIA_PLAYESTREAM_E(str, ...) TR_ERROR(TR_MOD(AUDFLG),    str, ##__VA_ARGS__)

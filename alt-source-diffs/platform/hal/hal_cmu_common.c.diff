@@ -1,0 +1,330 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_cmu_common.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_cmu_common.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+17a17,19
+> #ifdef CHIP_SUBSYS_SENS
+> #include CHIP_SPECIFIC_HDR(reg_senscmu)
+> #else
+18a21
+> #endif
+49a53,55
+> #ifdef CHIP_SUBSYS_SENS
+> static struct SENSCMU_T * const cmu = (struct SENSCMU_T *)SENS_CMU_BASE;
+> #else
+50a57
+> #endif
+83a91,97
+> #ifndef CMU_FAST_TIMER_FREQ
+> uint32_t BOOT_TEXT_SRAM_LOC hal_cmu_get_fast_timer_freq(void)
+> {
+>     return crystal_freq / 4;
+> }
+> #endif
+> 
+93a108
+> #ifndef HAL_CMU_SYS_REBOOT
+97a113
+> #endif
+100a117,119
+> #if defined(CHIP_BEST1501SIMU)
+>     cmu->MISC_0F8 = 0;
+> #else
+101a121
+> #endif
+105a126,128
+> #if defined(CHIP_BEST1501SIMU)
+>     cmu->MISC_0F8 = CMU_SIMU_RES_PASSED;
+> #else
+106a130
+> #endif
+110a135,137
+> #if defined(CHIP_BEST1501SIMU)
+>     cmu->MISC_0F8 = CMU_SIMU_RES_FAILED;
+> #else
+111a139
+> #endif
+115a144,146
+> #if defined(CHIP_BEST1501SIMU)
+>     cmu->MISC_0F8 |= (1 << shift);
+> #else
+116a148
+> #endif
+120a153,155
+> #if defined(CHIP_BEST1501SIMU)
+>     cmu->MISC_0F8 = val;
+> #else
+121a157
+> #endif
+125a162,164
+> #if defined(CHIP_BEST1501SIMU)
+>     return cmu->MISC_0F8;
+> #else
+126a166,172
+> #endif
+> }
+> 
+> #if defined(CP_BOOT) || defined(CP_BUILD)
+> void hal_cmu_dbg_set_val(uint8_t id, uint32_t val)
+> {
+>     aoncmu->DEBUG_RES[id] = val;
+128a175,193
+> uint32_t hal_cmu_dbg_get_val(uint8_t id)
+> {
+>     return aoncmu->DEBUG_RES[id];
+> }
+> #endif
+> 
+> int BOOT_TEXT_FLASH_LOC hal_cmu_flash_all_select_pll(enum HAL_CMU_PLL_T pll)
+> {
+>     hal_cmu_flash_select_pll(pll);
+> #ifdef FLASH1_CTRL_BASE
+>     hal_cmu_flash1_select_pll(pll);
+> #endif
+>     return 0;
+> }
+> 
+> #if !(defined(CHIP_SUBSYS_SENS) || (defined(CHIP_SUBSYS_BTH) && !defined(BTH_AS_MAIN_MCU)))
+> 
+> #if defined(CHIP_BEST1501) || defined(CHIP_BEST2000) || \
+>         defined(CHIP_BEST2300) || defined(CHIP_BEST2300A) || defined(CHIP_BEST2300P)
+131d195
+< #ifdef RAMRET_BASE
+134c198
+<         (uint32_t *)RAMRET_BASE;
+---
+>         (uint32_t *)REGRET_BASE;
+142d205
+< #endif
+147d209
+< #ifdef RAMRET_BASE
+152c214
+<         (HAL_POWER_DOWN_WAKEUP_HANDLER *)RAMRET_BASE;
+---
+>         (HAL_POWER_DOWN_WAKEUP_HANDLER *)REGRET_BASE;
+165a228,282
+> }
+> #endif
+> 
+> #ifndef HAL_CMU_USB_ROM_SELECT_CLOCK_SOURCE
+> enum HAL_CMU_USB_CLOCK_SEL_T hal_cmu_usb_rom_select_clock_source(int pll_en, unsigned int crystal)
+> {
+>     enum HAL_CMU_USB_CLOCK_SEL_T sel;
+> 
+>     if (pll_en) {
+>         sel = HAL_CMU_USB_CLOCK_SEL_PLL;
+>     } else {
+>         if (crystal == 24000000) {
+>             sel = HAL_CMU_USB_CLOCK_SEL_24M_X2;
+>         } else if (crystal == 48000000) {
+>             sel = HAL_CMU_USB_CLOCK_SEL_48M;
+>         } else {
+>             sel = HAL_CMU_USB_CLOCK_SEL_26M_X2;
+>         }
+>     }
+> 
+>     hal_cmu_usb_rom_set_clock_source(sel);
+> 
+>     return sel;
+> }
+> #endif
+> 
+> __STATIC_FORCEINLINE int hal_cmu_flash_all_set_freq(enum HAL_CMU_FREQ_T freq)
+> {
+>     hal_cmu_flash_set_freq(freq);
+> #ifdef FLASH1_CTRL_BASE
+>     hal_cmu_flash1_set_freq(freq);
+> #endif
+>     return 0;
+> }
+> 
+> #ifdef ROM_IN_FLASH
+> SRAM_TEXT_LOC
+> #endif
+> void hal_cmu_flash_all_reset_clear(int reset)
+> {
+>     if (reset) {
+>         // Reset flash controller (for JTAG reset and run)
+>         hal_cmu_reset_set(HAL_CMU_MOD_O_FLASH);
+>         hal_cmu_reset_set(HAL_CMU_MOD_H_FLASH);
+>     }
+>     // Enable flash controller (reset by default in BEST1400)
+>     hal_cmu_reset_clear(HAL_CMU_MOD_H_FLASH);
+>     hal_cmu_reset_clear(HAL_CMU_MOD_O_FLASH);
+> #ifdef FLASH1_CTRL_BASE
+>     if (reset) {
+>         hal_cmu_reset_set(HAL_CMU_MOD_O_FLASH1);
+>         hal_cmu_reset_set(HAL_CMU_MOD_H_FLASH1);
+>     }
+>     hal_cmu_reset_clear(HAL_CMU_MOD_H_FLASH1);
+>     hal_cmu_reset_clear(HAL_CMU_MOD_O_FLASH1);
+175c292
+<     hal_cmu_flash_select_pll(HAL_CMU_PLL_USB);
+---
+>     hal_cmu_flash_all_select_pll(HAL_CMU_PLL_USB);
+179c296
+<     hal_cmu_flash_select_pll(HAL_CMU_PLL_AUD);
+---
+>     hal_cmu_flash_all_select_pll(HAL_CMU_PLL_AUD);
+186c303
+<     hal_cmu_flash_select_pll(HAL_CMU_PLL_AUD);
+---
+>     hal_cmu_flash_all_select_pll(HAL_CMU_PLL_AUD);
+218c335
+<     hal_cmu_flash_select_pll(HAL_CMU_PLL_USB);
+---
+>     hal_cmu_flash_all_select_pll(HAL_CMU_PLL_USB);
+222c339
+<     hal_cmu_flash_select_pll(HAL_CMU_PLL_AUD);
+---
+>     hal_cmu_flash_all_select_pll(HAL_CMU_PLL_AUD);
+285a403,405
+> #ifdef ROM_IN_FLASH
+> SRAM_TEXT_LOC
+> #endif
+287a408,409
+>     int reset_flash;
+> 
+291,294d412
+<     hal_cmu_timer0_select_slow();
+< #ifdef TIMER1_BASE
+<     hal_cmu_timer1_select_fast();
+< #endif
+299a418,421
+> #ifdef ROM_IN_FLASH
+>     // Wait until norflash becomes idle
+>     hal_sys_timer_delay(MS_TO_TICKS(3));
+> #endif
+301,307c423,431
+<     hal_cmu_flash_set_freq(HAL_CMU_FREQ_26M);
+<     // Reset flash controller (for JTAG reset and run)
+<     // Enable flash controller (flash controller is reset by default since BEST1400)
+<     hal_cmu_reset_set(HAL_CMU_MOD_O_FLASH);
+<     hal_cmu_reset_set(HAL_CMU_MOD_H_FLASH);
+<     hal_cmu_reset_clear(HAL_CMU_MOD_H_FLASH);
+<     hal_cmu_reset_clear(HAL_CMU_MOD_O_FLASH);
+---
+> #ifndef CHIP_BEST1501SIMU
+>     hal_cmu_flash_all_set_freq(HAL_CMU_FREQ_26M);
+> #endif
+> #ifdef ROM_IN_FLASH
+>     reset_flash = false;
+> #else
+>     reset_flash = true;
+> #endif
+>     hal_cmu_flash_all_reset_clear(reset_flash);
+308a433
+>     // TODO: Check why system crashes when ROM_IN_FLASH=1 and INSRAM_RUN=0
+319,321d443
+<     hal_cmu_ema_init();
+<     hal_sys_timer_open();
+< 
+326a449,457
+>     hal_cmu_ema_init();
+>     hal_sys_timer_open();
+> 
+>     // Init system/flash/memory clocks before initializing clock setting
+>     // and before switching PLL
+>     hal_cmu_flash_all_set_freq(HAL_CMU_FREQ_26M);
+>     hal_cmu_mem_set_freq(HAL_CMU_FREQ_26M);
+>     hal_cmu_sys_set_freq(HAL_CMU_FREQ_26M);
+> 
+342a474,476
+> 
+>     // Enable PLL for flash (and system)
+>     hal_cmu_programmer_enable_pll();
+350d483
+<     hal_cmu_timer0_select_slow();
+352d484
+< 
+360c492
+< 
+---
+> #if !defined(CHIP_BEST1501SIMU)
+362,363c494,496
+< #if defined(CHIP_HAS_PSRAM) && defined(PSRAM_ENABLE)
+<     hal_psram_init();
+---
+>  #endif
+>  #if defined(CHIP_BEST1501SIMU)
+>     hal_cmu_module_init_state();
+371c504
+<     int ret;
+---
+>     POSSIBLY_UNUSED int ret;
+373a507
+> #ifndef ARM_CMNS
+374a509,510
+> #endif
+> 
+379,383c515,517
+<     hal_cmu_module_init_state();
+<     hal_cmu_ema_init();
+<     hal_cmu_timer0_select_slow();
+< #ifdef TIMER1_BASE
+<     hal_cmu_timer1_select_fast();
+---
+> #ifdef CLOCK_OUT_ID
+>     hal_iomux_set_clock_out();
+>     hal_cmu_clock_out_enable(CLOCK_OUT_ID);
+384a519,521
+> 
+>     hal_cmu_ema_init();
+>     hal_cmu_module_init_state();
+387c524,525
+< 
+---
+> #ifndef __MCU_FW_2002__
+> #if !defined(ARM_CMNS)
+390c528,530
+<     hal_norflash_set_freq(HAL_CMU_FREQ_26M);
+---
+>     hal_norflash_set_boot_freq(HAL_CMU_FREQ_26M);
+> #endif
+> #endif
+440c580
+< 
+---
+> #ifndef __MCU_FW_2002__
+441a582
+> #if !defined(ARM_CMNS)
+443c584,585
+< 
+---
+> #endif
+> #endif
+446a589,590
+> 
+> #endif // !CHIP_SUBSYS_SENS

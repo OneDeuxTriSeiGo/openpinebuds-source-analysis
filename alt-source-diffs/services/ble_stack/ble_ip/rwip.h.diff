@@ -1,0 +1,454 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/ble_ip/rwip.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/rwip/api/rwip.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+29a44,45
+> /// Maximum value of a Bluetooth timestamp (in us)
+> #define RWIP_MAX_BTS_TIME                (0xFFFFFFFF)
+31c47
+< #define RWIP_MAX_CLOCK_TIME              ((1L<<32) - 1)
+---
+> #define RWIP_MAX_CLOCK_TIME              ((1L<<28) - 1)
+33,37c49
+< #define RWIP_MAX_10MS_TIME               ((1L<<25) - 1)
+< /// retrieve 10ms time according to clock time
+< #define RWIP_CLOCK_TO_10MS_TIME(clock)   ((clock) >> 5)
+< /// retrieve clock time according to 10ms time
+< #define RWIP_10MS_TIME_TO_CLOCK(time)    ((time)  << 5)
+---
+> #define RWIP_MAX_10MS_TIME               ((1L<<23) - 1)
+39a52,75
+> /// timer margin to ensure proper programming in microseconds
+> #define RWIP_BTS_TIMER_MARGIN            (50)
+> /// timer margin to ensure proper programming in half microseconds
+> #define RWIP_TIMER_MARGIN_HUS            (100)
+> /// Maximum additional random increment value (range 0-3)
+> #define RWIP_PRIO_MAX_RAND_INC           (4)
+> 
+> #if (BLE_EMB_PRESENT && BLE_ISO_PRESENT)
+> /// Maximum simultaneous ISO timers
+> #define RWIP_ISO_TIMER_FIFO_DEPTH   5
+> #endif // (BLE_EMB_PRESENT && BLE_ISO_PRESENT)
+> 
+> /**
+> * Inverse an intra-half-slot value (in half-us), from/to following formats:
+> *   - A: elapsed time from the previous half-slot (in half-us)
+> *   - B: remaining time to the next half-slot (in half-us)
+> * The function from A to B or from B to A.
+> *  ____________________________________________________________________________________________________
+> *     Half-slot N-1            |             Half-slot N              |             Half-slot N+1
+> *  ____________________________|______________________________________|________________________________
+> *                              |<---------- A ---------->|<---- B --->|
+> *  ____________________________|______________________________________|________________________________
+> */
+> #define HALF_SLOT_INV(x)  (HALF_SLOT_SIZE - x - 1)
+63,64c99,100
+<     /// Flag indicating HCI timeout is ongoing
+<     RW_AHI_TIMEOUT                     = 0x0008,
+---
+>     /// Flag indicating the IP is in sleep, to avoid running sleep algorithm while already entering sleep
+>     RW_DEEP_SLEEP                      = 0x0008,
+72a109,116
+>     /// Flag to indicate that a baseband frame is ongoing
+>     RW_BB_FRAME_ONGOING                = 0x0200,
+>     /// Flag to indicate that BLE Hopping computation on-going
+>     RW_HOP_CALC_ONGOING                = 0x0400,
+>     /// Flag to indicate that BT is in active mode (ACL, SCO)
+>     RW_BT_ACTIVE_MODE                  = 0x0800,
+>     /// Flag to indicate that BLE requires active mode
+>     RW_BLE_ACTIVE_MODE                 = 0x1000,
+133a178,207
+> /// Enumeration of txpwr_cs_get search options
+> enum rwip_txpwr_cs_get_opt
+> {
+>     TXPWR_CS_LOWER,
+>     TXPWR_CS_HIGHER,
+>     TXPWR_CS_NEAREST,
+> };
+> 
+> #if RW_DEBUG
+> /// Assert type
+> /*@TRACE*/
+> enum assert_type
+> {
+>     ASSERT_TYPE_WARNING = 0,
+>     ASSERT_TYPE_ERROR   = 1,
+> };
+> #endif //RW_DEBUG
+> 
+> /// Types of initialization of the IP
+> enum rwip_init_type
+> {
+>     /// IP initialization
+>     RWIP_INIT    = 0,
+>     /// IP first reset (done once after initialization, before protocol stack is used)
+>     RWIP_1ST_RST,
+>     /// Normal IP reset (can be done at any time when protocol stack is in use)
+>     RWIP_RST,
+> };
+> 
+> 
+139a214
+> /*@TRACE*/
+142,145c217,222
+<     /// Time in 312.5 us step.
+<     uint32_t time;
+<     /// number of half us before getting next tick
+<     uint32_t next_tick;
+---
+>     /// Integer part of the time (in half-slot)
+>     uint32_t hs;
+>     /// Fractional part of the time (in half-us) (range: 0-624)
+>     uint16_t hus;
+>     /// Bluetooth timestamp value (in us) 32 bits counter
+>     uint32_t bts;
+148a226,234
+> /// Time information
+> /*@TRACE*/
+> typedef struct
+> {
+>     /// Integer part of the time (in half-slot)
+>     uint32_t hs;
+>     /// Fractional part of the time (in half-us) (range: 0-624)
+>     uint16_t hus;
+> } rwip_tgt_timer_t;
+164c250
+<     uint8_t (*txpwr_dbm_get)(uint8_t, uint8_t);
+---
+>     int8_t (*txpwr_dbm_get)(uint8_t, uint8_t);
+166c252
+<     uint8_t (*txpwr_cs_get)(int8_t, bool);
+---
+>     uint8_t (*txpwr_cs_get)(int8_t, uint8_t);
+170c256
+<     uint32_t (*reg_rd)(uint16_t);
+---
+>     uint32_t (*reg_rd)(uint32_t);
+172c258
+<     void (*reg_wr)(uint16_t, uint32_t);
+---
+>     void (*reg_wr)(uint32_t, uint32_t);
+195c281
+<      * @param[in/out]  lengthPtr    Pointer to the length of the parameter (input: contain max length, output contain the effective param length)
+---
+>      * @param[in/out]  lengthPtr    Pointer to the length of the parameter (input: contain max length, output contain the effective param length, in bytes)
+204c290
+<      * @param[in/out]  length       Length of the parameter
+---
+>      * @param[in/out]  length       Length of the parameter (in bytes)
+281a368,380
+> 
+> #if (BLE_EMB_PRESENT && BLE_ISO_PRESENT)
+> 
+> /**
+>  *************************************************************************************
+>  * @brief Callback definition to inform that a timer as elapsed
+>  *
+>  * @param[in] tgt_bts Target bluetooth timestamp configured
+>  *************************************************************************************
+>  */
+> typedef void (*rwip_iso_timer_cb) (uint32_t tgt_bts);
+> #endif // (BLE_EMB_PRESENT && BLE_ISO_PRESENT)
+> 
+294,297c393
+< #endif //#if (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+< 
+< #if (BT_EMB_PRESENT || BLE_EMB_PRESENT)
+< #if (RW_WLAN_COEX)
+---
+> #if (RW_WLAN_COEX || RW_MWS_COEX)
+300c396,398
+< #endif //(RW_WLAN_COEX)
+---
+> #endif //(RW_WLAN_COEX || RW_MWS_COEX)
+> /// Programming delay, margin for programming the baseband in advance of each activity (in half-slots)
+> extern uint8_t rwip_prog_delay;
+310c408,409
+< #if (RW_WLAN_COEX)
+---
+> #define RWIP_PRIO_INC(prio_idx) (rwip_priority[prio_idx].increment + CO_MOD(co_rand_byte(), RWIP_PRIO_MAX_RAND_INC))
+> #if (RW_WLAN_COEX || RW_MWS_COEX)
+313c412
+< #else //(RW_WLAN_COEX)
+---
+> #else //!(RW_WLAN_COEX || RW_MWS_COEX)
+315c414
+< #endif //(RW_WLAN_COEX)
+---
+> #endif //(RW_WLAN_COEX || RW_MWS_COEX)
+365c464
+< //void rwip_mwscoex_set(bool state);
+---
+> void rwip_mwscoex_set(bool state);
+377c476
+< //void rwip_wlcoex_set(bool state);
+---
+> void rwip_wlcoex_set(bool state);
+383,384c482
+<  * @brief Function to implement in platform in order to retrieve expected external
+<  * interface such as UART for Host Control Interface.
+---
+>  * @brief Function to implement in platform in order to retrieve each external interface API
+386c484
+<  * @param[in] type external interface type (@see rwip_eif_types)
+---
+>  * @param[in] idx External interface index
+391,405c489
+< extern const struct rwip_eif_api* rwip_eif_get(uint8_t type);
+< 
+< #if RW_DEBUG
+< /**
+<  ****************************************************************************************
+<  * @brief Raises an assertion message to the control interface (if present)
+<  *
+<  * @param[in] file    File name
+<  * @param[in] line    Line number
+<  * @param[in] param0  Parameter 0 (custom value given by the assert instruction)
+<  * @param[in] param1  Parameter 1 (custom value given by the assert instruction)
+<  ****************************************************************************************
+<  */
+< void rwip_assert_err(const char * file, int line, int param0, int param1);
+< #endif //RW_DEBUG
+---
+> extern const struct rwip_eif_api* rwip_eif_get(uint8_t idx);
+415c499
+<  * @brief Retrieved sampled current time in half slot and next tick time in half us.
+---
+>  * @brief Retrieved sampled time
+424a509
+> #if (BT_EMB_PRESENT)
+427c512
+<  * @brief Set the a 10 ms target timer
+---
+>  * @brief Set current time
+429c514,521
+<  * @note if target is RWIP_INVALID_TARGET_TIME, not timer are programmed
+---
+>  * @param clock value in half-slots
+>  ****************************************************************************************
+>  */
+> void rwip_time_set(uint32_t clock);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Adjust current time
+431c523
+<  * @param[in] target       10ms Timer target value
+---
+>  * @param adjustment value in us
+434c526,527
+< void rwip_timer_10ms_set(uint32_t target);
+---
+> void rwip_time_adj(int16_t clk_adj_us);
+> #endif // (BT_EMB_PRESENT)
+438c531
+<  * @brief Set the a half slot target timer
+---
+>  * @brief Set the common target timer
+440c533,545
+<  * @note if target is RWIP_INVALID_TARGET_TIME, not timer are programmed
+---
+>  * @note if target is RWIP_INVALID_TARGET_TIME, no timer is programmed
+>  *
+>  * @param[in] target_bts       1us Timer target value (in microseconds)
+>  ****************************************************************************************
+>  */
+> void rwip_timer_co_set(uint32_t target_bts);
+> 
+> #if (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+> /**
+>  ****************************************************************************************
+>  * @brief Set the an alarm target timer
+>  *
+>  * @note if target is RWIP_INVALID_TARGET_TIME, no timer is programmed
+442a548
+>  * @param[in] half_us_delay  Half us timer delay in corresponding half slot (range [0:624])
+445c551
+< void rwip_timer_hs_set(uint32_t target);
+---
+> void rwip_timer_alarm_set(uint32_t target, uint32_t half_us_delay);
+449c555,557
+<  * @brief Gives FW/HW versions of RW-BT stack.
+---
+>  * @brief Set the an Arbiter target timer
+>  *
+>  * @note if target is RWIP_INVALID_TARGET_TIME, no timer is programmed
+450a559,560
+>  * @param[in] target         Half Slot Timer target value
+>  * @param[in] half_us_delay  Half us timer delay in corresponding half slot (range [0:624])
+453c563,564
+< //void rwip_version(uint8_t* fw_version, uint8_t* hw_version);
+---
+> void rwip_timer_arb_set(uint32_t target, uint32_t half_us_delay);
+> #endif // (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+463c574
+<  * @param[in] data_em_ptr   Exchange memory data pointer of data to encrypt
+---
+>  * @param[in] val           16 bytes value array to encrypt using AES
+466c577
+< //void rwip_aes_encrypt(uint8_t *key, uint16_t data_em_ptr);
+---
+> void rwip_aes_encrypt(const uint8_t *key, const uint8_t* val);
+467a579
+> #if (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+473c585,586
+< //void rwip_sw_int_req(void);
+---
+> void rwip_sw_int_req(void);
+> #endif // (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+477c590
+<  * @brief Schedule all pending events.
+---
+>  * @brief Invoke the sleep function.
+478a592
+>  * @return  sleep status (@see enum rwip_sleep_state)
+481c595
+< //void rwip_schedule(void);
+---
+> uint8_t rwip_sleep(void);
+482a597
+> #if (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+485,487c600
+<  * @brief Invoke the sleep function.
+<  *
+<  * @return  sleep status (@see enum rwip_sleep_state)
+---
+>  * @brief Handle the common core interrupts.
+490c603,604
+< //uint8_t rwip_sleep(void);
+---
+> void rwip_isr(void);
+> #endif // (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+491a606
+> #if (BLE_EMB_PRESENT && BT_EMB_PRESENT)
+494,496c609
+<  * @brief Handle the common core interrupts.
+<  *
+<  * @param[in] current IRQ status
+---
+>  * @brief Handle the btdm-specific core interrupts.
+499c612,613
+< //void rwip_isr(uint32_t irq_stat);
+---
+> void rwip_btdm_isr(void);
+> #endif // (BLE_EMB_PRESENT && BT_EMB_PRESENT)
+509c623
+< //void rwip_prevent_sleep_set(uint16_t prv_slp_bit);
+---
+> void rwip_prevent_sleep_set(uint16_t prv_slp_bit);
+519c633,729
+< //void rwip_prevent_sleep_clear(uint16_t prv_slp_bit);
+---
+> void rwip_prevent_sleep_clear(uint16_t prv_slp_bit);
+> 
+> #if (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+> /**
+>  ****************************************************************************************
+>  * @brief Check if the system is permanently active (e.g. for BT ACL connection)
+>  *
+>  * @return  false: system might sleep | true: system stays active
+>  ****************************************************************************************
+>  */
+> bool rwip_active_check(void);
+> #endif // (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Schedule all pending events.
+>  *
+>  ****************************************************************************************
+>  */
+> void rwip_schedule(void);
+> 
+> 
+> #if (BLE_EMB_PRESENT && BLE_ISO_PRESENT)
+> /**
+>  ****************************************************************************************
+>  * @brief Handle the ISO Bluetooth timestamp interrupts.
+>  ****************************************************************************************
+>  */
+> void rwip_bts_isr(void);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Program an ISO timer
+>  *
+>  * Note: Function should be called under interrupt context.
+>  *       New timer must target later than the previous one
+>  *
+>  * @param[in] tgt_bts         Targeted Bluetooth Timestamp
+>  ****************************************************************************************
+>  */
+> void rwip_iso_timer_set(uint32_t tgt_bts);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Clear ISO timers
+>  *
+>  * Note: Function should be called under interrupt context.
+>  ****************************************************************************************
+>  */
+> void rwip_iso_timer_clear();
+> 
+> #endif // (BLE_EMB_PRESENT && BLE_ISO_PRESENT)
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Convert Bluetooth time provided in parameters to a Bluetooth timestamp value
+>  *
+>  * @param[in] hs   Bluetooth time in half slot
+>  * @param[in] hus  Bluetooth time in half microseconds
+>  *
+>  * @return Bluetooth timestamp in microseconds
+>  ****************************************************************************************
+>  */
+> uint32_t rwip_bt_time_to_bts(uint32_t hs, uint16_t hus);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Convert Bluetooth timestamp value to Bluetooth time
+>  *
+>  * @param[in]  bts    Bluetooth timestamp
+>  * @param[out] p_hs   Bluetooth time in half slot
+>  * @param[out] p_hus  Bluetooth time in half microseconds
+>  ****************************************************************************************
+>  */
+> void rwip_bts_to_bt_time(uint32_t bts, uint32_t* p_hs, uint16_t* p_hus);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Set the a 10 ms target timer
+>  *
+>  * @note if target is RWIP_INVALID_TARGET_TIME, not timer are programmed
+>  *
+>  * @param[in] target       10ms Timer target value
+>  ****************************************************************************************
+>  */
+> void rwip_timer_10ms_set(uint32_t target);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Set the a half slot target timer
+>  *
+>  * @note if target is RWIP_INVALID_TARGET_TIME, not timer are programmed
+>  *
+>  * @param[in] target      Half Slot Timer target value
+>  ****************************************************************************************
+>  */
+> void rwip_timer_hs_set(uint32_t target);

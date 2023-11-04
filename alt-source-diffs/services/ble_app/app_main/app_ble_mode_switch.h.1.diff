@@ -1,0 +1,655 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_app/app_main/app_ble_mode_switch.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_app_v2/app_main/app_ble_mode_switch.h
+diff -sw local remote
+---
+
+1,16c1,14
+< /***************************************************************************
+< *
+< *Copyright 2015-2019 BES.
+< *All rights reserved. All unpublished rights reserved.
+< *
+< *No part of this work may be used or reproduced in any form or by any
+< *means, or stored in a database or retrieval system, without prior written
+< *permission of BES.
+< *
+< *Use of this work is governed by a license granted by BES.
+< *This work contains confidential and proprietary information of
+< *BES. which is protected by copyright, trade secret,
+< *trademark and other intellectual property rights.
+< *
+< ****************************************************************************/
+< 
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+26c24
+< #include "co_bt_defines.h"
+---
+> #include "app_ble_param_config.h"
+29a28
+> #define BLE_ADV_TYPE_SHORTENED_NAME 0x08
+33a33,49
+> #ifndef BLE_AUDIO_CONNECTION_CNT
+> #define BLE_AUDIO_CONNECTION_CNT (2)
+> #endif
+> #ifndef ADV_DATA_LEN
+> #define ADV_DATA_LEN                    0x1F
+> #endif
+> #ifndef BLE_ADV_FLAG_PART_LEN
+> #define BLE_ADV_FLAG_PART_LEN           0x03
+> #endif
+> #ifndef BLE_ADV_DATA_WITHOUT_FLAG_LEN
+> #define BLE_ADV_DATA_WITHOUT_FLAG_LEN   (ADV_DATA_LEN)
+> #endif
+> #ifndef BLE_ADV_DATA_WITH_FLAG_LEN
+> #define BLE_ADV_DATA_WITH_FLAG_LEN      (ADV_DATA_LEN - BLE_ADV_FLAG_PART_LEN)
+> #endif
+> 
+> #define WHITE_LIST_MAX_NUM 8
+36a53
+> #define BLE_ADV_INVALID_INTERVAL (0)
+46,62c63
+< /******************************type defination******************************/
+< /**
+<  * @brief The state type of the ble
+<  *
+<  */
+< enum BLE_STATE_E {
+<     STATE_IDLE       = 0,
+<     ADVERTISING      = 1,
+<     STARTING_ADV     = 2,
+<     STOPPING_ADV     = 3,
+<     SCANNING         = 4,
+<     STARTING_SCAN    = 5,
+<     STOPPING_SCAN    = 6,
+<     CONNECTING       = 7,
+<     STARTING_CONNECT = 8,
+<     STOPPING_CONNECT = 9,
+< };
+---
+> #define ADV_PARTICLE_HEADER_LEN (1)
+64,76c65
+< /**
+<  * @brief The operation type of the ble
+<  *
+<  */
+< enum BLE_OP_E {
+<     OP_IDLE       = 0,
+<     START_ADV     = 1,
+<     START_SCAN    = 2,
+<     START_CONNECT = 3,
+<     STOP_ADV      = 4,
+<     STOP_SCAN     = 5,
+<     STOP_CONNECT  = 6,
+< };
+---
+> #define __ARRAY_EMPTY_F 1
+78,87c67,69
+< enum BLE_ADV_USER_E {
+<     USER_STUB            = 0,
+<     USER_GFPS            = 1,
+<     USER_GSOUND          = 2,
+<     USER_AI              = 3,
+<     USER_INTERCONNECTION = 4,
+<     USER_TILE            = 5,
+<     USER_OTA             = 6,
+<     BLE_ADV_USER_NUM,
+< };
+---
+> #define BLE_ADV_INVALID_TXPWR (100)
+> 
+> /******************************type defination******************************/
+95a78,79
+>     BLE_SWITCH_USER_FPGA        = 6, // used for fpga
+>     BLE_SWITCH_USER_BLE_AUDIO   = 7, // used for ble audio
+99a84,90
+> typedef enum _BLE_WHITE_LIST_USER_E {
+>     BLE_WHITE_LIST_USER_TWS     = 0,    // used for aob_tws
+>     BLE_WHITE_LIST_USER_MOBILE,         // used for mobile manager
+> 
+>     BLE_WHITE_LIST_USER_NUM,
+> } BLE_WHITE_LIST_USER_E;
+> 
+111a103,173
+> /// Initiating Types
+> typedef enum app_ble_init_type
+> {
+>     /// Direct connection establishment, establish a connection with an indicated device
+>     APP_BLE_INIT_TYPE_DIRECT_CONN_EST = 0,
+>     /// Automatic connection establishment, establish a connection with all devices whose address is
+>     /// present in the white list
+>     APP_BLE_INIT_TYPE_AUTO_CONN_EST,
+>     /// Name discovery, Establish a connection with an indicated device in order to read content of its
+>     /// Device Name characteristic. Connection is closed once this operation is stopped.
+>     APP_BLE_INIT_TYPE_NAME_DISC,
+> } BLE_INIT_TYPE_E;
+> 
+> /* Advertise Types                                  */
+> /* ************************************************ */
+> typedef enum app_ble_adv_type
+> {
+>     /// Connectable and scannable undirected advertising
+>     ADV_TYPE_UNDIRECT = 0,
+>     /// Directed connectable with Low Duty Cycle
+>     ADV_TYPE_DIRECT_LDC,
+>     /// Directed connectable with High Duty Cycle
+>     ADV_TYPE_DIRECT_HDC,
+>     /// Non-connectable but Scannable undirected advertising
+>     ADV_TYPE_NON_CONN_SCAN,
+>     /// Non-connectable and nonscannable undirected
+>     ADV_TYPE_NON_CONN_NON_SCAN,
+> } BLE_ADV_TYPE_E;
+> 
+> 
+> #ifdef BLE_USE_RPA
+> #define BLE_DEFAULT_SCAN_POLICY BLE_SCAN_ALLOW_ADV_ALL_AND_INIT_RPA
+> #else
+> #define BLE_DEFAULT_SCAN_POLICY BLE_SCAN_ALLOW_ADV_ALL
+> #endif
+> 
+> /// Activity action
+> typedef enum 
+> {
+>     /// Activity do nothing
+>     BLE_ACTV_ACTION_IDLE = 0,
+> 
+>     /// Activity starting advertise
+>     BLE_ACTV_ACTION_STARTING_ADV,
+>     /// Activity stopping advertise
+>     BLE_ACTV_ACTION_STOPPING_ADV,
+> 
+>     /// Activity starting scan
+>     BLE_ACTV_ACTION_STARTING_SCAN,
+>     /// Activity stopping scan
+>     BLE_ACTV_ACTION_STOPPING_SCAN,
+> 
+>     /// Activity connecting
+>     BLE_ACTV_ACTION_CONNECTING,
+>     /// Activity stop connecting
+>     BLE_ACTV_ACTION_STOP_CONNECTING,
+>     /// Activity disconnecting
+>     BLE_ACTV_ACTION_DISCONNECTING,
+> 
+>     /// Activity connecting
+>     BLE_ACTV_ACTION_SET_WHITE_LIST,
+> } BLE_ACTV_ACTION_E;
+> 
+> typedef struct ble_bdaddr
+> {
+>     /// BD Address of device
+>     uint8_t addr[BTIF_BD_ADDR_SIZE];
+>     /// Address type of the device 0=public/1=private random
+>     uint8_t addr_type;
+> } ble_bdaddr_t;
+> 
+113,114c175,179
+<     bool withFlag;
+<     uint8_t advType;
+---
+>     BLE_ADV_ACTIVITY_USER_E adv_actv_user;
+>     bool withFlags;
+>     /// Advertising filtering policy (@see enum adv_filter_policy)
+>     uint8_t filter_pol;
+>     BLE_ADV_TYPE_E advType;
+115a181,183
+>     uint16_t advUserInterval[BLE_ADV_USER_NUM];
+>     // Maximum power level
+>     BLE_ADV_TX_POWER_LEVEL_E advTxPwr;
+117c185
+<     uint8_t advData[BLE_DATA_LEN];
+---
+>     uint8_t advData[ADV_DATA_LEN];
+119,120c187,190
+<     uint8_t scanRspData[BLE_DATA_LEN];
+< } BLE_ADV_PARAM_T;
+---
+>     uint8_t scanRspData[ADV_DATA_LEN];
+>     uint8_t localAddr[BTIF_BD_ADDR_SIZE];
+>     ble_bdaddr_t peerAddr;
+> }  __attribute__((__packed__)) BLE_ADV_PARAM_T;
+122a193
+> typedef void (*BLE_USER_DATA_FILL_FUNC_T)(BLE_ADV_USER_E, void *advParam);
+129a201,227
+> typedef struct
+> {
+>     /// Initiating type (@see enum gapm_init_type)
+>     uint8_t gapm_init_type;
+>     /// Timeout for automatic connection establishment (in unit of 10ms). Cancel the procedure if not all
+>     /// indicated devices have been connected when the timeout occurs. 0 means there is no timeout
+>     uint16_t conn_to;
+>     /// Address of peer device in case white list is not used for connection
+>     ble_bdaddr_t peer_addr;
+> } __attribute__((__packed__)) BLE_INIT_PARAM_T;
+> 
+> typedef struct {
+>     bool pendingConnect;
+>     /// Initiating param
+>     BLE_INIT_PARAM_T init_param;
+> } __attribute__((__packed__)) BLE_INIT_INFO_T;
+> 
+> typedef struct
+> {
+>     ///Connection interval value
+>     uint16_t            con_interval;
+>     ///Connection latency value
+>     uint16_t            con_latency;
+>     ///Supervision timeout
+>     uint16_t            sup_to;
+> } APP_BLE_CONN_PARAM_T;
+> 
+131,134c229,241
+<     uint32_t advSwitch;
+<     uint8_t state;
+<     uint8_t op;
+<     uint8_t bleAddrToConnect[BTIF_BD_ADDR_SIZE];
+---
+>     bool enable;
+>     /// Number of entries to be added in the list. 0 means that list content has to be cleared
+>     uint8_t size;
+>     /// BD Address of device
+>     ble_bdaddr_t bdaddr[WHITE_LIST_MAX_NUM];
+> } BLE_WHITE_LIST_PARAM_T;
+> 
+> typedef struct {
+>     bool ble_is_busy;
+>     BLE_ACTV_ACTION_E ble_actv_action;
+>     uint8_t ble_op_actv_idx;
+> 
+>     uint32_t advSwitch;         //one bit represent one user
+136c243
+<     uint32_t adv_user_enable;   //one bit represent one user
+---
+>     uint32_t adv_user_enable[BLE_ADV_ACTIVITY_USER_NUM];   //one bit represent one user
+141c248,257
+<     BLE_ADV_PARAM_T advInfo;
+---
+>     bool adv_has_pending_op;
+>     bool withPendingFlag;
+>     uint16_t advPendingInterval;
+>     BLE_ADV_TYPE_E advPendingType;
+>     ble_bdaddr_t advPendingPeerAddr;
+>     int8_t advPendingTxpwr[BLE_ADV_ACTIVITY_USER_NUM];
+>     uint8_t advPendingLocalAddr[BLE_ADV_ACTIVITY_USER_NUM][BTIF_BD_ADDR_SIZE];
+>     int8_t advCurrentTxpwr[BLE_ADV_ACTIVITY_USER_NUM];
+>     BLE_ADV_PARAM_T advCurrentInfo[BLE_ADV_ACTIVITY_USER_NUM];
+>     BLE_ADV_PARAM_T advParamInfo;
+144c260,272
+<     BLE_SCAN_PARAM_T scanInfo;
+---
+>     bool scan_has_pending_op;
+>     bool scan_has_pending_stop_op;
+>     BLE_SCAN_PARAM_T scanCurrentInfo;
+>     BLE_SCAN_PARAM_T scanPendingInfo;
+> 
+>     // prarm used for BLE initiating
+>     bool pending_stop_connecting;
+>     BLE_INIT_INFO_T bleToConnectInfo[BLE_CONNECTION_MAX];
+>     bool pendingDisconnect[BLE_CONNECTION_MAX];
+> 
+>     // prarm used for set white list
+>     bool pending_set_white_list;
+>     BLE_WHITE_LIST_PARAM_T ble_white_list[BLE_WHITE_LIST_USER_NUM];
+149a278,283
+> typedef struct
+> {
+>     uint8_t length;
+>     uint8_t type;
+>     uint8_t value[__ARRAY_EMPTY_F];
+> } BLE_ADV_DATA_T;
+182c316
+< void app_ble_register_data_fill_handle(enum BLE_ADV_USER_E user, BLE_DATA_FILL_FUNC_T func, bool enable);
+---
+> void app_ble_register_data_fill_handle(BLE_ADV_USER_E user, BLE_DATA_FILL_FUNC_T func, bool enable);
+199c333
+< void app_ble_data_fill_enable(enum BLE_ADV_USER_E user, bool enable);
+---
+> void app_ble_data_fill_enable(BLE_ADV_USER_E user, bool enable);
+202c336
+<  *            app_ble_get_data_fill_enable
+---
+>  *            app_ble_start_connectable_adv
+206c340
+<  *    get if specific user is enabled to fill adv/scan response data
+---
+>  *    start connetable BLE advertise
+209c343
+<  *    user : user
+---
+>  *    advertisement interval in ms
+212,213c346
+<  *    true - user is enabled to fill data
+<  *    false - user is disabled to fill data
+---
+>  *    None
+215c348
+< bool app_ble_get_data_fill_enable(enum BLE_ADV_USER_E user);
+---
+> void app_ble_start_connectable_adv(uint16_t advInterval);
+218c351
+<  *            app_ble_start_connectable_adv
+---
+>  *            app_ble_refresh_adv_state
+222c355
+<  *    start connetable BLE advertise
+---
+>  *    refresh adv state
+230c363
+< void app_ble_start_connectable_adv(uint16_t advInterval);
+---
+> void app_ble_refresh_adv_state(uint16_t advInterval);
+233c366
+<  *            app_ble_refresh_adv_state
+---
+>  *            app_ble_set_adv_type
+237c370
+<  *    refresh adv state
+---
+>  *    for ble to set adv type
+240c373,374
+<  *    advertisement interval in ms
+---
+>  *    advType: advertising type
+>  *    peer_addr: peer address
+245c379,458
+< void app_ble_refresh_adv_state(uint16_t advInterval);
+---
+> void app_ble_set_adv_type(BLE_ADV_TYPE_E advType, ble_bdaddr_t *peer_addr);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_set_adv_txpwr_by_actv_user
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    set adv tx power value by activity user
+>  *
+>  * Parameters:
+>  *    actv_user: activity user
+>  *    txpwr_dbm: the value of tx power, -21 -> 16
+>  *
+>  * Return:
+>  *    None
+>  */
+> void app_ble_set_adv_txpwr_by_actv_user(BLE_ADV_ACTIVITY_USER_E actv_user, int8_t txpwr_dbm);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_set_adv_txpwr_by_adv_user
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    set adv tx power value by adv user
+>  *
+>  * Parameters:
+>  *    user: adv user
+>  *    txpwr_dbm: the value of tx power, -21 -> 16
+>  *
+>  * Return:
+>  *    None
+>  */
+> void app_ble_set_adv_txpwr_by_adv_user(BLE_ADV_USER_E user, int8_t txpwr_dbm);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_set_all_adv_txpwr
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    set adv tx power value of all activity
+>  *
+>  * Parameters:
+>  *    txpwr_dbm: the value of tx power, -21 -> 16
+>  *
+>  * Return:
+>  *    None
+>  */
+> void app_ble_set_all_adv_txpwr(int8_t txpwr_dbm);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_set_adv_local_addr_by_adv_user
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    for ble to set adv local address by advertising user
+>  *
+>  * Parameters:
+>  *    user: advertising user
+>  *    addr: the address that needed to set
+>  *
+>  * Return:
+>  *    None
+>  */
+> void app_ble_set_adv_local_addr_by_adv_user(BLE_ADV_USER_E user, uint8_t *addr);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_set_adv_local_addr_by_actv_user
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    for ble to set adv local address by adv activity user
+>  *
+>  * Parameters:
+>  *    actv_user: adv activity user
+>  *    addr: the address that needed to set
+>  *
+>  * Return:
+>  *    None
+>  */
+> void app_ble_set_adv_local_addr_by_actv_user(BLE_ADV_ACTIVITY_USER_E actv_user, uint8_t *addr);
+262c475
+< void app_ble_force_switch_adv(uint8_t user, bool onOff);
+---
+> void app_ble_force_switch_adv(enum BLE_ADV_SWITCH_USER_E user, bool onOff);
+281a495,509
+>  *            app_ble_stop_scan
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    stop BLE scan
+>  *
+>  * Parameters:
+>  *    void
+>  *
+>  * Return:
+>  *    void
+>  */
+> void app_ble_stop_scan(void);
+> 
+> /*---------------------------------------------------------------------------
+294c522,552
+< void app_ble_start_connect(uint8_t *bdAddrToConnect);
+---
+> void app_ble_start_connect(ble_bdaddr_t *addr);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_start_connect_with_init_type
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    start connect BLE with the given address
+>  *
+>  * Parameters:
+>  *    bdAddrToConnect : BLE address to connnect
+>  *
+>  * Return:
+>  *    void
+>  */
+> void app_ble_start_connect_with_init_type(ble_bdaddr_t *addr, BLE_INIT_TYPE_E init_type, uint16_t conn_to);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_cancel_connecting
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    cancel connecting as connecting cost too long time.
+>  *
+>  * Parameters:
+>  *    NULL
+>  *
+>  * Return:
+>  *    void
+>  */
+> void app_ble_cancel_connecting(void);
+312a571,585
+>  *            ble_execute_pending_op
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    execute pended BLE op
+>  *
+>  * Parameters:
+>  *    void
+>  *
+>  * Return:
+>  *    void
+>  */
+> void ble_execute_pending_op(BLE_ACTV_ACTION_E finish_action, uint8_t actv_idx);
+> 
+> /*---------------------------------------------------------------------------
+359c632
+<  *            app_ble_stop_activities
+---
+>  *            app_ble_is_in_advertising_state
+363,364c636
+<  *    stop all BLE activities
+<  *    NOTE: will not disconnect the existed connections
+---
+>  *    is BLE in advertising progress
+370c642,643
+<  *    void
+---
+>  *    true - BLE adv is in progress
+>  *    false - BLE adv is not in progress
+372c645
+< void app_ble_stop_activities(void);
+---
+> bool app_ble_is_in_advertising_state(void);
+375c648
+<  *            app_ble_is_in_advertising_state
+---
+>  *            app_ble_get_user_register
+379c652
+<  *    is BLE in advertising progress
+---
+>  *    to get adv user register
+385,386c658
+<  *    true - BLE adv is in progress
+<  *    false - BLE adv is not in progress
+---
+>  *    uint32_t -- adv user register
+388c660
+< bool app_ble_is_in_advertising_state(void);
+---
+> uint32_t app_ble_get_user_register(void);
+391c663
+<  *            app_ble_get_user_register
+---
+>  *            app_ble_get_runtime_adv_param
+395c667,683
+<  *    to get adv user register
+---
+>  *    to get current ble advertising parameters
+>  *
+>  * Parameters:
+>  *    pAdvType: Output pointer of adv type
+>  *    pAdvIntervalMs: Output pointer of adv internal in ms
+>  *
+>  * Return:
+>  *    void
+>  */
+> void app_ble_get_runtime_adv_param(uint8_t* pAdvType, uint16_t* pAdvIntervalMs);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_refresh_irk
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    to refresh ble identity key
+401c689
+<  *    uint32_t -- adv user register
+---
+>  *    void
+403c691
+< uint32_t app_ble_get_user_register(void);
+---
+> void app_ble_refresh_irk(void);
+406c694
+<  *            app_ble_get_current_state
+---
+>  *            app_ble_get_conhdl
+410c698,713
+<  *    to get current ble state
+---
+>  *    get ble connection handle by ble connection index
+>  *
+>  * Parameters:
+>  *    conidx: ble connection index
+>  *
+>  * Return:
+>  *    uint16_t: ble connection handle
+>  */
+> uint16_t app_ble_get_conhdl(uint8_t conidx);
+> 
+> /*---------------------------------------------------------------------------
+>  *            app_ble_get_conhdl
+>  *---------------------------------------------------------------------------
+>  *
+>  *Synopsis:
+>  *    get ble device name
+416c719
+<  *    enum BLE_STATE_E -- ble state
+---
+>  *    uint8_t *: ble device name
+418c721
+< enum BLE_STATE_E app_ble_get_current_state(void);
+---
+> uint8_t *app_ble_get_dev_name(void);
+421c724
+<  *            app_ble_get_current_operation
+---
+>  *            app_ble_get_mode_env
+425c728
+<  *    to get current ble operation
+---
+>  *    get ble mode env
+431c734
+<  *    enum BLE_OP_E -- ble operation
+---
+>  *    BLE_MODE_ENV_T *: ble mode env
+433c736
+< enum BLE_OP_E app_ble_get_current_operation(void);
+---
+> BLE_MODE_ENV_T *app_ble_get_mode_env(void);
+436c739
+<  *            app_ble_get_runtime_adv_param
+---
+>  *            app_ble_update_param_clear
+440c743
+<  *    to get current ble advertising parameters
+---
+>  *    clear ble update param record
+443,444c746
+<  *    pAdvType: Output pointer of adv type
+<  *    pAdvIntervalMs: Output pointer of adv internal in ms
+---
+>  *    conidx: connection index
+449c751
+< void app_ble_get_runtime_adv_param(uint8_t* pAdvType, uint16_t* pAdvIntervalMs);
+---
+> void app_ble_update_param_clear(uint8_t conidx);
+450a753,757
+> uint32_t ble_get_manufacture_data_ptr(uint8_t *advData,uint32_t dataLength,uint8_t *manufactureData);
+> bool app_ble_is_white_list_enable(void);
+> void app_ble_set_white_list(BLE_WHITE_LIST_USER_E user, ble_bdaddr_t *bdaddr, uint8_t size);
+> void app_ble_clear_white_list(BLE_WHITE_LIST_USER_E user);
+> void app_ble_clear_all_white_list(void);

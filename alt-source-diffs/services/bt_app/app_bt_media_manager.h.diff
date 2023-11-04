@@ -1,0 +1,87 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/bt_app/app_bt_media_manager.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/bt_app/app_bt_media_manager.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+37a37,39
+> #ifdef AUDIO_PCM_PLAYER
+> #define  BT_STREAM_PCM_PLAYER   0x20
+> #endif
+39,41c41,44
+< // direction is in
+< #ifdef VOICE_DATAPATH
+< #define BT_STREAM_CAPTURE       0x100
+---
+> #if BLE_AUDIO_ENABLED
+> #define  BT_STREAM_BIS_LINEIN   0x80
+> #define  BT_STREAM_BIS_BT       0x100
+> #define  BT_STREAM_BIS_SINK     0x400
+43a47,50
+> #define BT_STREAM_BESAUD 0x20
+> #define BT_STREAM_MP3 0x40
+> 
+> // direction is in
+48,49d54
+< #define BT_STREAM_THIRDPARTY_VOICE 0x400
+< 
+56d60
+<     APP_BT_STREAM_MANAGER_SWITCHTO_SCO,
+80c84
+< typedef void (*APP_AUDIO_MANAGER_CALLBACK_T)(uint32_t status, uint32_t param);
+---
+> typedef void (*APP_AUDIO_MANAGER_CALLBACK_T)(uint8_t device_id, uint32_t status, uint32_t param);
+97,99c101
+< void bt_media_stop(uint16_t stream_type,enum BT_DEVICE_ID_T device_id);
+< void bt_media_switch_to_voice(uint16_t stream_type,enum BT_DEVICE_ID_T device_id);
+< uint16_t bt_media_get_media_active(enum BT_DEVICE_ID_T device_id);
+---
+> void bt_media_stop(uint16_t stream_type,enum BT_DEVICE_ID_T device_id,uint16_t media_id);
+104c106
+< hf_chan_handle_t* app_audio_manager_get_active_sco_chnl(void);
+---
+> btif_hf_channel_t* app_audio_manager_get_active_sco_chnl(void);
+115c117
+< int app_audio_manager_get_scocodecid(void);
+---
+> hfp_sco_codec_t app_audio_manager_get_scocodecid(void);
+132c134,135
+< int app_audio_manager_ctrl_volume(APP_AUDIO_MANAGER_VOLUME_CTRL_T volume_ctrl, uint16_t volume_level);
+---
+> int app_audio_manager_ctrl_volume(enum APP_AUDIO_MANAGER_VOLUME_CTRL_T volume_ctrl, uint16_t volume_level);
+> int app_audio_manager_ctrl_volume_with_callback(enum APP_AUDIO_MANAGER_VOLUME_CTRL_T volume_ctrl, uint16_t volume_level, void (*cb)(uint8_t device_id));
+138a142,145
+> int app_audio_manager_set_a2dp_codec_type(uint8_t device_id, uint8_t codec_type);
+> uint8_t app_audio_manager_get_a2dp_codec_type(uint8_t device_id);
+> void bt_media_clear_current_media(uint16_t media_type);
+> bool bt_media_cur_is_besaud_stream_media(void);

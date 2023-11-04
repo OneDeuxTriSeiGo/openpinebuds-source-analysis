@@ -1,0 +1,264 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/drivers/norflash/norflash_drv.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/drivers/norflash/norflash_drv.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+20a20
+> #include "hal_cmu.h"
+29d28
+< #ifdef PUYA_FLASH_ERASE_PAGE_ENABLE
+31d29
+< #endif
+41a40,41
+> 
+>     DRV_NORFLASH_W_STATUS_QTY,
+76c76
+<         uint16_t offset     :2;
+---
+>         uint16_t offset     :1;
+80c80
+<         uint16_t reserved   :3;
+---
+>         uint16_t reserved   :4;
+85c85,93
+< typedef int (*NORFLASH_WRITE_STATUS_CB)(enum DRV_NORFLASH_W_STATUS_T type, uint32_t param);
+---
+> union DRV_NORFLASH_DTR_CFG_T {
+>     struct {
+>         uint8_t speed_ratio :3;
+>         uint8_t dummy_cycles:5;
+>     } s;
+>     uint8_t v;
+> };
+> 
+> typedef int (*NORFLASH_WRITE_STATUS_CB)(enum HAL_FLASH_ID_T id, enum DRV_NORFLASH_W_STATUS_T type, uint32_t param);
+88,100c96,109
+<     const uint8_t id[NORFLASH_ID_LEN];
+<     const union DRV_NORFLASH_SPEED_RATIO_T speed_ratio;
+<     const uint8_t crm_en_bits;
+<     const uint8_t crm_dis_bits;
+<     const uint16_t block_protect_mask;
+<     const union DRV_NORFLASH_SEC_REG_CFG_T sec_reg_cfg;
+<     const uint16_t page_size;
+<     const uint16_t sector_size;
+<     const uint32_t block_size;
+<     const uint32_t total_size;
+<     const uint32_t max_speed;
+<     const uint32_t mode;
+<     const NORFLASH_WRITE_STATUS_CB write_status;
+---
+>     uint8_t id[NORFLASH_ID_LEN];
+>     union DRV_NORFLASH_SPEED_RATIO_T speed_ratio;
+>     union DRV_NORFLASH_DTR_CFG_T dtr_quad_cfg;
+>     uint8_t crm_en_bits;
+>     uint8_t crm_dis_bits;
+>     uint16_t block_protect_mask;
+>     union DRV_NORFLASH_SEC_REG_CFG_T sec_reg_cfg;
+>     uint16_t page_size;
+>     uint16_t sector_size;
+>     uint32_t block_size;
+>     uint32_t total_size;
+>     uint32_t max_speed;
+>     uint32_t mode;
+>     NORFLASH_WRITE_STATUS_CB write_status;
+103c112,116
+< uint8_t norflash_read_status_s0_s7(void);
+---
+> uint8_t norflash_read_status_s0_s7(enum HAL_FLASH_ID_T id);
+> 
+> uint8_t norflash_read_status_s8_s15(enum HAL_FLASH_ID_T id);
+> 
+> void norflash_status_WEL_0_wait(enum HAL_FLASH_ID_T id);
+105c118
+< uint8_t norflash_read_status_s8_s15(void);
+---
+> enum HAL_NORFLASH_RET_T norflash_status_WIP_1_wait(enum HAL_FLASH_ID_T id, int suspend);
+107c120
+< void norflash_status_WEL_0_wait(void);
+---
+> uint32_t norflash_get_supported_mode(enum HAL_FLASH_ID_T id);
+109c122
+< enum HAL_NORFLASH_RET_T norflash_status_WIP_1_wait(int suspend);
+---
+> uint32_t norflash_get_current_mode(enum HAL_FLASH_ID_T id);
+111c124
+< uint32_t norflash_get_supported_mode(void);
+---
+> union DRV_NORFLASH_SEC_REG_CFG_T norflash_get_security_register_config(enum HAL_FLASH_ID_T id);
+113c126
+< uint32_t norflash_get_current_mode(void);
+---
+> uint32_t norflash_get_block_protect_mask(enum HAL_FLASH_ID_T id);
+115c128
+< union DRV_NORFLASH_SEC_REG_CFG_T norflash_get_security_register_config(void);
+---
+> void norflash_reset(enum HAL_FLASH_ID_T id);
+117c130
+< uint32_t norflash_get_block_protect_mask(void);
+---
+> int norflash_get_size(enum HAL_FLASH_ID_T id, uint32_t *total_size, uint32_t *block_size, uint32_t *sector_size, uint32_t *page_size);
+119c132
+< void norflash_reset(void);
+---
+> int norflash_set_mode(enum HAL_FLASH_ID_T id, uint32_t op);
+121c134
+< int norflash_get_size(uint32_t *total_size, uint32_t *block_size, uint32_t *sector_size, uint32_t *page_size);
+---
+> int norflash_pre_operation(enum HAL_FLASH_ID_T id);
+123c136
+< int norflash_set_mode(uint32_t op);
+---
+> int norflash_post_operation(enum HAL_FLASH_ID_T id);
+125c138
+< int norflash_pre_operation(void);
+---
+> int norflash_read_reg(enum HAL_FLASH_ID_T id, uint8_t cmd, uint8_t *val, uint32_t len);
+127c140
+< int norflash_post_operation(void);
+---
+> int norflash_read_reg_ex(enum HAL_FLASH_ID_T id, uint8_t cmd, uint8_t *param, uint32_t param_len, uint8_t *val, uint32_t len);
+129c142
+< int norflash_read_reg(uint8_t cmd, uint8_t *val, uint32_t len);
+---
+> int norflash_write_reg(enum HAL_FLASH_ID_T id, uint8_t cmd, const uint8_t *val, uint32_t len);
+131c144
+< int norflash_read_reg_ex(uint8_t cmd, uint8_t *param, uint32_t param_len, uint8_t *val, uint32_t len);
+---
+> int norflash_init_sample_delay_by_div(enum HAL_FLASH_ID_T id, uint32_t div);
+133c146
+< int norflash_write_reg(uint8_t cmd, const uint8_t *val, uint32_t len);
+---
+> void norflash_set_sample_delay_index(enum HAL_FLASH_ID_T id, uint32_t index);
+135c148
+< int norflash_init_sample_delay_by_div(uint32_t div);
+---
+> uint32_t norflash_get_sample_delay_index(enum HAL_FLASH_ID_T id);
+137c150
+< void norflash_set_sample_delay_index(uint32_t index);
+---
+> int norflash_sample_delay_calib(enum HAL_FLASH_ID_T id, enum DRV_NORFLASH_CALIB_T type);
+139c152
+< uint32_t norflash_get_sample_delay_index(void);
+---
+> void norflash_show_calib_result(enum HAL_FLASH_ID_T id);
+141c154
+< int norflash_sample_delay_calib(enum DRV_NORFLASH_CALIB_T type);
+---
+> int norflash_init_div(enum HAL_FLASH_ID_T id, const struct HAL_NORFLASH_CONFIG_T *cfg);
+143c156
+< void norflash_show_calib_result(void);
+---
+> int norflash_match_chip(enum HAL_FLASH_ID_T id, const uint8_t *dev_id, uint32_t len);
+145c158
+< int norflash_init_div(const struct HAL_NORFLASH_CONFIG_T *cfg);
+---
+> void norflash_get_flash_list(const struct NORFLASH_CFG_T **list, uint32_t *len);
+147c160
+< int norflash_match_chip(const uint8_t *id, uint32_t len);
+---
+> int norflash_get_id(enum HAL_FLASH_ID_T id, uint8_t *value, uint32_t len);
+149c162
+< int norflash_get_id(uint8_t *value, uint32_t len);
+---
+> int norflash_get_unique_id(enum HAL_FLASH_ID_T id, uint8_t *value, uint32_t len);
+151c164
+< int norflash_get_unique_id(uint8_t *value, uint32_t len);
+---
+> void norflash_enter_4byteaddr_mode(enum HAL_FLASH_ID_T id);
+153c166
+< enum HAL_NORFLASH_RET_T norflash_erase(uint32_t start_address, enum DRV_NORFLASH_ERASE_T type, int suspend);
+---
+> void norflash_exit_4byteaddr_mode(enum HAL_FLASH_ID_T id);
+155c168
+< enum HAL_NORFLASH_RET_T norflash_erase_resume(int suspend);
+---
+> enum HAL_NORFLASH_RET_T norflash_erase(enum HAL_FLASH_ID_T id, uint32_t start_address, enum DRV_NORFLASH_ERASE_T type, int suspend);
+157c170
+< enum HAL_NORFLASH_RET_T norflash_write(uint32_t start_address, const uint8_t *buffer, uint32_t len, int suspend);
+---
+> enum HAL_NORFLASH_RET_T norflash_erase_resume(enum HAL_FLASH_ID_T id, int suspend);
+159c172,174
+< enum HAL_NORFLASH_RET_T norflash_write_resume(int suspend);
+---
+> enum HAL_NORFLASH_RET_T norflash_write(enum HAL_FLASH_ID_T id, uint32_t start_address, const uint8_t *buffer, uint32_t len, int suspend);
+> 
+> enum HAL_NORFLASH_RET_T norflash_write_resume(enum HAL_FLASH_ID_T id, int suspend);
+163c178,182
+< int norflash_read(uint32_t start_address, uint8_t *buffer, uint32_t len);
+---
+> int norflash_read(enum HAL_FLASH_ID_T id, uint32_t start_address, uint8_t *buffer, uint32_t len);
+> 
+> void norflash_sleep(enum HAL_FLASH_ID_T id);
+> 
+> void norflash_wakeup(enum HAL_FLASH_ID_T id);
+165c184
+< void norflash_sleep(void);
+---
+> int norflash_read_status(enum HAL_FLASH_ID_T id, uint32_t *p_status);
+167c186
+< void norflash_wakeup(void);
+---
+> int norflash_init_status(enum HAL_FLASH_ID_T id, uint32_t status);
+169c188
+< int norflash_init_status(uint32_t status);
+---
+> int norflash_set_block_protection(enum HAL_FLASH_ID_T id, uint32_t bp);
+171c190
+< int norflash_set_block_protection(uint32_t bp);
+---
+> int norflash_security_register_get_lock_status(enum HAL_FLASH_ID_T id, uint32_t id_map, uint32_t *p_locked);
+173c192
+< int norflash_security_register_lock(uint32_t id);
+---
+> int norflash_security_register_lock(enum HAL_FLASH_ID_T id, uint32_t id_map);
+175c194
+< enum HAL_NORFLASH_RET_T norflash_security_register_erase(uint32_t start_address);
+---
+> enum HAL_NORFLASH_RET_T norflash_security_register_erase(enum HAL_FLASH_ID_T id, uint32_t start_address);
+177c196
+< enum HAL_NORFLASH_RET_T norflash_security_register_write(uint32_t start_address, const uint8_t *buffer, uint32_t len);
+---
+> enum HAL_NORFLASH_RET_T norflash_security_register_write(enum HAL_FLASH_ID_T id, uint32_t start_address, const uint8_t *buffer, uint32_t len);
+179c198
+< int norflash_security_register_read(uint32_t start_address, uint8_t *buffer, uint32_t len);
+---
+> int norflash_security_register_read(enum HAL_FLASH_ID_T id, uint32_t start_address, uint8_t *buffer, uint32_t len);
+181c200
+< uint32_t norflash_security_register_enable_read(void);
+---
+> uint32_t norflash_security_register_enable_read(enum HAL_FLASH_ID_T id);
+183c202
+< void norflash_security_register_disable_read(uint32_t mode);
+---
+> void norflash_security_register_disable_read(enum HAL_FLASH_ID_T id, uint32_t mode);

@@ -1,0 +1,471 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/Makefile
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/Makefile
+diff -sw local remote
+---
+
+0a1,12
+> # Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+> # Licensed under the Apache License, Version 2.0 (the "License");
+> # you may not use this file except in compliance with the License.
+> # You may obtain a copy of the License at
+> #
+> #     http://www.apache.org/licenses/LICENSE-2.0
+> #
+> # Unless required by applicable law or agreed to in writing, software
+> # distributed under the License is distributed on an "AS IS" BASIS,
+> # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+> # See the License for the specific language governing permissions and
+> # limitations under the License.
+10c22,37
+< subdir-ccflags-y += -Iplatform/drivers/ana
+---
+> ifeq ($(ARM_CMNS), 1)
+> EXCLUDE_OBJS := hal_norflash.o
+> EXCLUDE_OBJS += hal_norflash_se.o
+> obj-y := $(filter-out $(EXCLUDE_OBJS),$(obj-y))
+> endif
+> 
+> ifeq ($(NUTTX_BUILD), 1)
+> obj-y := $(filter-out hal_dsi.o,$(obj-y))
+> CFLAGS_hal_dsi_v2.o += -Iplatform/drivers/graphic
+> else
+> obj-y := $(filter-out hal_dsi_v2.o,$(obj-y))
+> CFLAGS_hal_dsi.o += -Iplatform/drivers/graphic
+> CFLAGS_hal_lcdc.o += -Iplatform/drivers/graphic
+> endif
+> 
+> subdir-ccflags-y += -Iplatform/drivers/ana  -Iservices/cp_boot/ -Iservices/transq_msg/ -Iservices/a7_dsp/common/
+15a43,46
+> ifeq ($(IQ_CALI_TEST),1)
+> CFLAGS_hal_btdump.o += -DIQ_CALI_TEST
+> endif
+> 
+22,25d52
+< ifeq ($(USB_EQ_TUNING), 1)
+< CFLAGS_hal_cmd.o += -DUSB_EQ_TUNING
+< endif
+< 
+27a55,62
+> 
+> ifeq ($(TOTA_EQ_TUNING), 1)
+> $(error TOTA_EQ_TUNING can not be defined together with PC_CMD_UART)
+> endif
+> 
+> ifeq ($(USB_EQ_TUNING), 1)
+> $(error USB_EQ_TUNING can not be defined together with PC_CMD_UART)
+> endif
+33a69,71
+> ifeq ($(CHIP_HAS_PSC),1)
+> CFLAGS_hal_cmu_common.o += -DCHIP_HAS_PSC
+> endif
+36a75,77
+> ifneq ($(CLOCK_OUT_ID),)
+> CFLAGS_hal_cmu_common.o += -DCLOCK_OUT_ID=$(CLOCK_OUT_ID)
+> endif
+55a97,105
+> ifeq ($(DMA_DEBUG),1)
+> CFLAGS_hal_dma.o += -DDMA_DEBUG
+> endif
+> ifeq ($(SENS_I2S_DMA_ENABLE),1)
+> CFLAGS_hal_dma.o += -DSENS_I2S_DMA_ENABLE
+> endif
+> ifeq ($(SENS_CAP_SENS_DMA_ENABLE),1)
+> CFLAGS_hal_dma.o += -DSENS_CAP_SENS_DMA_ENABLE
+> endif
+60a111,117
+> CHIP_GPIO_VER ?= 1
+> CFLAGS_hal_gpio_v1.o += -DCHIP_GPIO_VER=$(CHIP_GPIO_VER)
+> CFLAGS_hal_gpio_v2.o += -DCHIP_GPIO_VER=$(CHIP_GPIO_VER)
+> ifeq ($(PSC_GPIO_IRQ_CTRL),1)
+> CFLAGS_hal_gpio_v2.o += -DPSC_GPIO_IRQ_CTRL
+> endif
+> 
+87,88c144,145
+< ifeq ($(I2S_FSP_MODE),1)
+< CFLAGS_hal_i2c.o += -DI2S_FSP_MODE
+---
+> ifeq ($(I2C_FSP_MODE),1)
+> CFLAGS_hal_i2c.o += -DI2C_FSP_MODE
+101,102c158,159
+< ifeq ($(BONE_SENSOR_TDM),1)
+< CFLAGS_hal_i2s.o += -DI2S_MCLK_PIN
+---
+> ifeq ($(I2S_RESAMPLE),1)
+> CFLAGS_hal_i2s.o += -DI2S_RESAMPLE
+114a172,174
+> CHIP_INTERSYS_VER ?= 1
+> CFLAGS_hal_intersys.o += -DCHIP_INTERSYS_VER=$(CHIP_INTERSYS_VER)
+> 
+154a215,217
+> ifeq ($(FLASH_ULTRA_LOW_SPEED),1)
+> CFLAGS_hal_norflash.o += -DFLASH_ULTRA_LOW_SPEED
+> endif
+166a230,231
+> CFLAGS_hal_norflash_se.o += -DFLASH_UNIQUE_ID
+> CFLAGS_hal_spi_norflash.o += -DFLASH_UNIQUE_ID
+170a236,238
+> ifeq ($(FLASH_DTR),1)
+> CFLAGS_hal_norflash.o += -DFLASH_DTR
+> endif
+172a241
+> CFLAGS_hal_norflash_se.o += -DFLASH_SECURITY_REGISTER
+186,188c255
+< endif
+< ifeq ($(OTA_BARE_BOOT),1)
+< CFLAGS_hal_norflash.o += -DOTA_BARE_BOOT
+---
+> CFLAGS_hal_norflash_se.o += -DFLASH_SIZE=$(FLASH_SIZE)
+195a263,271
+> ifeq ($(FLASH_LOCK_CP_ACCESS),1)
+> CFLAGS_hal_norflash.o += -DFLASH_LOCK_CP_ACCESS
+> endif
+> ifeq ($(FLASH_REMAP_CHECK_FLASH_SIZE),1)
+> CFLAGS_hal_norflash.o += -DFLASH_REMAP_CHECK_FLASH_SIZE
+> endif
+> ifeq ($(PUYA_FLASH_ERASE_PAGE_ENABLE),1)
+> CFLAGS_hal_norflash.o += -DPUYA_FLASH_ERASE_PAGE_ENABLE
+> endif
+196a273
+> CFLAGS_hal_nandflash.o += -DCHIP_FLASH_CTRL_VER=$(CHIP_FLASH_CTRL_VER)
+208a286,291
+> ifneq ($(PSRAM_CFG_SPEED),)
+> PSRAM_CFG_FLAGS += -DPSRAM_CFG_SPEED=$(PSRAM_CFG_SPEED)
+> endif
+> ifneq ($(PSRAM_PAGE_SIZE),)
+> PSRAM_CFG_FLAGS += -DPSRAM_PAGE_SIZE=$(PSRAM_PAGE_SIZE)
+> endif
+211a295,298
+> CFLAGS_hal_sleep.o += -DPSRAM_ENABLE
+> CFLAGS_hal_intersys.o += -DPSRAM_ENABLE
+> CFLAGS_hal_dsi.o += -DPSRAM_ENABLE
+> CFLAGS_hal_transq.o += -DPSRAM_ENABLE
+218a306,317
+> ifeq ($(CHIP_PSRAM_SQPI_MODE),1)
+> PSRAM_CFG_FLAGS += -DCHIP_PSRAM_SQPI_MODE
+> endif
+> ifeq ($(PSRAM_XCCELA_MODE),1)
+> PSRAM_CFG_FLAGS += -DPSRAM_XCCELA_MODE
+> endif
+> ifeq ($(PSRAM_APS3208K),1)
+> PSRAM_CFG_FLAGS += -DPSRAM_APS3208K
+> endif
+> ifeq ($(PSRAM_DEBUG),1)
+> PSRAM_CFG_FLAGS += -DPSRAM_DEBUG
+> endif
+225a325
+> CFLAGS_hal_dsi.o += $(PSRAM_CFG_FLAGS)
+233a334,336
+> CFLAGS_hal_sleep.o += -DPSRAMUHS_ENABLE
+> CFLAGS_hal_intersys.o += -DPSRAMUHS_ENABLE
+> CFLAGS_hal_dsi.o += -DPSRAMUHS_ENABLE
+243a347,349
+> ifeq ($(PSRAMULS_MODE),1)
+> PSRAMUHS_CFG_FLAGS += -DPSRAMULS_MODE
+> endif
+251a358
+> CFLAGS_hal_dsi.o += $(PSRAMUHS_CFG_FLAGS)
+257,259d363
+< ifeq ($(CHIP_HAS_SDIO),1)
+< CFLAGS_hal_sdio.o += -DCHIP_HAS_SDIO
+< endif
+261,263c365,366
+< SLEEP_STATS_TRACE ?= 1
+< ifeq ($(SLEEP_STATS_TRACE),1)
+< CFLAGS_hal_sleep.o += -DSLEEP_STATS_TRACE
+---
+> ifeq ($(SEC_ENG_ROM_ONLY),1)
+> CFLAGS_hal_sec_eng.o += -DSEC_ENG_ROM_ONLY
+271a375,379
+> 
+> SLEEP_STATS_TRACE ?= 1
+> ifeq ($(SLEEP_STATS_TRACE),1)
+> CFLAGS_hal_sleep.o += -DSLEEP_STATS_TRACE
+> endif
+274a383,397
+> ifeq ($(WAKEUP_SRC_STATS),1)
+> CFLAGS_hal_sleep.o += -DWAKEUP_SRC_STATS
+> endif
+> ifeq ($(CACHE_STATS),1)
+> CFLAGS_hal_sleep.o += -DCACHE_STATS
+> endif
+> ifeq ($(SYSFREQ_STATS),1)
+> CFLAGS_hal_sleep.o += -DSYSFREQ_STATS
+> CFLAGS_hal_sysfreq.o += -DSYSFREQ_STATS
+> endif
+> 
+> ifeq ($(FAST_TIMER_COMPENSATE),1)
+> CFLAGS_hal_sleep.o += -DFAST_TIMER_COMPENSATE
+> CFLAGS_hal_timer.o += -DFAST_TIMER_COMPENSATE
+> endif
+294a418,420
+> ifeq ($(TIMER_USE_FPU),1)
+> CFLAGS_hal_timer.o += -DTIMER_USE_FPU
+> endif
+296a423,425
+> ifeq ($(LOW_SYS_FREQ_6P5M),1)
+> CFLAGS_hal_timer.o += -DLOW_SYS_FREQ_6P5M
+> endif
+302a432,438
+> ifneq ($(TRACE_PRINTF_LEN),)
+> CFLAGS_hal_trace.o += -DTRACE_PRINTF_LEN=$(TRACE_PRINTF_LEN)
+> CFLAGS_hal_uart.o += -DTRACE_PRINTF_LEN=$(TRACE_PRINTF_LEN)
+> endif
+> ifneq ($(TRACE_DUMP_LEN),)
+> CFLAGS_hal_trace.o += -DTRACE_DUMP_LEN=$(TRACE_DUMP_LEN)
+> endif
+328,329c464,465
+< ifeq ($(DUMP_NORMAL_LOG),1)
+< CFLAGS_hal_trace.o += -DDUMP_NORMAL_LOG
+---
+> ifeq ($(DUMP_LOG_ENABLE),1)
+> CFLAGS_hal_trace.o += -DDUMP_LOG_ENABLE
+343c479,487
+< 
+---
+> ifeq ($(TRACE_GLOBAL_TAG),1)
+> CFLAGS_hal_trace.o += -DTRACE_GLOBAL_TAG
+> endif
+> ifeq ($(CORE_DUMP),1)
+> CFLAGS_hal_trace.o += -Iutils/crash_catcher/include -DCORE_DUMP
+> endif
+> ifneq ($(CHIP_SUBSYS),)
+> CFLAGS_hal_trace.o += -DIN_SUBSYS
+> endif
+348,350c492,493
+< 
+< ifeq ($(CORE_DUMP),1)
+< CFLAGS_hal_trace.o += -Iutils/crash_catcher/include -DCORE_DUMP
+---
+> ifneq ($(DUMP_SECURE_STACK),)
+> CFLAGS_hal_trace.o += -DDUMP_SECURE_STACK
+353,354c496,497
+< ifneq ($(UART_FREQ),)
+< CFLAGS_hal_uart.o += -DUART_FREQ=$(UART_FREQ)
+---
+> ifeq ($(UART_CLK_DIV_4),1)
+> CFLAGS_hal_uart.o += -DUART_CLK_DIV_4
+360a504,511
+> CFLAGS_hal_usbhost.o += -Iutils/hwtimer_list
+> 
+> ifeq ($(ROM_BUILD),1)
+> ifneq ($(SIMU),1)
+> # Reduce the ROM size (except for hwtest image)
+> CFLAGS_hal_usb.o += -Os
+> endif
+> endif
+371a523
+> 
+374a527,532
+> 
+> ifeq ($(USB_PLUGOUT_DET),1)
+> CFLAGS_hal_usb.o += -DUSB_PLUGOUT_DET
+> endif
+> 
+> 
+390a549
+> CFLAGS_hal_usbhost.o += -DCHIP_HAS_USBPHY
+397c556,573
+< CFLAGS_hal_usbhost.o += -Iutils/hwtimer_list
+---
+> ifneq ($(HAL_USB_TRACE_MASK),)
+> CFLAGS_hal_usb.o += -DHAL_USB_TRACE_MASK=$(HAL_USB_TRACE_MASK)
+> endif
+> ifneq ($(HAL_USBHOST_TRACE_MASK),)
+> CFLAGS_hal_usbhost.o += -DHAL_USBHOST_TRACE_MASK=$(HAL_USBHOST_TRACE_MASK)
+> endif
+> 
+> ifeq ($(IR_DONOT_USE_DMA),1)
+> CFLAGS_hal_ir.o += -DIR_DONOT_USE_DMA
+> endif
+> 
+> ifeq ($(SDIO_DEVICE_DEBUG),1)
+> CFLAGS_hal_sdio_device.o += -DSDIO_DEVICE_DEBUG
+> endif
+> 
+> ifeq ($(SDIO_HOST_DEBUG),1)
+> CFLAGS_hal_sdio_host.o += -DSDIO_HOST_DEBUG
+> endif
+407a584,587
+> ifeq ($(ULTRA_LOW_POWER),1)
+> CMU_CFG_FLAGS += -DULTRA_LOW_POWER
+> endif
+> 
+437a618,623
+> ifeq ($(LOW_SYS_FREQ_6P5M),1)
+> CMU_CFG_FLAGS += -DLOW_SYS_FREQ_6P5M
+> endif
+> ifeq ($(LOW_SYS_FREQ_3P25M),1)
+> CMU_CFG_FLAGS += -DLOW_SYS_FREQ_3P25M
+> endif
+459a646,650
+> ISPI_CHECK_RF_ACCESS ?= 1
+> ifeq ($(ISPI_CHECK_RF_ACCESS),1)
+> ANAIF_CFG_FLAGS += -DISPI_CHECK_RF_ACCESS
+> endif
+> 
+467a659,666
+> ifeq ($(CODEC_POWER_DOWN),1)
+> CODEC_CFG_FLAGS += -DCODEC_POWER_DOWN
+> endif
+> 
+> ifeq ($(CODEC_KEEP_CLOCK),1)
+> CODEC_CFG_FLAGS += -DCODEC_KEEP_CLOCK
+> endif
+> 
+488a688,691
+> ifeq ($(PSAP_APP),1)
+> CODEC_CFG_FLAGS += -DPSAP_APP
+> endif
+> 
+492a696,699
+> ifeq ($(AUDIO_OUTPUT_DAC2_SW_GAIN),1)
+> CODEC_CFG_FLAGS += -DAUDIO_OUTPUT_DAC2_SW_GAIN
+> endif
+> 
+499a707,710
+> ifeq ($(AUDIO_OUTPUT_DAC2),1)
+> CODEC_CFG_FLAGS += -DAUDIO_OUTPUT_DAC2
+> endif
+> 
+523a735,746
+> ifeq ($(CODEC_MIN_PHASE),1)
+> CODEC_CFG_FLAGS += -DCODEC_MIN_PHASE
+> endif
+> 
+> ifeq ($(ANA_26M_X4_ENABLE),1)
+> CODEC_CFG_FLAGS += -DANA_26M_X4_ENABLE
+> endif
+> 
+> ifeq ($(CODEC_SW_SYNC),1)
+> CODEC_CFG_FLAGS += -DCODEC_SW_SYNC
+> endif
+> 
+530a754,773
+> ifneq ($(JTAG_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DJTAG_IOMUX_INDEX=$(JTAG_IOMUX_INDEX)
+> endif
+> 
+> ifneq ($(UART1_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DUART1_IOMUX_INDEX=$(UART1_IOMUX_INDEX)
+> endif
+> 
+> ifneq ($(UART2_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DUART2_IOMUX_INDEX=$(UART2_IOMUX_INDEX)
+> endif
+> 
+> ifneq ($(UART3_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DUART3_IOMUX_INDEX=$(UART3_IOMUX_INDEX)
+> endif
+> 
+> ifneq ($(WIFI_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DWIFI_IOMUX_INDEX=$(WIFI_IOMUX_INDEX)
+> endif
+> 
+658a902,1001
+> ifeq ($(I2C2_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DI2C2_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(I2C2_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DI2C2_IOMUX_INDEX=$(I2C2_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(I2C3_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DI2C3_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(I2C3_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DI2C3_IOMUX_INDEX=$(I2C3_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(PWM0_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DPWM0_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(PWM0_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DPWM0_IOMUX_INDEX=$(PWM0_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(PWM1_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DPWM1_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(PWM1_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DPWM1_IOMUX_INDEX=$(PWM1_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(PWM2_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DPWM2_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(PWM2_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DPWM2_IOMUX_INDEX=$(PWM2_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(PWM3_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DPWM3_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(PWM3_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DPWM3_IOMUX_INDEX=$(PWM3_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(PWM4_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DPWM4_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(PWM4_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DPWM4_IOMUX_INDEX=$(PWM4_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(PWM5_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DPWM5_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(PWM5_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DPWM5_IOMUX_INDEX=$(PWM5_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(PWM6_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DPWM6_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(PWM6_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DPWM6_IOMUX_INDEX=$(PWM6_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(PWM7_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DPWM7_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(PWM7_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DPWM7_IOMUX_INDEX=$(PWM7_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(IR_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DIR_VOLTAGE_VMEM
+> endif
+> 
+> ifneq ($(IR_RX_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DIR_RX_IOMUX_INDEX=$(IR_RX_IOMUX_INDEX)
+> endif
+> 
+> ifneq ($(IR_TX_IOMUX_INDEX),)
+> IOMUX_CFG_FLAGS += -DIR_TX_IOMUX_INDEX=$(IR_TX_IOMUX_INDEX)
+> endif
+> 
+> ifeq ($(SDIO_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DSDIO_VOLTAGE_VMEM
+> endif
+> 
+> ifeq ($(SDMMC_VOLTAGE_VMEM),1)
+> IOMUX_CFG_FLAGS += -DSDMMC_VOLTAGE_VMEM
+> endif
+> 
+683,685c1026,1027
+< ifeq ($(BONE_SENSOR_TDM),1)
+< IOMUX_CFG_FLAGS += -DI2S_MCLK_IOMUX_INDEX=13
+< endif
+---
+> CHIP_WIFITSF_VER ?= 1
+> CFLAGS_hal_wifitsf.o += -DCHIP_WIFITSF_VER=$(CHIP_WIFITSF_VER)

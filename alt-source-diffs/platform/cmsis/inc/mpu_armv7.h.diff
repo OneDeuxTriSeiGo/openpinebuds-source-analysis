@@ -1,0 +1,24 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/mpu_armv7.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/cmsis/inc/mpu_armv7.h
+diff -sw local remote
+---
+
+4,5c4,5
+<  * @version  V5.1.0
+<  * @date     08. March 2019
+---
+>  * @version  V5.1.1
+>  * @date     10. February 2020
+8c8
+<  * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+---
+>  * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+157c157
+< #define ARM_MPU_ACCESS_NORMAL(OuterCp, InnerCp, IsShareable) ARM_MPU_ACCESS_((4U | (OuterCp)), IsShareable, ((InnerCp) & 2U), ((InnerCp) & 1U))
+---
+> #define ARM_MPU_ACCESS_NORMAL(OuterCp, InnerCp, IsShareable) ARM_MPU_ACCESS_((4U | (OuterCp)), IsShareable, ((InnerCp) >> 1U), ((InnerCp) & 1U))
+192a193
+>   __DMB();
+209a211,212
+>   __DSB();
+>   __ISB();

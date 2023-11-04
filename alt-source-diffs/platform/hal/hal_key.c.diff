@@ -1,0 +1,147 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_key.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_key.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+35a35,37
+> // Warning on permanent press
+> #define KEY_PERMPRESS_WARNING
+> 
+46,48c48,50
+< // #ifndef APP_TEST_MODE
+< // #define CHECK_PWRKEY_AT_BOOT
+< // #endif
+---
+> #ifndef APP_TEST_MODE
+> #define CHECK_PWRKEY_AT_BOOT
+> #endif
+86a89
+> #define KEY_PERMPRESS_THRESHOLD             MS_TO_TICKS(30000)
+141a145,149
+> #ifdef KEY_PERMPRESS_WARNING
+> static bool debounce_started = false;
+> static uint32_t time_first_debounce;
+> #endif
+> 
+144c152
+< 
+---
+> static uint32_t adc_key_status;
+146a155,162
+>     for(int i = 0; i < CFG_HW_ADCKEY_NUMBER; i++) {
+>         if(CFG_HW_ADCKEY_MAP_TABLE[i] == code) {
+>             if (event == HAL_KEY_EVENT_DOWN)
+>                 adc_key_status |= CFG_HW_ADCKEY_MAP_TABLE[i];
+>             else if (event == HAL_KEY_EVENT_UP)
+>                 adc_key_status &= ~CFG_HW_ADCKEY_MAP_TABLE[i];
+>         }
+>     }
+216,217c232,235
+< 
+<     if (CFG_HW_ADCKEY_ADC_KEYVOLT_BASE < volt && volt < CFG_HW_ADCKEY_ADC_MAXVOLT) {
+---
+> #if defined(NUTTX_BUILD)
+>     if (volt == 0) volt++;
+> #endif
+>     if (CFG_HW_ADCKEY_ADC_KEYVOLT_BASE <= volt && volt < CFG_HW_ADCKEY_ADC_MAXVOLT) {
+277,279d294
+<     uint32_t basevolt;
+< 
+<     HAL_KEY_TRACE(1,"%s\n", __func__);
+282c297,298
+< 
+---
+>     /*
+>     uint32_t basevolt;
+291c307,309
+< 
+---
+>     */
+>    for(i=0; i< CFG_HW_ADCKEY_NUMBER; ++i)
+>         adckey_volt_table[i] = CFG_HW_ADCKEY_VOL_TABLE[i];
+356c374
+< //    uint32_t time = hal_sys_timer_get();
+---
+>     uint32_t time = hal_sys_timer_get();
+390c408
+<        // pwr_key.time = time;
+---
+>         pwr_key.time = time;
+623a642,650
+>         for(i = 0; i < CFG_HW_ADCKEY_NUMBER; i++) {
+>             if(CFG_HW_ADCKEY_MAP_TABLE[i] == code) {
+>                 if (adc_key_status & CFG_HW_ADCKEY_MAP_TABLE[i]) {
+>                     return HAL_KEY_EVENT_DOWN;
+>                 } else {
+>                     return HAL_KEY_EVENT_UP;
+>                 }
+>             }
+>         }
+1009a1037,1060
+> 
+> #ifdef KEY_PERMPRESS_WARNING
+>         if (debounce_started) {
+>             if (time - time_first_debounce >= KEY_PERMPRESS_THRESHOLD) {
+>                 time_first_debounce = time;
+> #if (CFG_HW_GPIOKEY_NUM > 0)
+> #ifdef GPIO_MAP_64BIT
+> #define GPIO_DOWN_STR                       " gpio_down=0x%X-%X"
+> #define GPIO_DOWN_VAL                       , (uint32_t)(gpio_key.pin_down >> 32), (uint32_t)(gpio_key.pin_down)
+> #else
+> #define GPIO_DOWN_STR                       " gpio_down=0x%X"
+> #define GPIO_DOWN_VAL                       , (uint32_t)(gpio_key.pin_down)
+> #endif
+> #else
+> #define GPIO_DOWN_STR
+> #define GPIO_DOWN_VAL
+> #endif
+>                 TR_WARN(0, "*** WARNING:keyDbn: Permanent key press? code_down=0x%X" GPIO_DOWN_STR, code_down GPIO_DOWN_VAL);
+>             }
+>         } else {
+>             debounce_started = true;
+>             time_first_debounce = time;
+>         }
+> #endif
+1015a1067,1069
+> #ifdef KEY_PERMPRESS_WARNING
+>         debounce_started = false;
+> #endif
+1019c1073
+< #if 0//def CHECK_PWRKEY_AT_BOOT
+---
+> #ifdef CHECK_PWRKEY_AT_BOOT
+1114c1168
+<             hal_sys_timer_delay(MS_TO_TICKS(150));
+---
+>             hal_sys_timer_delay(MS_TO_TICKS(20));

@@ -1,0 +1,704 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/best2300p/reg_aoncmu_best2300p.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/best2003/reg_aoncmu_best2003.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,17c9,16
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+< #ifndef __REG_AONCMU_BEST2300P_H__
+< #define __REG_AONCMU_BEST2300P_H__
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+> #ifndef __REG_AONCMU_BEST2003_H__
+> #define __REG_AONCMU_BEST2003_H__
+34c33
+<     __IO uint32_t RESERVED_03C;     // 0x3C
+---
+>     __IO uint32_t FLS_PSR_CLK;      // 0x3C
+42c41
+<     __IO uint32_t RAM_CFG;          // 0x5C
+---
+>     __IO uint32_t LNA_CFG;          // 0x5C
+53c52,66
+<          uint32_t RESERVED_088[0x1A]; // 0x88
+---
+>     __IO uint32_t TIMER_WDT;        // 0x88
+>     __IO uint32_t PLL_ENABLE;       // 0x8C
+>     __IO uint32_t PLL_DISABLE;      // 0x90
+>     __IO uint32_t DSP_PLL_SELECT;   // 0x94
+>     __IO uint32_t DDR_CLK;          // 0x98
+>     __IO uint32_t MIPI_CLK;         // 0x9C
+>     __IO uint32_t SOFT_RSTN_PULSE;  // 0xA0
+>     __IO uint32_t SOFT_RSTN_SET;    // 0xA4
+>     __IO uint32_t SOFT_RSTN_CLR;    // 0xA8
+>     __IO uint32_t FLASH_IOCFG;      // 0xAC
+>     __IO uint32_t PWM45_CLK;        // 0xB0
+>     __IO uint32_t PWM67_CLK;        // 0xB4
+>     __IO uint32_t RESERVED_0B8[0xC];// 0xB8
+>     __IO uint32_t RESERVED_0E8;     // 0xE8
+>     __IO uint32_t RESERVED_0EC;     // 0xEC
+68,73c81,86
+< #define AON_CMU_EN_CLK_TOP_PLLBB_ENABLE         (1 << 0)
+< #define AON_CMU_EN_CLK_TOP_PLLAUD_ENABLE        (1 << 1)
+< #define AON_CMU_EN_CLK_TOP_OSCX2_ENABLE         (1 << 2)
+< #define AON_CMU_EN_CLK_TOP_OSC_ENABLE           (1 << 3)
+< #define AON_CMU_EN_CLK_TOP_JTAG_ENABLE          (1 << 4)
+< #define AON_CMU_EN_CLK_TOP_PLLBB2_ENABLE        (1 << 5)
+---
+> #define AON_CMU_EN_CLK_TOP_OSC_ENABLE           (1 << 0)
+> #define AON_CMU_EN_CLK_TOP_OSCX2_ENABLE         (1 << 1)
+> #define AON_CMU_EN_CLK_TOP_OSCX4_ENABLE         (1 << 2)
+> #define AON_CMU_EN_CLK_TOP_PLLBB_ENABLE         (1 << 3)
+> #define AON_CMU_EN_CLK_TOP_PLLA7_ENABLE         (1 << 4)
+> #define AON_CMU_EN_CLK_TOP_PLLDDR_ENABLE        (1 << 5)
+75,99c88,107
+< #define AON_CMU_EN_CLK_PLL_CODEC_ENABLE         (1 << 7)
+< #define AON_CMU_EN_CLK_CODEC_HCLK_ENABLE        (1 << 8)
+< #define AON_CMU_EN_CLK_CODEC_RS_ENABLE          (1 << 9)
+< #define AON_CMU_EN_CLK_CODEC_ENABLE             (1 << 10)
+< #define AON_CMU_EN_CLK_CODEC_IIR_ENABLE         (1 << 11)
+< #define AON_CMU_EN_CLK_OSCX2_MCU_ENABLE         (1 << 12)
+< #define AON_CMU_EN_CLK_OSC_MCU_ENABLE           (1 << 13)
+< #define AON_CMU_EN_CLK_32K_MCU_ENABLE           (1 << 14)
+< #define AON_CMU_EN_CLK_PLL_BT_ENABLE            (1 << 15)
+< #define AON_CMU_EN_CLK_60M_BT_ENABLE            (1 << 16)
+< #define AON_CMU_EN_CLK_OSCX2_BT_ENABLE          (1 << 17)
+< #define AON_CMU_EN_CLK_OSC_BT_ENABLE            (1 << 18)
+< #define AON_CMU_EN_CLK_32K_BT_ENABLE            (1 << 19)
+< #define AON_CMU_EN_CLK_PLL_PER_ENABLE           (1 << 20)
+< #define AON_CMU_EN_CLK_DCDC0_ENABLE             (1 << 21)
+< #define AON_CMU_EN_CLK_DCDC1_ENABLE             (1 << 22)
+< #define AON_CMU_EN_CLK_DCDC2_ENABLE             (1 << 23)
+< #define AON_CMU_EN_X2_DIG_ENABLE                (1 << 24)
+< #define AON_CMU_EN_X4_DIG_ENABLE                (1 << 25)
+< #define AON_CMU_PU_PLLBB_ENABLE                 (1 << 26)
+< #define AON_CMU_PU_PLLUSB_ENABLE                (1 << 27)
+< #define AON_CMU_PU_PLLAUD_ENABLE                (1 << 28)
+< #define AON_CMU_PU_OSC_ENABLE                   (1 << 29)
+< #define AON_CMU_EN_X4_ANA_ENABLE                (1 << 30)
+< #define AON_CMU_EN_CLK_32K_CODEC_ENABLE         (1 << 31)
+---
+> #define AON_CMU_EN_CLK_TOP_PLLBB_PS_ENABLE      (1 << 7)
+> #define AON_CMU_EN_CLK_TOP_PLLBB_WF_ENABLE      (1 << 8)
+> #define AON_CMU_EN_CLK_TOP_PHY_PS_ENABLE        (1 << 9)
+> #define AON_CMU_EN_CLK_TOP_JTAG_ENABLE          (1 << 10)
+> #define AON_CMU_EN_CLK_USB_PLL_ENABLE           (1 << 11)
+> #define AON_CMU_EN_CLK_BT_ENABLE                (1 << 12)
+> #define AON_CMU_EN_CLK_WF_ENABLE                (1 << 13)
+> #define AON_CMU_EN_CLK_CODEC_ENABLE             (1 << 14)
+> #define AON_CMU_EN_CLK_CODECIIR_ENABLE          (1 << 15)
+> #define AON_CMU_EN_CLK_CODECRS0_ENABLE          (1 << 16)
+> #define AON_CMU_EN_CLK_CODECRS1_ENABLE          (1 << 17)
+> #define AON_CMU_EN_CLK_CODECHCLK_ENABLE         (1 << 18)
+> #define AON_CMU_EN_CLK_VAD32K_ENABLE            (1 << 19)
+> #define AON_CMU_EN_CLK_MCU_32K_ENABLE           (1 << 20)
+> #define AON_CMU_EN_CLK_MCU_OSC_ENABLE           (1 << 21)
+> #define AON_CMU_EN_CLK_MCU_OSCX2_ENABLE         (1 << 22)
+> #define AON_CMU_EN_X2_DIG_ENABLE                (1 << 23)
+> #define AON_CMU_EN_X4_DIG_ENABLE                (1 << 24)
+> #define AON_CMU_EN_BT_CLK_SYS_ENABLE            (1 << 25)
+> #define AON_CMU_EN_CLK_PSRAMX2_ENABLE           (1 << 26)
+102,107c110,115
+< #define AON_CMU_EN_CLK_TOP_PLLBB_DISABLE        (1 << 0)
+< #define AON_CMU_EN_CLK_TOP_PLLAUD_DISABLE       (1 << 1)
+< #define AON_CMU_EN_CLK_TOP_OSCX2_DISABLE        (1 << 2)
+< #define AON_CMU_EN_CLK_TOP_OSC_DISABLE          (1 << 3)
+< #define AON_CMU_EN_CLK_TOP_JTAG_DISABLE         (1 << 4)
+< #define AON_CMU_EN_CLK_TOP_PLLBB2_DISABLE       (1 << 5)
+---
+> #define AON_CMU_EN_CLK_TOP_OSC_DISABLE          (1 << 0)
+> #define AON_CMU_EN_CLK_TOP_OSCX2_DISABLE        (1 << 1)
+> #define AON_CMU_EN_CLK_TOP_OSCX4_DISABLE        (1 << 2)
+> #define AON_CMU_EN_CLK_TOP_PLLBB_DISABLE        (1 << 3)
+> #define AON_CMU_EN_CLK_TOP_PLLA7_DISABLE        (1 << 4)
+> #define AON_CMU_EN_CLK_TOP_PLLDDR_DISABLE       (1 << 5)
+109,133c117,136
+< #define AON_CMU_EN_CLK_PLL_CODEC_DISABLE        (1 << 7)
+< #define AON_CMU_EN_CLK_CODEC_HCLK_DISABLE       (1 << 8)
+< #define AON_CMU_EN_CLK_CODEC_RS_DISABLE         (1 << 9)
+< #define AON_CMU_EN_CLK_CODEC_DISABLE            (1 << 10)
+< #define AON_CMU_EN_CLK_CODEC_IIR_DISABLE        (1 << 11)
+< #define AON_CMU_EN_CLK_OSCX2_MCU_DISABLE        (1 << 12)
+< #define AON_CMU_EN_CLK_OSC_MCU_DISABLE          (1 << 13)
+< #define AON_CMU_EN_CLK_32K_MCU_DISABLE          (1 << 14)
+< #define AON_CMU_EN_CLK_PLL_BT_DISABLE           (1 << 15)
+< #define AON_CMU_EN_CLK_60M_BT_DISABLE           (1 << 16)
+< #define AON_CMU_EN_CLK_OSCX2_BT_DISABLE         (1 << 17)
+< #define AON_CMU_EN_CLK_OSC_BT_DISABLE           (1 << 18)
+< #define AON_CMU_EN_CLK_32K_BT_DISABLE           (1 << 19)
+< #define AON_CMU_EN_CLK_PLL_PER_DISABLE          (1 << 20)
+< #define AON_CMU_EN_CLK_DCDC0_DISABLE            (1 << 21)
+< #define AON_CMU_EN_CLK_DCDC1_DISABLE            (1 << 22)
+< #define AON_CMU_EN_CLK_DCDC2_DISABLE            (1 << 23)
+< #define AON_CMU_EN_X2_DIG_DISABLE               (1 << 24)
+< #define AON_CMU_EN_X4_DIG_DISABLE               (1 << 25)
+< #define AON_CMU_PU_PLLBB_DISABLE                (1 << 26)
+< #define AON_CMU_PU_PLLUSB_DISABLE               (1 << 27)
+< #define AON_CMU_PU_PLLAUD_DISABLE               (1 << 28)
+< #define AON_CMU_PU_OSC_DISABLE                  (1 << 29)
+< #define AON_CMU_EN_X4_ANA_DISABLE               (1 << 30)
+< #define AON_CMU_EN_CLK_32K_CODEC_DISABLE        (1 << 31)
+---
+> #define AON_CMU_EN_CLK_TOP_PLLBB_PS_DISABLE     (1 << 7)
+> #define AON_CMU_EN_CLK_TOP_PLLBB_WF_DISABLE     (1 << 8)
+> #define AON_CMU_EN_CLK_TOP_PHY_PS_DISABLE       (1 << 9)
+> #define AON_CMU_EN_CLK_TOP_JTAG_DISABLE         (1 << 10)
+> #define AON_CMU_EN_CLK_USB_PLL_DISABLE          (1 << 11)
+> #define AON_CMU_EN_CLK_BT_DISABLE               (1 << 12)
+> #define AON_CMU_EN_CLK_WF_DISABLE               (1 << 13)
+> #define AON_CMU_EN_CLK_CODEC_DISABLE            (1 << 14)
+> #define AON_CMU_EN_CLK_CODECIIR_DISABLE         (1 << 15)
+> #define AON_CMU_EN_CLK_CODECRS0_DISABLE         (1 << 16)
+> #define AON_CMU_EN_CLK_CODECRS1_DISABLE         (1 << 17)
+> #define AON_CMU_EN_CLK_CODECHCLK_DISABLE        (1 << 18)
+> #define AON_CMU_EN_CLK_VAD32K_DISABLE           (1 << 19)
+> #define AON_CMU_EN_CLK_MCU_32K_DISABLE          (1 << 20)
+> #define AON_CMU_EN_CLK_MCU_OSC_DISABLE          (1 << 21)
+> #define AON_CMU_EN_CLK_MCU_OSCX2_DISABLE        (1 << 22)
+> #define AON_CMU_EN_X2_DIG_DISABLE               (1 << 23)
+> #define AON_CMU_EN_X4_DIG_DISABLE               (1 << 24)
+> #define AON_CMU_EN_BT_CLK_SYS_DISABLE           (1 << 25)
+> #define AON_CMU_EN_CLK_PSRAMX2_DISABLE          (1 << 26)
+135,136c138,139
+< #define AON_ARST_NUM                            10
+< #define AON_ORST_NUM                            10
+---
+> #define AON_ARST_NUM                            13
+> #define AON_ORST_NUM                            18
+147,154d149
+< #define AON_CMU_SOFT_RSTN_MCU_PULSE             (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1-1))
+< #define AON_CMU_SOFT_RSTN_CODEC_PULSE           (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1-1))
+< #define AON_CMU_SOFT_RSTN_WF_PULSE              (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_BT_PULSE              (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_MCUCPU_PULSE          (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_WFCPU_PULSE           (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_BTCPU_PULSE           (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1+1-1))
+< #define AON_CMU_GLOBAL_RESETN_PULSE             (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1+1+1-1))
+163,170d157
+< #define AON_CMU_SOFT_RSTN_MCU_SET               (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1-1))
+< #define AON_CMU_SOFT_RSTN_CODEC_SET             (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1-1))
+< #define AON_CMU_SOFT_RSTN_WF_SET                (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_BT_SET                (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_MCUCPU_SET            (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_WFCPU_SET             (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_BTCPU_SET             (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1+1-1))
+< #define AON_CMU_GLOBAL_RESETN_SET               (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1+1+1-1))
+179,186d165
+< #define AON_CMU_SOFT_RSTN_MCU_CLR               (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1-1))
+< #define AON_CMU_SOFT_RSTN_CODEC_CLR             (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1-1))
+< #define AON_CMU_SOFT_RSTN_WF_CLR                (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_BT_CLR                (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_MCUCPU_CLR            (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_WFCPU_CLR             (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1-1))
+< #define AON_CMU_SOFT_RSTN_BTCPU_CLR             (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1+1-1))
+< #define AON_CMU_GLOBAL_RESETN_CLR               (1 << (AON_ARST_NUM+AON_ORST_NUM+32-8-AON_ARST_NUM-AON_ORST_NUM+1+1+1+1+1+1+1+1-1))
+193,221c172,195
+< #define AON_CMU_CFG_DIV_BT60M(n)                (((n) & 0x3) << 3)
+< #define AON_CMU_CFG_DIV_BT60M_MASK              (0x3 << 3)
+< #define AON_CMU_CFG_DIV_BT60M_SHIFT             (3)
+< #define AON_CMU_SEL_PLL_SYS(n)                  (((n) & 0x3) << 5)
+< #define AON_CMU_SEL_PLL_SYS_MASK                (0x3 << 5)
+< #define AON_CMU_SEL_PLL_SYS_SHIFT               (5)
+< #define AON_CMU_SEL_PLL_AUD(n)                  (((n) & 0x3) << 7)
+< #define AON_CMU_SEL_PLL_AUD_MASK                (0x3 << 7)
+< #define AON_CMU_SEL_PLL_AUD_SHIFT               (7)
+< #define AON_CMU_SEL_OSCX2_DIG                   (1 << 9)
+< #define AON_CMU_SEL_X2_PHASE(n)                 (((n) & 0x1F) << 10)
+< #define AON_CMU_SEL_X2_PHASE_MASK               (0x1F << 10)
+< #define AON_CMU_SEL_X2_PHASE_SHIFT              (10)
+< #define AON_CMU_SEL_X4_SYS                      (1 << 15)
+< #define AON_CMU_SEL_X4_AUD                      (1 << 16)
+< #define AON_CMU_SEL_X4_USB                      (1 << 17)
+< #define AON_CMU_SEL_X4_PHASE(n)                 (((n) & 0x1F) << 18)
+< #define AON_CMU_SEL_X4_PHASE_MASK               (0x1F << 18)
+< #define AON_CMU_SEL_X4_PHASE_SHIFT              (18)
+< #define AON_CMU_SEL_X4_DIG                      (1 << 23)
+< #define AON_CMU_CFG_DIV_PER(n)                  (((n) & 0x3) << 24)
+< #define AON_CMU_CFG_DIV_PER_MASK                (0x3 << 24)
+< #define AON_CMU_CFG_DIV_PER_SHIFT               (24)
+< #define AON_CMU_BYPASS_DIV_PER                  (1 << 26)
+< #define AON_CMU_SEL_32K_TIMER                   (1 << 27)
+< #define AON_CMU_SEL_32K_WDT                     (1 << 28)
+< #define AON_CMU_SEL_TIMER_FAST                  (1 << 29)
+< #define AON_CMU_LPU_AUTO_SWITCH26               (1 << 30)
+< #define AON_CMU_EN_MCU_WDG_RESET                (1 << 31)
+---
+> #define AON_CMU_SEL_BT_PLL                      (1 << 3)
+> #define AON_CMU_EN_BT_2M                        (1 << 4)
+> #define AON_CMU_SEL_USB_PLLUSB                  (1 << 5)
+> #define AON_CMU_CFG_DIV_USB(n)                  (((n) & 0x7) << 6)
+> #define AON_CMU_CFG_DIV_USB_MASK                (0x7 << 6)
+> #define AON_CMU_CFG_DIV_USB_SHIFT               (6)
+> #define AON_CMU_SEL_USB_OSCX2                   (1 << 9)
+> #define AON_CMU_CFG_DIV_PER(n)                  (((n) & 0x3) << 10)
+> #define AON_CMU_CFG_DIV_PER_MASK                (0x3 << 10)
+> #define AON_CMU_CFG_DIV_PER_SHIFT               (10)
+> #define AON_CMU_BYPASS_DIV_PER                  (1 << 12)
+> #define AON_CMU_RSTN_DIV_PER                    (1 << 13)
+> #define AON_CMU_SEL_OSCX2_DIG                   (1 << 14)
+> #define AON_CMU_SEL_X2_PHASE(n)                 (((n) & 0x1F) << 15)
+> #define AON_CMU_SEL_X2_PHASE_MASK               (0x1F << 15)
+> #define AON_CMU_SEL_X2_PHASE_SHIFT              (15)
+> #define AON_CMU_SEL_OSCX4_DIG                   (1 << 20)
+> #define AON_CMU_SEL_X4_PHASE(n)                 (((n) & 0x1F) << 21)
+> #define AON_CMU_SEL_X4_PHASE_MASK               (0x1F << 21)
+> #define AON_CMU_SEL_X4_PHASE_SHIFT              (21)
+> #define AON_CMU_PU_MCU_PLLBB_MASK               (1 << 26)
+> #define AON_CMU_PU_MCU_PLLUSB_MASK              (1 << 27)
+> #define AON_CMU_PU_MCU_PLLA7_MASK               (1 << 28)
+> #define AON_CMU_PU_MCU_PLLDSI_MASK              (1 << 29)
+225,226c199,200
+< #define AON_CMU_SEL_CLK_OUT(n)                  (((n) & 0x3) << 1)
+< #define AON_CMU_SEL_CLK_OUT_MASK                (0x3 << 1)
+---
+> #define AON_CMU_SEL_CLK_OUT(n)                  (((n) & 0x7) << 1)
+> #define AON_CMU_SEL_CLK_OUT_MASK                (0x7 << 1)
+228,242c202,222
+< #define AON_CMU_CFG_CLK_OUT(n)                  (((n) & 0xF) << 3)
+< #define AON_CMU_CFG_CLK_OUT_MASK                (0xF << 3)
+< #define AON_CMU_CFG_CLK_OUT_SHIFT               (3)
+< #define AON_CMU_CFG_DIV_DCDC(n)                 (((n) & 0xF) << 7)
+< #define AON_CMU_CFG_DIV_DCDC_MASK               (0xF << 7)
+< #define AON_CMU_CFG_DIV_DCDC_SHIFT              (7)
+< #define AON_CMU_BYPASS_DIV_DCDC                 (1 << 11)
+< #define AON_CMU_SEL_DCDC_PLL                    (1 << 12)
+< #define AON_CMU_SEL_DCDC_OSCX2                  (1 << 13)
+< #define AON_CMU_CLK_DCDC_DRV(n)                 (((n) & 0x3) << 14)
+< #define AON_CMU_CLK_DCDC_DRV_MASK               (0x3 << 14)
+< #define AON_CMU_CLK_DCDC_DRV_SHIFT              (14)
+< #define AON_CMU_EN_VOD_IIR                      (1 << 16)
+< #define AON_CMU_EN_VOD_RS                       (1 << 17)
+< #define AON_CMU_SEL_X4_FLS                      (1 << 18)
+---
+> #define AON_CMU_CFG_CLK_OUT(n)                  (((n) & 0x1F) << 4)
+> #define AON_CMU_CFG_CLK_OUT_MASK                (0x1F << 4)
+> #define AON_CMU_CFG_CLK_OUT_SHIFT               (4)
+> #define AON_CMU_CFG_DIV_DCDC(n)                 (((n) & 0xF) << 9)
+> #define AON_CMU_CFG_DIV_DCDC_MASK               (0xF << 9)
+> #define AON_CMU_CFG_DIV_DCDC_SHIFT              (9)
+> #define AON_CMU_BYPASS_DIV_DCDC                 (1 << 13)
+> #define AON_CMU_SEL_DCDC_OSC                    (1 << 14)
+> #define AON_CMU_SEL_DCDC_PLL                    (1 << 15)
+> #define AON_CMU_CLK_DCDC_DRV(n)                 (((n) & 0x3) << 16)
+> #define AON_CMU_CLK_DCDC_DRV_MASK               (0x3 << 16)
+> #define AON_CMU_CLK_DCDC_DRV_SHIFT              (16)
+> #define AON_CMU_SEL_DCDC_PHASE0(n)              (((n) & 0x1F) << 18)
+> #define AON_CMU_SEL_DCDC_PHASE0_MASK            (0x1F << 18)
+> #define AON_CMU_SEL_DCDC_PHASE0_SHIFT           (18)
+> #define AON_CMU_SEL_DCDC_PHASE1(n)              (((n) & 0x1F) << 23)
+> #define AON_CMU_SEL_DCDC_PHASE1_MASK            (0x1F << 23)
+> #define AON_CMU_SEL_DCDC_PHASE1_SHIFT           (23)
+> #define AON_CMU_EN_CLK_DCDC0                    (1 << 28)
+> #define AON_CMU_EN_CLK_DCDC1                    (1 << 29)
+> #define AON_CMU_EN_CLK_DCDC2                    (1 << 30)
+276,279c256,281
+< #define AON_CMU_RESERVED(n)                     (((n) & 0xFFFFFFFF) << 0)
+< #define AON_CMU_RESERVED_MASK                   (0xFFFFFFFF << 0)
+< #define AON_CMU_RESERVED_SHIFT                  (0)
+< #define AON_CMU_OSC_TO_DIG_X4                   (1 << 1)
+---
+> #define AON_CMU_SEL_MCU_PLLBB_PS                (1 << 0)
+> #define AON_CMU_SEL_MCU_PLLUSB                  (1 << 1)
+> #define AON_CMU_SEL_MCU_PLLA7USB                (1 << 2)
+> #define AON_CMU_RSTN_DIV_FLS                    (1 << 3)
+> #define AON_CMU_CFG_DIV_FLS(n)                  (((n) & 0x7) << 4)
+> #define AON_CMU_CFG_DIV_FLS_MASK                (0x7 << 4)
+> #define AON_CMU_CFG_DIV_FLS_SHIFT               (4)
+> #define AON_CMU_BYPASS_DIV_FLS                  (1 << 7)
+> #define AON_CMU_SEL_FLS_OSCX2                   (1 << 8)
+> #define AON_CMU_SEL_FLS_OSCX4                   (1 << 9)
+> #define AON_CMU_SEL_FLS_PLL                     (1 << 10)
+> #define AON_CMU_RSTN_DIV_PSR                    (1 << 11)
+> #define AON_CMU_CFG_DIV_PSR(n)                  (((n) & 0x3) << 12)
+> #define AON_CMU_CFG_DIV_PSR_MASK                (0x3 << 12)
+> #define AON_CMU_CFG_DIV_PSR_SHIFT               (12)
+> #define AON_CMU_BYPASS_DIV_PSR                  (1 << 14)
+> #define AON_CMU_SEL_PSR_OSCX2                   (1 << 15)
+> #define AON_CMU_SEL_PSR_OSCX4                   (1 << 16)
+> #define AON_CMU_SEL_PSR_PLL                     (1 << 17)
+> #define AON_CMU_SEL_PSR_INT                     (1 << 18)
+> #define AON_CMU_SEL_FLS_PLLPS                   (1 << 19)
+> #define AON_CMU_SEL_MCU_PLLDSI                  (1 << 20)
+> #define AON_CMU_SEL_PSR_PLLDSI                  (1 << 21)
+> #define AON_CMU_SEL_DCDC_PHASE2(n)              (((n) & 0x1F) << 22)
+> #define AON_CMU_SEL_DCDC_PHASE2_MASK            (0x1F << 22)
+> #define AON_CMU_SEL_DCDC_PHASE2_SHIFT           (22)
+306,317c308,320
+< #define AON_CMU_SEL_CLK_OSC                     (1 << 0)
+< #define AON_CMU_SEL_CLK_OSCX2                   (1 << 1)
+< #define AON_CMU_CFG_DIV_CODEC(n)                (((n) & 0x1F) << 2)
+< #define AON_CMU_CFG_DIV_CODEC_MASK              (0x1F << 2)
+< #define AON_CMU_CFG_DIV_CODEC_SHIFT             (2)
+< #define AON_CMU_SEL_OSC_CODEC                   (1 << 7)
+< #define AON_CMU_SEL_OSCX2_CODECHCLK             (1 << 8)
+< #define AON_CMU_SEL_PLL_CODECHCLK               (1 << 9)
+< #define AON_CMU_SEL_CODEC_HCLK_AON              (1 << 10)
+< #define AON_CMU_BYPASS_LOCK_PLLUSB              (1 << 11)
+< #define AON_CMU_BYPASS_LOCK_PLLBB               (1 << 12)
+< #define AON_CMU_BYPASS_LOCK_PLLAUD              (1 << 13)
+---
+> #define AON_CMU_SEL_AON_OSC                     (1 << 0)
+> #define AON_CMU_SEL_AON_OSCX2                   (1 << 1)
+> #define AON_CMU_SEL_AON_SPI_OSCX2               (1 << 2)
+> #define AON_CMU_SEL_CODEC_ANA_2                 (1 << 3)
+> #define AON_CMU_SEL_CODEC_OSC_2                 (1 << 4)
+> #define AON_CMU_SEL_CODEC_OSC                   (1 << 5)
+> #define AON_CMU_SEL_CODECHCLK_OSCX2             (1 << 6)
+> #define AON_CMU_SEL_CODECHCLK_PLL               (1 << 7)
+> #define AON_CMU_SEL_CODECHCLK_MCU               (1 << 8)
+> #define AON_CMU_EN_I2S_MCLK                     (1 << 9)
+> #define AON_CMU_SEL_I2S_MCLK(n)                 (((n) & 0xF) << 10)
+> #define AON_CMU_SEL_I2S_MCLK_MASK               (0xF << 10)
+> #define AON_CMU_SEL_I2S_MCLK_SHIFT              (10)
+324,328c327,335
+< #define AON_CMU_PU_FLASH_IO                     (1 << 20)
+< #define AON_CMU_POR_SLEEP_MODE                  (1 << 21)
+< #define AON_CMU_LOCK_PLLBB                      (1 << 22)
+< #define AON_CMU_LOCK_PLLUSB                     (1 << 23)
+< #define AON_CMU_LOCK_PLLAUD                     (1 << 24)
+---
+> #define AON_CMU_PU_FLASH0_IO                     (1 << 20)
+> #define AON_CMU_EN_VAD_IIR                      (1 << 21)
+> #define AON_CMU_EN_VAD_RS                       (1 << 22)
+> #define AON_CMU_EN_MCU_PLLBB_MASK               (1 << 23)
+> #define AON_CMU_EN_MCU_PLLUSB_MASK              (1 << 24)
+> #define AON_CMU_EN_MCU_PLLPS_MASK               (1 << 25)
+> #define AON_CMU_EN_MCU_PLLA7_MASK               (1 << 26)
+> #define AON_CMU_LPU_AUTO_SWITCH26               (1 << 27)
+> #define AON_CMU_POR_SLEEP_MODE                  (1 << 28)
+342,343c349,350
+< #define AON_CMU_SEL_OSC_PWM0                    (1 << 12)
+< #define AON_CMU_EN_OSC_PWM0                     (1 << 13)
+---
+> #define AON_CMU_SEL_PWM0_OSC                    (1 << 12)
+> #define AON_CMU_EN_CLK_PWM0_OSC                 (1 << 13)
+347,348c354,355
+< #define AON_CMU_SEL_OSC_PWM1                    (1 << 28)
+< #define AON_CMU_EN_OSC_PWM1                     (1 << 29)
+---
+> #define AON_CMU_SEL_PWM1_OSC                    (1 << 28)
+> #define AON_CMU_EN_CLK_PWM1_OSC                 (1 << 29)
+354,355c361,362
+< #define AON_CMU_SEL_OSC_PWM2                    (1 << 12)
+< #define AON_CMU_EN_OSC_PWM2                     (1 << 13)
+---
+> #define AON_CMU_SEL_PWM2_OSC                    (1 << 12)
+> #define AON_CMU_EN_CLK_PWM2_OSC                 (1 << 13)
+359,360c366,367
+< #define AON_CMU_SEL_OSC_PWM3                    (1 << 28)
+< #define AON_CMU_EN_OSC_PWM3                     (1 << 29)
+---
+> #define AON_CMU_SEL_PWM3_OSC                    (1 << 28)
+> #define AON_CMU_EN_CLK_PWM3_OSC                 (1 << 29)
+363,391c370,387
+< #define AON_CMU_RAM_EMA(n)                      (((n) & 0x7) << 0)
+< #define AON_CMU_RAM_EMA_MASK                    (0x7 << 0)
+< #define AON_CMU_RAM_EMA_SHIFT                   (0)
+< #define AON_CMU_RAM_EMAW(n)                     (((n) & 0x3) << 3)
+< #define AON_CMU_RAM_EMAW_MASK                   (0x3 << 3)
+< #define AON_CMU_RAM_EMAW_SHIFT                  (3)
+< #define AON_CMU_RAM_WABL                        (1 << 5)
+< #define AON_CMU_RAM_WABLM(n)                    (((n) & 0x3) << 6)
+< #define AON_CMU_RAM_WABLM_MASK                  (0x3 << 6)
+< #define AON_CMU_RAM_WABLM_SHIFT                 (6)
+< #define AON_CMU_RAM_RET1N0(n)                   (((n) & 0x7) << 8)
+< #define AON_CMU_RAM_RET1N0_MASK                 (0x7 << 8)
+< #define AON_CMU_RAM_RET1N0_SHIFT                (8)
+< #define AON_CMU_RAM_RET2N0(n)                   (((n) & 0x7) << 11)
+< #define AON_CMU_RAM_RET2N0_MASK                 (0x7 << 11)
+< #define AON_CMU_RAM_RET2N0_SHIFT                (11)
+< #define AON_CMU_RAM_PGEN0(n)                    (((n) & 0x7) << 14)
+< #define AON_CMU_RAM_PGEN0_MASK                  (0x7 << 14)
+< #define AON_CMU_RAM_PGEN0_SHIFT                 (14)
+< #define AON_CMU_RAM_RET1N1(n)                   (((n) & 0x7) << 17)
+< #define AON_CMU_RAM_RET1N1_MASK                 (0x7 << 17)
+< #define AON_CMU_RAM_RET1N1_SHIFT                (17)
+< #define AON_CMU_RAM_RET2N1(n)                   (((n) & 0x7) << 20)
+< #define AON_CMU_RAM_RET2N1_MASK                 (0x7 << 20)
+< #define AON_CMU_RAM_RET2N1_SHIFT                (20)
+< #define AON_CMU_RAM_PGEN1(n)                    (((n) & 0x7) << 23)
+< #define AON_CMU_RAM_PGEN1_MASK                  (0x7 << 23)
+< #define AON_CMU_RAM_PGEN1_SHIFT                 (23)
+< #define AON_CMU_RAM_EMAS                        (1 << 26)
+---
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP0(n)        (((n) & 0x7) << 0)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP0_MASK      (0x7 << 0)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP0_SHIFT     (0)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP1(n)        (((n) & 0x7) << 3)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP1_MASK      (0x7 << 3)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP1_SHIFT     (3)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP2(n)        (((n) & 0x7) << 6)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP2_MASK      (0x7 << 6)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP2_SHIFT     (6)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP3(n)        (((n) & 0x7) << 9)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP3_MASK      (0x7 << 9)
+> #define AON_CMU_EXT_LNA_AT_GAIN_STEP3_SHIFT     (9)
+> #define AON_CMU_EXT_LNA_ENABLE                  (1 << 12)
+> #define AON_CMU_EXT_LNA_ENABLE_DR               (1 << 13)
+> #define AON_CMU_EXT_LNA_EN_BYPASS_RXON          (1 << 14)
+> #define AON_CMU_FEM_SWTCH_WF_MUX_CFG(n)         (((n) & 0x3) << 15)
+> #define AON_CMU_FEM_SWTCH_WF_MUX_CFG_MASK       (0x3 << 15)
+> #define AON_CMU_FEM_SWTCH_WF_MUX_CFG_SHIFT      (15)
+397,399c393
+< #define AON_CMU_SEL_I2S_MCLK(n)                 (((n) & 0x7) << 13)
+< #define AON_CMU_SEL_I2S_MCLK_MASK               (0x7 << 13)
+< #define AON_CMU_SEL_I2S_MCLK_SHIFT              (13)
+---
+> #define AON_CMU_EN_CLK_PLL_PCM                  (1 << 13)
+404,405c398,399
+< #define AON_CMU_EN_CLK_PLL_PCM                  (1 << 30)
+< #define AON_CMU_EN_I2S_MCLK                     (1 << 31)
+---
+> #define AON_CMU_SEL_AUD_PLLUSB                  (1 << 30)
+> #define AON_CMU_SEL_AUD_X4                      (1 << 31)
+438,439c432,433
+< #define AON_CMU_SEL_OSC_CODECIIR                (1 << 4)
+< #define AON_CMU_SEL_OSCX2_CODECIIR              (1 << 5)
+---
+> #define AON_CMU_SEL_CODECIIR_OSC                (1 << 4)
+> #define AON_CMU_SEL_CODECIIR_OSCX2              (1 << 5)
+441,446c435,446
+< #define AON_CMU_CFG_DIV_CODECRS(n)              (((n) & 0xF) << 8)
+< #define AON_CMU_CFG_DIV_CODECRS_MASK            (0xF << 8)
+< #define AON_CMU_CFG_DIV_CODECRS_SHIFT           (8)
+< #define AON_CMU_SEL_OSC_CODECRS                 (1 << 12)
+< #define AON_CMU_SEL_OSCX2_CODECRS               (1 << 13)
+< #define AON_CMU_BYPASS_DIV_CODECRS              (1 << 14)
+---
+> #define AON_CMU_CFG_DIV_CODECRS0(n)             (((n) & 0xF) << 8)
+> #define AON_CMU_CFG_DIV_CODECRS0_MASK           (0xF << 8)
+> #define AON_CMU_CFG_DIV_CODECRS0_SHIFT          (8)
+> #define AON_CMU_SEL_CODECRS0_OSC                (1 << 12)
+> #define AON_CMU_SEL_CODECRS0_OSCX2              (1 << 13)
+> #define AON_CMU_BYPASS_DIV_CODECRS0             (1 << 14)
+> #define AON_CMU_CFG_DIV_CODECRS1(n)             (((n) & 0xF) << 16)
+> #define AON_CMU_CFG_DIV_CODECRS1_MASK           (0xF << 16)
+> #define AON_CMU_CFG_DIV_CODECRS1_SHIFT          (16)
+> #define AON_CMU_SEL_CODECRS1_OSC                (1 << 20)
+> #define AON_CMU_SEL_CODECRS1_OSCX2              (1 << 21)
+> #define AON_CMU_BYPASS_DIV_CODECRS1             (1 << 22)
+464a465,625
+> // reg_88
+> #define AON_CMU_SEL_32K_TIMER                   (1 << 0)
+> #define AON_CMU_SEL_32K_WDT                     (1 << 1)
+> #define AON_CMU_SEL_TIMER_FAST                  (1 << 2)
+> #define AON_CMU_EN_MCU_WDG_RESET                (1 << 3)
+> #define AON_CMU_SEL_32K_WF                      (1 << 4)
+> #define AON_CMU_SEL_OSC_WF                      (1 << 5)
+> #define AON_CMU_SEL_BBPLL_WF_320M               (1 << 6)
+> 
+> // reg_8c
+> #define AON_CMU_PU_PLLBB_ENABLE                 (1 << 0)
+> #define AON_CMU_PU_PLLUSB_ENABLE                (1 << 1) //unused
+> #define AON_CMU_PU_PLLDDR_ENABLE                (1 << 2)
+> #define AON_CMU_PU_PLLA7_ENABLE                 (1 << 3)
+> #define AON_CMU_PU_PLLBB_DIV_WF_ENABLE          (1 << 4)
+> #define AON_CMU_PU_PLLBB_DIV_PS_ENABLE          (1 << 5)
+> #define AON_CMU_PU_PLLBB_DIV_MCU_ENABLE         (1 << 6)
+> #define AON_CMU_PU_OSC_ENABLE                   (1 << 7)
+> #define AON_CMU_PU_OSCX2_ENABLE                 (1 << 8)
+> #define AON_CMU_PU_OSCX4_ENABLE                 (1 << 9)
+> #define AON_CMU_PU_PLLDSI_ENABLE                (1 << 10)
+> #define AON_CMU_PU_PLLCSI_ENABLE                (1 << 11) //unused
+> #define AON_CMU_PU_PLLDSI_DIV_PS_ENABLE         (1 << 12)
+> #define AON_CMU_PU_PLLDSI_DIV_MCU_ENABLE        (1 << 13)
+> 
+> // reg_90
+> #define AON_CMU_PU_PLLBB_DISABLE                (1 << 0)
+> #define AON_CMU_PU_PLLUSB_DISABLE               (1 << 1)
+> #define AON_CMU_PU_PLLDDR_DISABLE               (1 << 2)
+> #define AON_CMU_PU_PLLA7_DISABLE                (1 << 3)
+> #define AON_CMU_PU_PLLBB_DIV_WF_DISABLE         (1 << 4)
+> #define AON_CMU_PU_PLLBB_DIV_PS_DISABLE         (1 << 5)
+> #define AON_CMU_PU_PLLBB_DIV_MCU_DISABLE        (1 << 6)
+> #define AON_CMU_PU_OSC_DISABLE                  (1 << 7)
+> #define AON_CMU_PU_OSCX2_DISABLE                (1 << 8)
+> #define AON_CMU_PU_OSCX4_DISABLE                (1 << 9)
+> #define AON_CMU_PU_PLLDSI_DISABLE               (1 << 10)
+> #define AON_CMU_PU_PLLCSI_DISABLE               (1 << 11)
+> #define AON_CMU_PU_PLLDSI_DIV_PS_DISABLE        (1 << 12)
+> #define AON_CMU_PU_PLLDSI_DIV_MCU_DISABLE       (1 << 13)
+> 
+> // reg_94
+> #define AON_CMU_SEL_A7_PLLUSB                   (1 << 0)
+> #define AON_CMU_SEL_A7_PLLBB                    (1 << 1)
+> #define AON_CMU_EN_A7_PLLBB_MASK                (1 << 2)
+> #define AON_CMU_EN_A7_PLLUSB_MASK               (1 << 3)
+> #define AON_CMU_EN_A7_PLLA7_MASK                (1 << 4)
+> #define AON_CMU_PU_A7_PLLBB_MASK                (1 << 5)
+> #define AON_CMU_PU_A7_PLLUSB_MASK               (1 << 6)
+> #define AON_CMU_PU_A7_PLLA7_MASK                (1 << 7)
+> 
+> // reg_98
+> #define AON_CMU_RSTN_DIV_DDR                    (1 << 0)
+> #define AON_CMU_CFG_DIV_DDR(n)                  (((n) & 0x3) << 1)
+> #define AON_CMU_CFG_DIV_DDR_MASK                (0x3 << 1)
+> #define AON_CMU_CFG_DIV_DDR_SHIFT               (1)
+> #define AON_CMU_BYPASS_DIV_DDR                  (1 << 3)
+> #define AON_CMU_SEL_DDR_OSCX2                   (1 << 4)
+> #define AON_CMU_SEL_DDR_OSCX4                   (1 << 5)
+> #define AON_CMU_SEL_DDR_PLL                     (1 << 6)
+> #define AON_CMU_CFG_DIV_PSRAMX2(n)              (((n) & 0x1F) << 7)
+> #define AON_CMU_CFG_DIV_PSRAMX2_MASK            (0x1F << 7)
+> #define AON_CMU_CFG_DIV_PSRAMX2_SHIFT           (7)
+> 
+> // reg_9c
+> #define AON_CMU_EN_CLK_PIX_DSI                  (1 << 0)
+> #define AON_CMU_EN_CLK_PIX_CSI                  (1 << 1)
+> #define AON_CMU_POL_CLK_DSI_IN                  (1 << 2)
+> #define AON_CMU_POL_CLK_CSI_IN                  (1 << 3)
+> #define AON_CMU_CFG_DIV_PIX_DSI(n)              (((n) & 0x1F) << 4)
+> #define AON_CMU_CFG_DIV_PIX_DSI_MASK            (0x1F << 4)
+> #define AON_CMU_CFG_DIV_PIX_DSI_SHIFT           (4)
+> #define AON_CMU_CFG_DIV_PIX_CSI(n)              (((n) & 0x1F) << 9)
+> #define AON_CMU_CFG_DIV_PIX_CSI_MASK            (0x1F << 9)
+> #define AON_CMU_CFG_DIV_PIX_CSI_SHIFT           (9)
+> 
+> // reg_a0
+> #define AON_CMU_SOFT_RSTN_A7_PULSE              (1 << 0)
+> #define AON_CMU_SOFT_RSTN_A7CPU_PULSE           (1 << 1)
+> #define AON_CMU_SOFT_RSTN_MCU_PULSE             (1 << 2)
+> #define AON_CMU_SOFT_RSTN_CODEC_PULSE           (1 << 3)
+> #define AON_CMU_SOFT_RSTN_WF_PULSE              (1 << 4)
+> #define AON_CMU_SOFT_RSTN_BT_PULSE              (1 << 5)
+> #define AON_CMU_SOFT_RSTN_MCUCPU_PULSE          (1 << 6)
+> #define AON_CMU_SOFT_RSTN_WFCPU_PULSE           (1 << 7)
+> #define AON_CMU_SOFT_RSTN_BTCPU_PULSE           (1 << 8)
+> #define AON_CMU_GLOBAL_RESETN_PULSE             (1 << 9)
+> 
+> // reg_a4
+> #define AON_CMU_SOFT_RSTN_A7_SET                (1 << 0)
+> #define AON_CMU_SOFT_RSTN_A7CPU_SET             (1 << 1)
+> #define AON_CMU_SOFT_RSTN_MCU_SET               (1 << 2)
+> #define AON_CMU_SOFT_RSTN_CODEC_SET             (1 << 3)
+> #define AON_CMU_SOFT_RSTN_WF_SET                (1 << 4)
+> #define AON_CMU_SOFT_RSTN_BT_SET                (1 << 5)
+> #define AON_CMU_SOFT_RSTN_MCUCPU_SET            (1 << 6)
+> #define AON_CMU_SOFT_RSTN_WFCPU_SET             (1 << 7)
+> #define AON_CMU_SOFT_RSTN_BTCPU_SET             (1 << 8)
+> #define AON_CMU_GLOBAL_RESETN_SET               (1 << 9)
+> 
+> // reg_a8
+> #define AON_CMU_SOFT_RSTN_A7_CLR                (1 << 0)
+> #define AON_CMU_SOFT_RSTN_A7CPU_CLR             (1 << 1)
+> #define AON_CMU_SOFT_RSTN_MCU_CLR               (1 << 2)
+> #define AON_CMU_SOFT_RSTN_CODEC_CLR             (1 << 3)
+> #define AON_CMU_SOFT_RSTN_WF_CLR                (1 << 4)
+> #define AON_CMU_SOFT_RSTN_BT_CLR                (1 << 5)
+> #define AON_CMU_SOFT_RSTN_MCUCPU_CLR            (1 << 6)
+> #define AON_CMU_SOFT_RSTN_WFCPU_CLR             (1 << 7)
+> #define AON_CMU_SOFT_RSTN_BTCPU_CLR             (1 << 8)
+> #define AON_CMU_GLOBAL_RESETN_CLR               (1 << 9)
+> 
+> // reg_ac
+> #define AON_CMU_FLASH0_IODRV(n)                 (((n) & 0x7) << 0)
+> #define AON_CMU_FLASH0_IODRV_MASK               (0x7 << 0)
+> #define AON_CMU_FLASH0_IODRV_SHIFT              (0)
+> #define AON_CMU_FLASH0_IORES(n)                 (((n) & 0xF) << 3)
+> #define AON_CMU_FLASH0_IORES_MASK               (0xF << 3)
+> #define AON_CMU_FLASH0_IORES_SHIFT              (3)
+> #define AON_CMU_PU_FLASH1_IO                    (1 << 7)
+> #define AON_CMU_FLASH1_IODRV(n)                 (((n) & 0x7) << 8)
+> #define AON_CMU_FLASH1_IODRV_MASK               (0x7 << 8)
+> #define AON_CMU_FLASH1_IODRV_SHIFT              (8)
+> #define AON_CMU_FLASH1_IORES(n)                 (((n) & 0xF) << 11)
+> #define AON_CMU_FLASH1_IORES_MASK               (0xF << 11)
+> #define AON_CMU_FLASH1_IORES_SHIFT              (11)
+> 
+> // reg_b0
+> #define AON_CMU_CFG_DIV_PWM4(n)                 (((n) & 0xFFF) << 0)
+> #define AON_CMU_CFG_DIV_PWM4_MASK               (0xFFF << 0)
+> #define AON_CMU_CFG_DIV_PWM4_SHIFT              (0)
+> #define AON_CMU_SEL_PWM4_OSC                    (1 << 12)
+> #define AON_CMU_EN_CLK_PWM4_OSC                 (1 << 13)
+> #define AON_CMU_CFG_DIV_PWM5(n)                 (((n) & 0xFFF) << 16)
+> #define AON_CMU_CFG_DIV_PWM5_MASK               (0xFFF << 16)
+> #define AON_CMU_CFG_DIV_PWM5_SHIFT              (16)
+> #define AON_CMU_SEL_PWM5_OSC                    (1 << 28)
+> #define AON_CMU_EN_CLK_PWM5_OSC                 (1 << 29)
+> 
+> // reg_b4
+> #define AON_CMU_CFG_DIV_PWM6(n)                 (((n) & 0xFFF) << 0)
+> #define AON_CMU_CFG_DIV_PWM6_MASK               (0xFFF << 0)
+> #define AON_CMU_CFG_DIV_PWM6_SHIFT              (0)
+> #define AON_CMU_SEL_PWM6_OSC                    (1 << 12)
+> #define AON_CMU_EN_CLK_PWM6_OSC                 (1 << 13)
+> #define AON_CMU_CFG_DIV_PWM7(n)                 (((n) & 0xFFF) << 16)
+> #define AON_CMU_CFG_DIV_PWM7_MASK               (0xFFF << 16)
+> #define AON_CMU_CFG_DIV_PWM7_SHIFT              (16)
+> #define AON_CMU_SEL_PWM7_OSC                    (1 << 28)
+> #define AON_CMU_EN_CLK_PWM7_OSC                 (1 << 29)
+> 
+> // reg_e8
+> #define AON_CMU_RESERVED0(n)                    (((n) & 0xFFFFFFFF) << 0)
+> #define AON_CMU_RESERVED0_MASK                  (0xFFFFFFFF << 0)
+> #define AON_CMU_RESERVED0_SHIFT                 (0)
+> 
+> // reg_ec
+> #define AON_CMU_RESERVED1(n)                    (((n) & 0xFFFFFFFF) << 0)
+> #define AON_CMU_RESERVED1_MASK                  (0xFFFFFFFF << 0)
+> #define AON_CMU_RESERVED1_SHIFT                 (0)
+> 
+486d646
+< 
+500,503c660,663
+< #define AON_ACLK_PSC                    (1 << 6)
+< #define AON_ARST_PSC                    (1 << 6)
+< #define AON_ACLK_IOMUX                  (1 << 7)
+< #define AON_ARST_IOMUX                  (1 << 7)
+---
+> #define AON_ACLK_IOMUX                          (1 << 6)
+> #define AON_ARST_IOMUX                          (1 << 6)
+> #define AON_ACLK_SPIDPD                         (1 << 7)
+> #define AON_ARST_SPIDPD                         (1 << 7)
+507a668,673
+> #define AON_ACLK_PSC                            (1 << 10)
+> #define AON_ARST_PSC                            (1 << 10)
+> #define AON_ACLK_PWM1                           (1 << 11)
+> #define AON_ARST_PWM1                           (1 << 11)
+> #define AON_ACLK_WLAN_SLEEP                     (1 << 12)
+> #define AON_ARST_WLAN_SLEEP                     (1 << 12)
+529a696,711
+> #define AON_OCLK_SPIDPD                         (1 << 10)
+> #define AON_ORST_SPIDPD                         (1 << 10)
+> #define AON_OCLK_WLAN32K                        (1 << 11)
+> #define AON_ORST_WLAN32K                        (1 << 11)
+> #define AON_OCLK_WLAN26M                        (1 << 12)
+> #define AON_ORST_WLAN26M                        (1 << 12)
+> #define AON_OCLK_BTAON                          (1 << 13)
+> #define AON_ORST_BTAON                          (1 << 13)
+> #define AON_OCLK_PWM4                           (1 << 14)
+> #define AON_ORST_PWM4                           (1 << 14)
+> #define AON_OCLK_PWM5                           (1 << 15)
+> #define AON_ORST_PWM5                           (1 << 15)
+> #define AON_OCLK_PWM6                           (1 << 16)
+> #define AON_ORST_PWM6                           (1 << 16)
+> #define AON_OCLK_PWM7                           (1 << 17)
+> #define AON_ORST_PWM7                           (1 << 17)

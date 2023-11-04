@@ -1,0 +1,316 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/hl/api/prf_types.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/ip/ble/hl/api/prf_types.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+7c21
+<  * @ingroup PROFILE
+---
+>  * @ingroup Profile
+18c32,33
+< #include "att.h"
+---
+> 
+> #include "gatt.h"
+19a35
+> #include <stdint.h>
+26,30d41
+< /// Attribute is mandatory
+< #define ATT_MANDATORY   (0xFF)
+< /// Attribute is optional
+< #define ATT_OPTIONAL    (0x00)
+< 
+32a44,74
+> /// Client Characteristic Configuration descriptor value length
+> #define PRF_CCC_DESC_LEN                (2)
+> /// Minimum number of attributes for a characteristic (description + value attributes)
+> #define PRF_CHAR_NB_ATT_MIN             (2)
+> /// Offset of Characteristic Value attribute in a local characteristic
+> #define PRF_ATT_OFFSET_CHAR_VAL         (1)
+> /// Offset of first descriptor in a local characteristic
+> #define PRF_ATT_OFFSET_FIRST_DESC       (2)
+> 
+> /*
+>  * MACROS
+>  ****************************************************************************************
+>  */
+> 
+> /// Provide attribute requirement value
+> #define ATT_REQ(req_type, val) \
+>             ((PRF_ATT_REQ_ ## req_type ## _ ## val) << PRF_ATT_REQ_ ## req_type ## _LSB)
+> 
+> /*
+>  * ENUMERATIONS
+>  ****************************************************************************************
+>  */
+> 
+> /// Attribute Instantiation requirement values
+> enum prf_att_req_inst
+> {
+>     /// Mono-instantiated
+>     PRF_ATT_REQ_INST_MONO = 0,
+>     /// Multi-instantiated
+>     PRF_ATT_REQ_INST_MULTI,
+> };
+33a76,100
+> /// Attribute presence requirement values
+> enum prf_att_req_pres
+> {
+>     /// Attribute is optional
+>     PRF_ATT_REQ_PRES_OPT = 0,
+>     /// Attribute is mandatory
+>     PRF_ATT_REQ_PRES_MAND,
+> };
+> 
+> /// Attribute requirements bit field meaning
+> /// +-----+----------+----------+
+> /// | 7-2 |    1     |     0    |
+> /// +-----+----------+----------+
+> /// | RFU | INSTANCE | PRESENCE |
+> /// +-----+----------+----------+
+> enum prf_att_req_bf
+> {
+>     /// Indicate if presence of attribute is optional or mandatory
+>     PRF_ATT_REQ_PRES_LSB = 0,
+>     PRF_ATT_REQ_PRES_MASK = 0x01,
+> 
+>     /// Indicate if attribute is mono-instantiated or multi-instantiated
+>     PRF_ATT_REQ_INST_LSB = 1,
+>     PRF_ATT_REQ_INST_MASK = 0x02,
+> };
+41c108
+<     PRF_CLI_START_NTF,
+---
+>     PRF_CLI_START_NTF   = 0x0001,
+43c110,124
+<     PRF_CLI_START_IND,
+---
+>     PRF_CLI_START_IND   = 0x0002,
+> };
+> 
+> /// Policy for sending of events
+> enum prf_evt_policy
+> {
+>     /// Send an event to all Client devices that have registered for reception of events
+>     PRF_EVT_POLICY_ALL = 0,
+>     /// Send an event to a single Client device
+>     PRF_EVT_POLICY_SINGLE,
+>     /// Send an event to all Client devices that hae registered for reception of events
+>     /// except one
+>     PRF_EVT_POLICY_ALL_BUT,
+>     /// Send an event to a set of devices
+>     PRF_EVT_POLICY_LIST,
+52c133
+<     PRF_SRV_START_BCST,
+---
+>     PRF_SRV_START_BCST = 0x0001,
+63a145
+> /// Service type
+65a148
+>     /// Primary service
+66a150
+>     /// Secondary service
+79,80c163
+< /// characteristic presentation information
+< struct prf_char_pres_fmt
+---
+> typedef struct prf_char_pres_fmt
+92c175
+< };
+---
+> } prf_char_pres_fmt_t;
+99c182
+< struct prf_date_time
+---
+> typedef struct prf_date_time
+113c196,207
+< };
+---
+> } prf_date_time_t;
+> 
+> /// Date profile information - 4 bytes
+> typedef struct prf_date
+> {
+>     /// year date element
+>     uint16_t year;
+>     /// month date element
+>     uint8_t month;
+>     /// day date element
+>     uint8_t day;
+> } prf_date_t;
+126,129c220,221
+< 
+< 
+< /// Attribute information
+< struct prf_att_info
+---
+> /// utf8_s string
+> typedef struct prf_utf_8
+131,133c223
+<     /// Attribute Handle
+<     uint16_t handle;
+<     /// Attribute length
+---
+>     /// value length
+135,140c225,227
+<     /// Status of request
+<     uint8_t  status;
+<     /// Attribute value
+<     uint8_t value[__ARRAY_EMPTY];
+< };
+< 
+---
+>     /// Value string in UTF8 format
+>     uint8_t  str[__ARRAY_EMPTY];
+> } prf_utf_8_t;
+142,145c229,230
+< 
+< 
+< /// service handles
+< struct prf_svc
+---
+> /// Service information structure
+> typedef struct prf_svc
+151c236
+< };
+---
+> } prf_svc_t;
+153,154c238,239
+< /// service handles
+< struct prf_incl_svc
+---
+> /// Included Service information structure
+> typedef struct prf_incl_svc
+165,166c250,251
+<     uint8_t uuid[ATT_UUID_128_LEN];
+< };
+---
+>     uint8_t uuid[GATT_UUID_128_LEN];
+> } prf_incl_svc_t;
+168,169c253,254
+< /// characteristic info
+< struct prf_char_inf
+---
+> /// Characteristic information structure
+> typedef struct prf_char
+171,172d255
+<     /// Characteristic handle
+<     uint16_t char_hdl;
+177,179c260
+<     /// End of characteristic offset
+<     uint8_t char_ehdl_off;
+< };
+---
+> } prf_char_t;
+181,182c262,263
+< /// characteristic description
+< struct prf_char_desc_inf
+---
+> /// Descriptor information structure
+> typedef struct prf_desc
+186,187c267
+< };
+< 
+---
+> } prf_desc_t;
+190c270
+< struct prf_char_def
+---
+> typedef struct prf_char_def
+194,195c274,275
+<     /// Requirement Attribute Flag
+<     uint8_t req_flag;
+---
+>     /// Requirement bit field
+>     uint8_t req_bf;
+198c278,289
+< };
+---
+> } prf_char_def_t;
+> 
+> /// 128-bit UUID Characteristic definition
+> typedef struct prf_char128_def
+> {
+>     /// 128-bit Characteristic UUID
+>     uint8_t uuid[GATT_UUID_128_LEN];
+>     /// Requirement bit field
+>     uint8_t req_bf;
+>     /// Mandatory Properties
+>     uint8_t prop_mand;
+> } prf_char128_def_t;
+201c292
+< struct prf_char_desc_def
+---
+> typedef struct prf_desc_def
+205,206c296,297
+<     /// requirement attribute flag
+<     uint8_t req_flag;
+---
+>     /// Requirement bit field
+>     uint8_t req_bf;
+209c300
+< };
+---
+> } prf_desc_def_t;
+211,216d301
+< /// Message structure used to inform APP that a profile client role has been disabled
+< struct prf_client_disable_ind
+< {
+<     /// Status
+<     uint8_t status;
+< };
+217a303,306
+> /*
+>  * CALLBACK FUNCTION DEFINITIONS
+>  ****************************************************************************************
+>  */
+218a308,318
+> /**
+>  ****************************************************************************************
+>  * @brief Callback function to call when an included service attribute is found
+>  *
+>  * @param[in] con_lid   Connection local index
+>  * @param[in] uuid      Service UUID
+>  * @param[in] shdl      Service start handle
+>  * @param[in] ehdl      Service end handle
+>  ****************************************************************************************
+>  */
+> typedef void (*prf_inc_svc_cb)(uint8_t con_lid, uint16_t uuid, uint16_t shdl, uint16_t ehdl);
+220,227c320,332
+< /// Message structure used to inform APP that an error has occured in the profile server role task
+< struct prf_server_error_ind
+< {
+<     /// Message ID
+<     uint16_t msg_id;
+<     /// Status
+<     uint8_t status;
+< };
+---
+> /**
+>  ****************************************************************************************
+>  * @brief Callback function to call when a multi-instantiated attribute is found
+>  *
+>  * @param[in] con_lid   Connection local index
+>  * @param[in] hdl       Characteristic value handle or Descriptor handle
+>  * @param[in] desc      Indicate if found attribute is a descriptor (True) or a characteristic
+>  * @param[in] idx       Index
+>  * @param[in] prop      Characteristic properties
+>  ****************************************************************************************
+>  */
+> typedef void (*prf_multi_att_cb)(uint8_t con_lid, uint16_t hdl, bool desc, uint8_t idx,
+>                                  uint8_t prop);

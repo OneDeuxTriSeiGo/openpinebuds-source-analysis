@@ -1,0 +1,67 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/multimedia/audio/codec/sbc/inc/codec_sbc.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/multimedia/audio/codec/sbc/inc/codec_sbc.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+26a26,29
+> #if defined(ROM_UTILS_ON) && defined(SBC_CHANNEL_SELECT_IN_DECODER_INSTANCE)
+> #define BTIF_CHANNEL_SELECT_IN_DECODER_INST
+> #endif
+> 
+109a113,119
+> typedef enum {
+>     BTIF_SBC_DECODER_CHANNEL_SELECT_SELECT_STEREO = 0,
+>     BTIF_SBC_DECODER_CHANNEL_SELECT_SELECT_LRMERGE,
+>     BTIF_SBC_DECODER_CHANNEL_SELECT_LCHNL,
+>     BTIF_SBC_DECODER_CHANNEL_SELECT_RCHNL,
+> } BTIF_SBC_DECODER_CHANNEL_SELECT_E;
+> 
+114a125,128
+> 
+> #if defined(BTIF_CHANNEL_SELECT_IN_DECODER_INST)
+>     BTIF_SBC_DECODER_CHANNEL_SELECT_E resv_channel_select;
+> #endif
+126a141,142
+>     uint16_t reserved_data_size;
+>     uint16_t reserved_header_size;
+143a160
+> //void btif_sbc_cfg_ch_mode(btif_sbc_decoder_t *Decoder, uint32_t btif_ch_select);
+150a168,174
+> bt_status_t btif_sbc_decode_frames_select_channel(btif_sbc_decoder_t *Decoder,
+>                           uint8_t         *Buff,
+>                           uint16_t         Len,
+>                           uint16_t        *BytesParsed,
+>                           btif_sbc_pcm_data_t *PcmData,
+>                           uint16_t         MaxPcmData,
+>                           float*       gains, BTIF_SBC_DECODER_CHANNEL_SELECT_E channel);

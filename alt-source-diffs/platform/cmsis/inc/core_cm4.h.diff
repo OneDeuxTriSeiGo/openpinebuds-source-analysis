@@ -1,0 +1,146 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/core_cm4.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/cmsis/inc/core_cm4.h
+diff -sw local remote
+---
+
+4,5c4,5
+<  * @version  V5.1.0
+<  * @date     13. March 2019
+---
+>  * @version  V5.1.1
+>  * @date     27. March 2020
+8c8
+<  * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
+---
+>  * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+199a200,204
+>   #ifndef __VTOR_PRESENT
+>     #define __VTOR_PRESENT             1U
+>     #warning "__VTOR_PRESENT not defined in device header file; using default!"
+>   #endif
+>   
+1609d1613
+<   #define NVIC_EnableIRQ              __NVIC_EnableIRQ
+1611d1614
+<   #define NVIC_DisableIRQ             __NVIC_DisableIRQ
+1615a1619,1621
+> #ifdef KERNEL_NUTTX
+>   #define NVIC_SetPriority(a,b)        __NVIC_SetPriority(a,5)
+> #else
+1616a1623
+> #endif
+1626a1634,1642
+> #ifdef KERNEL_NUTTX
+> typedef int (*xcpt_t)(int irq, void *context, void *arg);
+> void nuttx_irq_attach(IRQn_Type IRQn, xcpt_t isr, uint32_t arg);
+> int up_irq_handler(int irq, FAR void *context, FAR void *arg);
+> bool nuttx_irq_check(IRQn_Type IRQn, bool isEnable);
+>   #define NVIC_SetVector(a,b)         nuttx_irq_attach(a,up_irq_handler,b)
+>   #define NVIC_EnableIRQ(a)           do { if (nuttx_irq_check(a,true)) __NVIC_EnableIRQ(a);}while (0)
+>   #define NVIC_DisableIRQ(a)          do { if (nuttx_irq_check(a,false)) __NVIC_DisableIRQ(a);}while (0)
+> #else
+1627a1644,1646
+>   #define NVIC_EnableIRQ              __NVIC_EnableIRQ
+>   #define NVIC_DisableIRQ             __NVIC_DisableIRQ
+> #endif
+1652c1671
+< __STATIC_INLINE void __NVIC_SetPriorityGrouping(uint32_t PriorityGroup)
+---
+> __STATIC_FORCEINLINE void __NVIC_SetPriorityGrouping(uint32_t PriorityGroup)
+1671c1690
+< __STATIC_INLINE uint32_t __NVIC_GetPriorityGrouping(void)
+---
+> __STATIC_FORCEINLINE uint32_t __NVIC_GetPriorityGrouping(void)
+1683c1702
+< __STATIC_INLINE void __NVIC_EnableIRQ(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE void __NVIC_EnableIRQ(IRQn_Type IRQn)
+1686a1706
+>     __COMPILER_BARRIER();
+1687a1708
+>     __COMPILER_BARRIER();
+1700c1721
+< __STATIC_INLINE uint32_t __NVIC_GetEnableIRQ(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE uint32_t __NVIC_GetEnableIRQ(IRQn_Type IRQn)
+1719c1740
+< __STATIC_INLINE void __NVIC_DisableIRQ(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE void __NVIC_DisableIRQ(IRQn_Type IRQn)
+1738c1759
+< __STATIC_INLINE uint32_t __NVIC_GetPendingIRQ(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE uint32_t __NVIC_GetPendingIRQ(IRQn_Type IRQn)
+1757c1778
+< __STATIC_INLINE void __NVIC_SetPendingIRQ(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE void __NVIC_SetPendingIRQ(IRQn_Type IRQn)
+1772c1793
+< __STATIC_INLINE void __NVIC_ClearPendingIRQ(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE void __NVIC_ClearPendingIRQ(IRQn_Type IRQn)
+1789c1810
+< __STATIC_INLINE uint32_t __NVIC_GetActive(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE uint32_t __NVIC_GetActive(IRQn_Type IRQn)
+1811c1832
+< __STATIC_INLINE void __NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority)
+---
+> __STATIC_FORCEINLINE void __NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority)
+1833c1854
+< __STATIC_INLINE uint32_t __NVIC_GetPriority(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE uint32_t __NVIC_GetPriority(IRQn_Type IRQn)
+1858c1879
+< __STATIC_INLINE uint32_t NVIC_EncodePriority (uint32_t PriorityGroup, uint32_t PreemptPriority, uint32_t SubPriority)
+---
+> __STATIC_FORCEINLINE uint32_t NVIC_EncodePriority (uint32_t PriorityGroup, uint32_t PreemptPriority, uint32_t SubPriority)
+1885c1906
+< __STATIC_INLINE void NVIC_DecodePriority (uint32_t Priority, uint32_t PriorityGroup, uint32_t* const pPreemptPriority, uint32_t* const pSubPriority)
+---
+> __STATIC_FORCEINLINE void NVIC_DecodePriority (uint32_t Priority, uint32_t PriorityGroup, uint32_t* const pPreemptPriority, uint32_t* const pSubPriority)
+1908c1929
+< __STATIC_INLINE void __NVIC_SetVector(IRQn_Type IRQn, uint32_t vector)
+---
+> __STATIC_FORCEINLINE void __NVIC_SetVector(IRQn_Type IRQn, uint32_t vector)
+1910,1911c1931,1933
+<   uint32_t vectors = (uint32_t )SCB->VTOR;
+<   (* (int *) (vectors + ((int32_t)IRQn + NVIC_USER_IRQ_OFFSET) * 4)) = vector;
+---
+>   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+>   vectors[(int32_t)IRQn + NVIC_USER_IRQ_OFFSET] = vector;
+>   /* ARM Application Note 321 states that the M4 does not require the architectural barrier */
+1923c1945
+< __STATIC_INLINE uint32_t __NVIC_GetVector(IRQn_Type IRQn)
+---
+> __STATIC_FORCEINLINE uint32_t __NVIC_GetVector(IRQn_Type IRQn)
+1925,1926c1947,1948
+<   uint32_t vectors = (uint32_t )SCB->VTOR;
+<   return (uint32_t)(* (int *) (vectors + ((int32_t)IRQn + NVIC_USER_IRQ_OFFSET) * 4));
+---
+>   uint32_t *vectors = (uint32_t *)SCB->VTOR;
+>   return vectors[(int32_t)IRQn + NVIC_USER_IRQ_OFFSET];
+1934c1956
+< __NO_RETURN __STATIC_INLINE void __NVIC_SystemReset(void)
+---
+> __NO_RETURN __STATIC_FORCEINLINE void __NVIC_SystemReset(void)
+1977c1999
+< __STATIC_INLINE uint32_t SCB_GetFPUType(void)
+---
+> __STATIC_FORCEINLINE uint32_t SCB_GetFPUType(void)
+2018c2040
+< __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
+---
+> __STATIC_FORCEINLINE uint32_t SysTick_Config(uint32_t ticks)
+2060c2082
+< __STATIC_INLINE uint32_t ITM_SendChar (uint32_t ch)
+---
+> __STATIC_FORCEINLINE uint32_t ITM_SendChar (uint32_t ch)
+2081c2103
+< __STATIC_INLINE int32_t ITM_ReceiveChar (void)
+---
+> __STATIC_FORCEINLINE int32_t ITM_ReceiveChar (void)
+2101c2123
+< __STATIC_INLINE int32_t ITM_CheckChar (void)
+---
+> __STATIC_FORCEINLINE int32_t ITM_CheckChar (void)

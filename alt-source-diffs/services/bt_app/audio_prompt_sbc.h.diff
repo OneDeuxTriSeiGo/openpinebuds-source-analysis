@@ -1,0 +1,68 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/bt_app/audio_prompt_sbc.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/bt_app/audio_prompt_sbc.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+36a51
+>     bt_bdaddr_t remote;
+44a60
+>     uint16_t                prompt_type;
+53,56d68
+< #define AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE     (512)
+< #define AUDIO_PROMPT_TARGET_PCM_BUFFER_SIZE     (AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE*3)
+< #define AUDIO_PROMPT_PCM_BUFFER_SIZE            (AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE*4)
+< 
+60c72,73
+< 
+---
+> #if 1    // by default it's 16000 sample rate
+> // Set this macro to 8000 if you want to use 8k sample rate ringtone
+62a76,83
+> #define AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE     (512)
+> #if (AUDIO_PROMPT_SBC_SAMPLE_RATE_VALUE == 8000)
+> #define AUDIO_PROMPT_TARGET_PCM_BUFFER_SIZE     (AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE*4)
+> #else
+> #define AUDIO_PROMPT_TARGET_PCM_BUFFER_SIZE     (AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE*2)
+> #endif
+> #define AUDIO_PROMPT_PCM_BUFFER_SIZE            (AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE*4)
+> 
+65a87,96
+> #else
+> #define AUDIO_PROMPT_SBC_SAMPLE_RATE_VALUE      48000  // could be changed to 32000 or 48000 if needed
+> 
+> #define AUDIO_PROMPT_SBC_FRAME_PERIOD_IN_MS     32
+> 
+> #define AUDIO_PROMPT_SBC_PCM_DATA_SIZE_PER_FRAME        512
+> #define AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE     (1024)
+> #define AUDIO_PROMPT_TARGET_PCM_BUFFER_SIZE     (AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE*2)
+> #define AUDIO_PROMPT_PCM_BUFFER_SIZE            (AUDIO_PROMPT_SOURCE_PCM_BUFFER_SIZE*4)
+> #endif
+93c124
+< void audio_prompt_processing_handler(uint32_t acquiredPcmDataLen,
+---
+> void audio_prompt_processing_handler(uint8_t device_id, uint32_t acquiredPcmDataLen,
+107c138
+< void tws_playback_ticks_check_for_mix_prompt(void);
+---
+> void tws_playback_ticks_check_for_mix_prompt(uint8_t device_id);
+109a141,145
+> 
+> void app_tws_cmd_prompt_play_req_handler(uint8_t *ptrParam, uint32_t paramLen);
+> 
+> bool app_tws_let_peer_device_play_audio_prompt(uint16_t promptId,
+>     uint16_t aud_param, uint8_t dev_id);

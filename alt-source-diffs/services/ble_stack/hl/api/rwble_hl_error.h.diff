@@ -1,0 +1,255 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/hl/api/rwble_hl_error.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/ip/ble/hl/api/rwble_hl_error.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+37,39c51
+<     /// No error
+<     ATT_ERR_NO_ERROR                                                               = 0x00,
+<     /// 0x01: Handle is invalid
+---
+>     /// 0x01: H_andle is invalid
+72a85,88
+>     /// 0x12: The server requests the client to rediscover the database.
+>     ATT_ERR_DB_OUT_OF_SYNC                                                         = 0x12,
+>     /// 0x13: The attribute parameter value was not allowed.
+>     ATT_ERR_VALUE_NOT_ALLOWED                                                      = 0x13,
+77c93
+<     // -------------------------- L2C Specific Error ------------------------------------
+---
+>     // ------------------------- L2CAP Specific Error -----------------------------------
+80,84c96,100
+<     L2C_ERR_CONNECTION_LOST                                                        = 0x30,
+<     /// Invalid PDU length exceed MTU
+<     L2C_ERR_INVALID_MTU_EXCEED                                                     = 0x31,
+<     /// Invalid PDU length exceed MPS
+<     L2C_ERR_INVALID_MPS_EXCEED                                                     = 0x32,
+---
+>     L2CAP_ERR_CONNECTION_LOST                                                      = 0x30,
+>     /// MTU size exceed or invalid MTU proposed
+>     L2CAP_ERR_INVALID_MTU                                                          = 0x31,
+>     /// MPS size exceed or invalid MPS proposed
+>     L2CAP_ERR_INVALID_MPS                                                          = 0x32,
+86c102
+<     L2C_ERR_INVALID_CID                                                            = 0x33,
+---
+>     L2CAP_ERR_INVALID_CID                                                          = 0x33,
+88,90c104,106
+<     L2C_ERR_INVALID_PDU                                                            = 0x34,
+<     /// Connection refused - no resources available
+<     L2C_ERR_NO_RES_AVAIL                                                           = 0x35,
+---
+>     L2CAP_ERR_INVALID_PDU                                                          = 0x34,
+>     /// Connection refused - unacceptable parameters
+>     L2CAP_ERR_UNACCEPTABLE_PARAM                                                   = 0x35,
+92c108
+<     L2C_ERR_INSUFF_AUTHEN                                                          = 0x36,
+---
+>     L2CAP_ERR_INSUFF_AUTHEN                                                        = 0x36,
+94c110
+<     L2C_ERR_INSUFF_AUTHOR                                                          = 0x37,
+---
+>     L2CAP_ERR_INSUFF_AUTHOR                                                        = 0x37,
+96c112
+<     L2C_ERR_INSUFF_ENC_KEY_SIZE                                                    = 0x38,
+---
+>     L2CAP_ERR_INSUFF_ENC_KEY_SIZE                                                  = 0x38,
+98,100c114,116
+<     L2C_ERR_INSUFF_ENC                                                             = 0x39,
+<     /// Connection refused - LE_PSM not supported
+<     L2C_ERR_LEPSM_NOT_SUPP                                                         = 0x3A,
+---
+>     L2CAP_ERR_INSUFF_ENC                                                           = 0x39,
+>     /// Connection refused - SPSM not supported
+>     L2CAP_ERR_SPSM_NOT_SUPP                                                        = 0x3A,
+102c118
+<     L2C_ERR_INSUFF_CREDIT                                                          = 0x3B,
+---
+>     L2CAP_ERR_INSUFF_CREDIT                                                        = 0x3B,
+104c120
+<     L2C_ERR_NOT_UNDERSTOOD                                                         = 0x3C,
+---
+>     L2CAP_ERR_NOT_UNDERSTOOD                                                       = 0x3C,
+106c122
+<     L2C_ERR_CREDIT_ERROR                                                           = 0x3D,
+---
+>     L2CAP_ERR_CREDIT_ERROR                                                         = 0x3D,
+108c124,126
+<     L2C_ERR_CID_ALREADY_ALLOC                                                      = 0x3E,
+---
+>     L2CAP_ERR_CID_ALREADY_ALLOC                                                    = 0x3E,
+>     /// Unknown PDU
+>     L2CAP_ERR_UNKNOWN_PDU                                                          = 0x3F,
+142,143c160,161
+<     /// Limit Reached
+<     GAP_ERR_LIMIT_REACHED                                                          = 0x4E,
+---
+>     /// Buffer cannot be used due to invalid header or tail length
+>     GAP_ERR_INVALID_BUFFER                                                         = 0x4E,
+161a180,183
+>     /// The Attribute bearer is closed
+>     GATT_ERR_ATT_BEARER_CLOSE                                                      = 0x57,
+>     /// No more Attribute bearer available
+>     GATT_ERR_NO_MORE_BEARER                                                        = 0x58,
+168c190
+<     SMP_ERROR_LOC_PASSKEY_ENTRY_FAILED                                             = 0x61,
+---
+>     SMP_ERR_LOC_PASSKEY_ENTRY_FAILED                                               = 0x61,
+170c192
+<     SMP_ERROR_LOC_OOB_NOT_AVAILABLE                                                = 0x62,
+---
+>     SMP_ERR_LOC_OOB_NOT_AVAILABLE                                                  = 0x62,
+173c195
+<     SMP_ERROR_LOC_AUTH_REQ                                                         = 0x63,
+---
+>     SMP_ERR_LOC_AUTH_REQ                                                           = 0x63,
+175c197
+<     SMP_ERROR_LOC_CONF_VAL_FAILED                                                  = 0x64,
+---
+>     SMP_ERR_LOC_CONF_VAL_FAILED                                                    = 0x64,
+177c199
+<     SMP_ERROR_LOC_PAIRING_NOT_SUPP                                                 = 0x65,
+---
+>     SMP_ERR_LOC_PAIRING_NOT_SUPP                                                   = 0x65,
+180c202
+<     SMP_ERROR_LOC_ENC_KEY_SIZE                                                     = 0x66,
+---
+>     SMP_ERR_LOC_ENC_KEY_SIZE                                                       = 0x66,
+182c204
+<     SMP_ERROR_LOC_CMD_NOT_SUPPORTED                                                = 0x67,
+---
+>     SMP_ERR_LOC_CMD_NOT_SUPPORTED                                                  = 0x67,
+184c206
+<     SMP_ERROR_LOC_UNSPECIFIED_REASON                                               = 0x68,
+---
+>     SMP_ERR_LOC_UNSPECIFIED_REASON                                                 = 0x68,
+187c209
+<     SMP_ERROR_LOC_REPEATED_ATTEMPTS                                                = 0x69,
+---
+>     SMP_ERR_LOC_REPEATED_ATTEMPTS                                                  = 0x69,
+189c211
+<     SMP_ERROR_LOC_INVALID_PARAM                                                    = 0x6A,
+---
+>     SMP_ERR_LOC_INVALID_PARAM                                                      = 0x6A,
+192c214
+<     SMP_ERROR_LOC_DHKEY_CHECK_FAILED                                               = 0x6B,
+---
+>     SMP_ERR_LOC_DHKEY_CHECK_FAILED                                                 = 0x6B,
+194c216
+<     SMP_ERROR_LOC_NUMERIC_COMPARISON_FAILED                                        = 0x6C,
+---
+>     SMP_ERR_LOC_NUMERIC_COMPARISON_FAILED                                          = 0x6C,
+197c219
+<     SMP_ERROR_LOC_BREDR_PAIRING_IN_PROGRESS                                        = 0x6D,
+---
+>     SMP_ERR_LOC_BREDR_PAIRING_IN_PROGRESS                                          = 0x6D,
+200c222
+<     SMP_ERROR_LOC_CROSS_TRANSPORT_KEY_GENERATION_NOT_ALLOWED                       = 0x6E,
+---
+>     SMP_ERR_LOC_CROSS_TRANSPORT_KEY_GENERATION_NOT_ALLOWED                         = 0x6E,
+203c225
+<     SMP_ERROR_REM_PASSKEY_ENTRY_FAILED                                             = 0x71,
+---
+>     SMP_ERR_REM_PASSKEY_ENTRY_FAILED                                               = 0x71,
+205c227
+<     SMP_ERROR_REM_OOB_NOT_AVAILABLE                                                = 0x72,
+---
+>     SMP_ERR_REM_OOB_NOT_AVAILABLE                                                  = 0x72,
+208c230
+<     SMP_ERROR_REM_AUTH_REQ                                                         = 0x73,
+---
+>     SMP_ERR_REM_AUTH_REQ                                                           = 0x73,
+210c232
+<     SMP_ERROR_REM_CONF_VAL_FAILED                                                  = 0x74,
+---
+>     SMP_ERR_REM_CONF_VAL_FAILED                                                    = 0x74,
+212c234
+<     SMP_ERROR_REM_PAIRING_NOT_SUPP                                                 = 0x75,
+---
+>     SMP_ERR_REM_PAIRING_NOT_SUPP                                                   = 0x75,
+215c237
+<     SMP_ERROR_REM_ENC_KEY_SIZE                                                     = 0x76,
+---
+>     SMP_ERR_REM_ENC_KEY_SIZE                                                       = 0x76,
+217c239
+<     SMP_ERROR_REM_CMD_NOT_SUPPORTED                                                = 0x77,
+---
+>     SMP_ERR_REM_CMD_NOT_SUPPORTED                                                  = 0x77,
+219c241
+<     SMP_ERROR_REM_UNSPECIFIED_REASON                                               = 0x78,
+---
+>     SMP_ERR_REM_UNSPECIFIED_REASON                                                 = 0x78,
+222c244
+<     SMP_ERROR_REM_REPEATED_ATTEMPTS                                                = 0x79,
+---
+>     SMP_ERR_REM_REPEATED_ATTEMPTS                                                  = 0x79,
+224c246
+<     SMP_ERROR_REM_INVALID_PARAM                                                    = 0x7A,
+---
+>     SMP_ERR_REM_INVALID_PARAM                                                      = 0x7A,
+227c249
+<     SMP_ERROR_REM_DHKEY_CHECK_FAILED                                               = 0x7B,
+---
+>     SMP_ERR_REM_DHKEY_CHECK_FAILED                                                 = 0x7B,
+229c251
+<     SMP_ERROR_REM_NUMERIC_COMPARISON_FAILED                                        = 0x7C,
+---
+>     SMP_ERR_REM_NUMERIC_COMPARISON_FAILED                                          = 0x7C,
+232c254
+<     SMP_ERROR_REM_BREDR_PAIRING_IN_PROGRESS                                        = 0x7D,
+---
+>     SMP_ERR_REM_BREDR_PAIRING_IN_PROGRESS                                          = 0x7D,
+235c257
+<     SMP_ERROR_REM_CROSS_TRANSPORT_KEY_GENERATION_NOT_ALLOWED                       = 0x7E,
+---
+>     SMP_ERR_REM_CROSS_TRANSPORT_KEY_GENERATION_NOT_ALLOWED                         = 0x7E,
+238c260
+<     SMP_ERROR_ADDR_RESOLV_FAIL                                                     = 0xD0,
+---
+>     SMP_ERR_ADDR_RESOLV_FAIL                                                       = 0x20,
+240c262
+<     SMP_ERROR_SIGN_VERIF_FAIL                                                      = 0xD1,
+---
+>     SMP_ERR_SIGN_VERIF_FAIL                                                        = 0x21,
+243c265
+<     SMP_ERROR_ENC_KEY_MISSING                                                      = 0xD2,
+---
+>     SMP_ERR_ENC_KEY_MISSING                                                        = 0x22,
+246c268
+<     SMP_ERROR_ENC_NOT_SUPPORTED                                                    = 0xD3,
+---
+>     SMP_ERR_ENC_NOT_SUPPORTED                                                      = 0x23,
+248c270
+<     SMP_ERROR_ENC_TIMEOUT                                                          = 0xD4,
+---
+>     SMP_ERR_ENC_TIMEOUT                                                            = 0x24,
+410a433,446
+>     /// MAC Connection Failed
+>     LL_ERR_MAC_CONN_FAILED                                                         = 0xCF,
+>     /// Coarse Clock Adjustment Rejected but Will Try to Adjust Using Clock Dragging
+>     LL_ERR_CCA_REJ_USE_CLOCK_DRAG                                                  = 0xD0,
+>     /// Type0 Submap Not Defined
+>     LL_ERR_TYPE0_SUBMAP_NOT_DEFINED                                                = 0xD1,
+>     /// Unknown Advertising Identifier
+>     LL_ERR_UNKNOWN_ADVERTISING_ID                                                  = 0xD2,
+>     /// Limit Reached
+>     LL_ERR_LIMIT_REACHED                                                           = 0xD3,
+>     /// Operation Cancelled by Host
+>     LL_ERR_OPERATION_CANCELED_BY_HOST                                              = 0xD4,
+>     /// Packet Too Long
+>     LL_ERR_PKT_TOO_LONG                                                            = 0xD5,

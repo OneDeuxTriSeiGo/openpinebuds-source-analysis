@@ -1,0 +1,46 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/rtos/Makefile
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/rtos/Makefile
+diff -sw local remote
+---
+
+0a1,12
+> # Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+> # Licensed under the Apache License, Version 2.0 (the "License");
+> # you may not use this file except in compliance with the License.
+> # You may obtain a copy of the License at
+> #
+> #     http://www.apache.org/licenses/LICENSE-2.0
+> #
+> # Unless required by applicable law or agreed to in writing, software
+> # distributed under the License is distributed on an "AS IS" BASIS,
+> # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+> # See the License for the specific language governing permissions and
+> # limitations under the License.
+6a19,39
+> else ifeq ($(KERNEL),NUTTX)
+> rtos_lib-y := nuttx/
+> else ifeq ($(KERNEL),RTT)
+> rtos_lib-y := rt_thread/
+> KBUILD_CFLAGS += -Wno-error=date-time
+> else ifeq ($(KERNEL),LITEOS_M)
+> rtos_lib-y := liteos/liteos_m/
+> else ifeq ($(KERNEL),LITEOS_A)
+> rtos_lib-y := liteos/liteos_a/
+> else ifeq ($(KERNEL),RHINO)
+> ifeq ($(KERNEL_INTO_LIB),1)
+> rtos_lib-y := rhino/
+> else
+> rtos_lib-y :=
+> endif
+> ifeq ($(KERNEL),RHINO)
+> rtos_lib-y += rhino/cmsis/cmsis_os.o
+> rtos_lib-y += rhino/cmsis/cmsis_init.o
+> rtos_lib-y += rhino/cmsis/cmsis_os2.o
+> rtos_lib-y += rhino/cmsis/k_membox.o
+> endif
+13a47,51
+> ifeq ($(KERNEL), RHINO)
+> ifneq ($(KERNEL_INTO_LIB),1)
+> obj-y += rhino/
+> endif
+> endif #rhino

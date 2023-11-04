@@ -1,0 +1,289 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/drivers/bt/bt_drv_interface.h
+remote: https://raw.githubusercontent.com/dawmlight/device_bestechnic/fc81e5e2ceafd3610bae6591117735ff997d478d/bes2600w/sdk_liteos/bsp/platform/drivers/bt/bt_drv_interface.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 bestechnic (Shanghai) Technologies CO., LIMITED.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+122a122,123
+> #define BD_NAME_SIZE        0xF8
+> 
+129a131,228
+> //LE RX test PHY type
+> #define LE_RX_TEST_1M_PHY 0x01
+> #define LE_RX_TEST_2M_PHY 0x02
+> #define LE_RX_TEST_LE_CODED_PHY 0x03
+> //LE RX test  Modulation_Index
+> #define LE_TEST_STANDARD_IDX 0x00
+> #define LE_TEST_STABLE_IDX 0x01
+> 
+> //LE TX test PHY type
+> #define LE_TX_TEST_1M_PHY 0x01
+> #define LE_TX_TEST_2M_PHY 0x02
+> #define LE_TX_TEST_LE_CODED_S_8_PHY 0x03
+> #define LE_TX_TEST_LE_CODED_S_2_PHY 0x04
+> //LE TX test Packet_Payload type
+> #define LE_TX_TEST_PRBS9_PAYLOAD 0x00
+> #define LE_TX_TEST_11110000_PAYLOAD 0x01
+> #define LE_TX_TEST_10101010_PAYLOAD 0x02
+> #define LE_TX_TEST_PRBS15_PAYLOAD 0x03
+> #define LE_TX_TEST_11111111_PAYLOAD 0x04
+> #define LE_TX_TEST_00000000_PAYLOAD 0x05
+> #define LE_TX_TEST_00001111_PAYLOAD 0x06
+> #define LE_TX_TEST_01010101_PAYLOAD 0x07
+> 
+> //BT nonsignaling test
+> #define NONSIGNALING_TEST_OK 0x00
+> #define TX_NUM_UNDEFINE 0xffffffff
+> #define HOPSINGLE               0x00
+> #define HOPUSA                  0x01
+> 
+> #define WHITENING_MODE_ON 0x00
+> #define WHITENING_MODE_OFF 0x01
+> 
+> #define BT_EDR_ENABLE 1
+> #define BT_EDR_DISABLE 0
+> 
+> #define BT_NONSIGNALING_00_PAYLOAD 0x00
+> #define BT_NONSIGNALING_FF_PAYLOAD 0x01
+> #define BT_NONSIGNALING_55_PAYLOAD 0x02
+> #define BT_NONSIGNALING_0F_PAYLOAD 0x03
+> #define BT_NONSIGNALING_PRBS9_PAYLOAD 0x04
+> 
+> /// Packet type code interpretation possibilities BB:6.5
+> #define ID_NUL_TYPE     0x0
+> #define POLL_TYPE       0x1
+> #define FHS_TYPE        0x2
+> #define DM1_TYPE        0x3
+> #define DH1_TYPE        0x4
+> #define DH1_2_TYPE      0x4
+> #define DH1_3_TYPE      0x8
+> #define HV1_TYPE        0x5
+> #define HV2_TYPE        0x6
+> #define EV3_2_TYPE      0x6
+> #define HV3_TYPE        0x7
+> #define EV3_TYPE        0x7
+> #define EV3_3_TYPE      0x7
+> #define DV_TYPE         0x8
+> #define AUX1_TYPE       0x9
+> #define DM3_TYPE        0xA
+> #define DH3_TYPE        0xB
+> #define DH3_2_TYPE      0xA
+> #define DH3_3_TYPE      0xB
+> #define EV4_TYPE        0xC
+> #define EV5_2_TYPE      0xC
+> #define EV5_TYPE        0xD
+> #define EV5_3_TYPE      0xD
+> #define DM5_TYPE        0xE
+> #define DH5_TYPE        0xF
+> #define DH5_2_TYPE      0xE
+> #define DH5_3_TYPE      0xF
+> 
+> #define FHS_PACKET_SIZE         18
+> #define DM1_PACKET_SIZE         17
+> #define DH1_PACKET_SIZE         27
+> #define DH1_2_PACKET_SIZE       54
+> #define DH1_3_PACKET_SIZE       83
+> #define DV_ACL_PACKET_SIZE      9
+> #define DM3_PACKET_SIZE         121
+> #define DH3_PACKET_SIZE         183
+> #define DH3_2_PACKET_SIZE       367
+> #define DH3_3_PACKET_SIZE       552
+> #define DM5_PACKET_SIZE         224
+> #define DH5_PACKET_SIZE         339
+> #define DH5_2_PACKET_SIZE       679
+> #define DH5_3_PACKET_SIZE       1021
+> #define AUX1_PACKET_SIZE        29
+> 
+> #define HV1_PACKET_SIZE         10
+> #define HV2_PACKET_SIZE         20
+> #define HV3_PACKET_SIZE         30
+> #define EV3_PACKET_SIZE         30
+> #define EV3_2_PACKET_SIZE       60
+> #define EV3_3_PACKET_SIZE       90
+> #define EV4_PACKET_SIZE        120
+> #define EV5_PACKET_SIZE        180
+> #define EV5_2_PACKET_SIZE      360
+> #define EV5_3_PACKET_SIZE      540
+> 
+> 
+142a242,246
+> enum BT_RSSI_THR_TYPE_T{
+>    READ_MOBILE_TYPE = 0,
+>    READ_TWS_TYPE,
+> };
+> 
+149a254,263
+> struct rssi_txpower_link_thd
+> {
+>     uint16_t    rssi_avg_nb_pkt;
+>     int8_t      rssi_high_thr;
+>     int8_t      rssi_low_thr;
+>     int8_t      rssi_below_low_thr;
+>     int8_t      rssi_interf_thr;
+> };
+> typedef int (* btstack_send_hci_cmd_t)(uint16_t , uint8_t *, uint8_t );
+> 
+153a268,270
+> #define btdrv_set_spuv_hci_buff_trace_enable_high()  beshci_set_supv_hci_buff_trace_enable_high()
+> #define btdrv_set_acl_packet_trace_enable()  beshci_set_acl_packet_trace_enable(true)
+> #define btdrv_set_acl_packet_trace_disable()  beshci_set_acl_packet_trace_enable(false)
+169a287,300
+> void btdrv_hci_bridge_start(void);
+> void ble_nosignal_start(void);
+> void ble_nosignal_close(void);
+> void ble_nosignal_uart_bridge_loop(void);
+> void btdrv_set_bdr_ble_txpower(uint8_t div, uint8_t power_level);
+> void btdrv_set_edr_txpower(uint8_t div, uint8_t power_level);
+> void btdrv_vco_test_start(uint8_t chnl);
+> void btdrv_vco_test_stop(void);
+> void btdrv_switch_to_i2c(void);
+> void write_reg32(uint32_t reg32, uint32_t value);
+> void read_reg32(uint32_t reg32);
+> void nosignal_set_max_power_level(void);
+> void nosignal_clear_max_power_level(void);
+> 
+201a333
+> int8_t btdrv_get_rssi_delta_thr(bool tws_link_flag);
+213c345
+< void  btdrv_syn_clr_trigger(void);
+---
+> void  btdrv_syn_clr_trigger(uint8_t trig_route);
+216a349
+> uint32_t btdrv_syn_get_cis_curr_time(void);
+219c352,355
+< void bt_syn_set_tg_ticks(uint32_t val,uint16_t conhdl, uint8_t mode);
+---
+> void bt_syn_cancel_tg_ticks(uint8_t trig_route);
+> void bt_syn_set_tg_ticks(uint32_t val,uint16_t conhdl, uint8_t mode, uint8_t trig_route);
+> void bt_syn_ble_set_tg_ticks(uint32_t val,uint8_t trig_route);
+> uint32_t bt_syn_ble_bt_time_to_bts(uint32_t hs, uint16_t hus);
+232c368
+< void btdrv_set_pcm_data_ignore_crc(void);
+---
+> void btdrv_enable_tports(void);
+247a384
+> void btdrv_reconn(bool en);
+250,251c387,389
+<     defined(CHIP_BEST2300P) || defined(CHIP_BEST2001) || defined(CHIP_BEST2300A)
+< void btdrv_linear_format_16bit_set(void);
+---
+>     defined(CHIP_BEST2300P) || defined(CHIP_BEST2001) || defined(CHIP_BEST2300A) || \
+>     defined(CHIP_BEST1501) || defined(CHIP_BEST2003) || defined(CHIP_BEST1305) ||   \
+>     defined(CHIP_BEST1501SIMU) || defined(CHIP_BEST1600SIMU)
+260a399
+> void btdrv_open_bt_hw_spi_en(uint8_t link_id, uint8_t enable);
+265a405
+> const struct rssi_txpower_link_thd* btdrv_get_tws_link_txpwr_thd_ptr(void);
+274a415
+> void beshci_set_supv_hci_buff_trace_enable_high(void);
+275a417
+> void beshci_set_acl_packet_trace_enable(bool enable);
+282a425
+> void *btdrv_memcpy_word(void * d, const void * s, size_t n);
+294c437
+< void btdrv_cvsd_bypass_enable(uint8_t is_msbc);
+---
+> void btdrv_cvsd_bypass_enable(void);
+304,305d446
+< void bt_drv_reg_op_acl_tx_silence(uint16_t connHandle, uint8_t on);
+< 
+312a454,455
+> int64_t btdrv_clkcnt_to_us(uint32_t clk, uint16_t cnt);
+> int64_t btdrv_iso_clkcnt_to_us(uint32_t clk, uint16_t cnt);
+328d470
+< void bt_drv_adaptive_fa_rx_gain(int8_t rssi);
+341,342c483,484
+< void btdrv_sw_trig_master_set(uint32_t Tclk_M, int16_t Tbit_M_h_ori);
+< void btdrv_sw_trig_slave_calculate_and_set(uint16_t conhdl, uint32_t Tclk_M, int16_t Tbit_M_h_ori);
+---
+> void btdrv_sw_trig_master_set(uint32_t Tclk_M, int16_t Tbit_M_h_ori, uint8_t trig_route);
+> void btdrv_sw_trig_slave_calculate_and_set(uint16_t conhdl, uint32_t Tclk_M, int16_t Tbit_M_h_ori, uint8_t trig_route);
+349c491
+< uint16_t btdrv_sw_trig_tg_finecnt_get(void);
+---
+> uint16_t btdrv_sw_trig_tg_finecnt_get(uint8_t trig_route);
+379c521,523
+< 
+---
+> void bt_drv_testmode_adaptive_adjust_param(void);
+> void bt_drv_reg_op_ble_sup_timeout_set(uint16_t ble_conhdl, uint16_t sup_to);
+> void btdrv_delay_for_wakeup(void);
+386a531,578
+> 
+> void btdrv_le_rx_test_v2(uint8_t rx_channel, uint8_t phy, uint8_t mod_idx);
+> void btdrv_le_tx_test_v2(uint8_t tx_channel, uint8_t data_len, uint8_t pkt_payload, uint8_t phy);
+> void btdrv_le_test_end(void);
+> 
+> void btdrv_le_rx_test_v2_bystack(uint8_t rx_channel, uint8_t phy, uint8_t mod_idx);
+> void btdrv_le_tx_test_v2_bystack(uint8_t tx_channel, uint8_t data_len, uint8_t pkt_payload, uint8_t phy);
+> void btdrv_le_test_end_bystack(void);
+> 
+> typedef bool (*le_test_end_handler_func)(uint8_t status, uint16_t nb_packet_received);
+> typedef bool (*bt_nonsig_test_end_handler_func)(uint8_t status, uint16_t nb_packet_received, uint16_t hec_nb, uint16_t crc_nb);
+> 
+> void btdrv_regist_le_teset_end_callback(le_test_end_handler_func cb);
+> void btdrv_regist_bt_nonsignalint_test_end_callback(bt_nonsig_test_end_handler_func cb);
+> 
+> int bt_drv_register_send_hci_cmd_hander(btstack_send_hci_cmd_t hander);
+> int btdrv_send_hci_cmd_bystack(uint16_t opcode, uint8_t *param, uint8_t len);
+> void btdrv_stack_send_hci_cmd_data_bystack(uint8_t *hci_ptr);
+> void btdrv_nosig_tx_test_set(uint8_t hopping_mode, uint8_t whitening_mode, uint8_t tx_freq, uint8_t rx_freq, uint8_t power_level,
+>                                 uint8_t *bd_addr, uint8_t lt_addr, uint8_t edr_enabled, uint8_t packet_type, uint8_t payload_pattern, uint16_t payload_length, uint32_t tx_packet_num);
+> void btdrv_nosig_rx_test_set(uint8_t hopping_mode, uint8_t whitening_mode, uint8_t tx_freq, uint8_t rx_freq, uint8_t power_level,
+>                                 uint8_t *bd_addr, uint8_t lt_addr, uint8_t edr_enabled, uint8_t packet_type, uint8_t payload_pattern, uint16_t payload_length);
+> void btdrv_nosig_stop_rx_test_set(void);
+> void btdrv_nosig_tx_test_set_for_1300(uint16_t test_period, uint8_t hopping_mode, uint8_t whitening_mode, uint8_t tx_freq, uint8_t rx_freq, uint8_t power_level,
+>                                 uint8_t *bd_addr, uint8_t lt_addr, uint8_t edr_enabled, uint8_t packet_type, uint8_t payload_pattern, uint16_t payload_length);
+> void btdrv_nosig_rx_test_set_for_1300(uint16_t test_period, uint8_t hopping_mode, uint8_t whitening_mode, uint8_t tx_freq, uint8_t rx_freq, uint8_t power_level,
+>                                 uint8_t *bd_addr, uint8_t lt_addr, uint8_t edr_enabled, uint8_t packet_type, uint8_t payload_pattern, uint16_t payload_length);
+> 
+> void bt_drv_ble_adv_txpwr_via_advhdl(uint8_t adv_hdl, uint8_t idx, int8_t txpwr_dbm);
+> void btdrv_regop_get_ble_event_info(uint16_t ble_conhdl, uint16_t *evt_count, uint32_t *interval, uint32_t *anchor_ts, uint16_t *bit_off);
+> 
+> typedef bool (*freqcalib_mode_get_handler_func)(void);
+> void btdrv_register_freqcalib_mode_get_callback(freqcalib_mode_get_handler_func cb);
+> bool btdrv_freqcalib_mode_get(void);
+> void bt_drv_rf_high_efficency_tx_pwr_ctrl(bool en, bool reset);
+> uint8_t btdrv_reg_op_isohci_in_nb_buffer(uint8_t link_id);
+> void trace_2_uart(uint8_t debug_level,const char *format, ...);
+> uint32_t btdrv_reg_op_big_anchor_timestamp(uint8_t link_id);
+> 
+> void bt_drv_reg_op_crash_dump_2_uart(void);
+> void btdrv_dump_mem_2_uart(uint8_t *dump_mem_start, uint32_t dump_length, uint8_t dump_type);
+> int hal_uart_dump(const char *fmt, unsigned int size,  unsigned int count, const void *buffer);
+> void bt_uart_debug_send(unsigned char *data, unsigned int len);
+> 
+> #define UART_DUMP8(str, buf, cnt)            hal_uart_dump(str, sizeof(uint8_t), cnt, buf)
+> #define UART_DUMP16(str, buf, cnt)           hal_uart_dump(str, sizeof(uint16_t), cnt, buf)
+> #define UART_DUMP32(str, buf, cnt)           hal_uart_dump(str, sizeof(uint32_t), cnt, buf)
+> 

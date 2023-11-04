@@ -1,0 +1,321 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/Makefile
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/Makefile
+diff -sw local remote
+---
+
+0a1,12
+> # Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+> # Licensed under the Apache License, Version 2.0 (the "License");
+> # you may not use this file except in compliance with the License.
+> # You may obtain a copy of the License at
+> #
+> #     http://www.apache.org/licenses/LICENSE-2.0
+> #
+> # Unless required by applicable law or agreed to in writing, software
+> # distributed under the License is distributed on an "AS IS" BASIS,
+> # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+> # See the License for the specific language governing permissions and
+> # limitations under the License.
+6a19,31
+> ifneq ($(CONFIG_ARCH_BOARD),)
+> T := $(CONFIG_ARCH_BOARD)
+> export NUTTX_BUILD :=1
+> export KERNEL := NUTTX
+> export NUTTX_ROOT := $(TOPDIR)
+> NUTTX_LIBS := $(patsubst %,$(NUTTX_ROOT)/staging/%,$(LINKLIBS))
+> NUTTX_CFG_FILE := $(NUTTX_ROOT)/.config
+> else
+> export NUTTX_ROOT := $(srctree)/thirdparty/incubator-nuttx/nuttx
+> NUTTX_LIBS := $(filter-out $(NUTTX_ROOT)/staging/libproxies.a ,$(wildcard $(NUTTX_ROOT)/staging/*.a))
+> NUTTX_CFG_FILE := $(srctree)/config/$(T)/defconfig
+> endif
+> 
+8a34,38
+> # filter-out modules
+> ifeq ($(FORCE_TO_FILTER_MODULE),1)
+> filter-out-module :=
+> filter-out-file :=
+> endif
+275c305
+< ifeq ($(skip-makefile),)
+---
+> ifneq ($(skip-makefile),1)
+309a340,342
+> BES_LIB_DIR ?= lib/bes
+> export BES_LIB_DIR
+> 
+385a419,424
+> ifeq ($(WIN_PLAT),y)
+> TO_RCF	= $(PERL) $(subst /,\,$(srctree)/tools/bin2ascii.pl)
+> else
+> TO_RCF	= $(srctree)/tools/bin2ascii.pl
+> endif
+> 
+413a453,454
+> # NOTE:
+> # In armclang -g == -gdwarf-4, and fromelf cannot interleave source in disassembly file when -gdwarf-4 or -O1/2/3 is specified.
+419c460
+< C++_ONLY_FLAGS	:= -std=gnu++98 -fno-rtti
+---
+> C++_ONLY_FLAGS	:= -std=gnu++14 -fno-rtti
+462a504,505
+> include $(srctree)/scripts/include.mk
+> 
+473a517,528
+> # filter-out modules
+> ifeq ($(FORCE_TO_FILTER_MODULE),1)
+> filter-module := $(patsubst %/,%,$(filter-out-module))
+> export filter-module-pattern  := $(addsuffix %,$(filter-module))
+> core-y := $(filter-out $(filter-module-pattern),$(core-y))
+> filter-obj := $(patsubst %.c, %.o, $(filter-out-file))
+> filter-obj += $(patsubst %.S, %.o, $(filter-out-file))
+> filter-obj += $(patsubst %.cc, %.o, $(filter-out-file))
+> filter-obj += $(patsubst %.cpp, %.o, $(filter-out-file))
+> export filter-obj
+> endif
+> 
+474a530,532
+> # Weak symbols must be put in the last library -- stupid armlink!
+> core-y += platform/cmsis/weak_sym_armclang/
+> 
+499a558,559
+> USE_ROM_ENTRY := 0
+> ifneq ($(ROM_IN_FLASH),1)
+500a561,564
+> USE_ROM_ENTRY := 1
+> endif
+> endif
+> ifeq ($(USE_ROM_ENTRY),1)
+539,540d602
+< include $(srctree)/scripts/include.mk
+< 
+591a654
+> IMAGE_RCF := $(addsuffix .rcf,$(basename $(IMAGE_FILE)))
+596d658
+< IMAGE_SEC := $(addsuffix $(LST_SECTION_NAME)$(suffix $(IMAGE_FILE)),$(basename $(IMAGE_FILE)))
+597a660,669
+> append_lst_sec_name = $(addsuffix $(LST_SECTION_NAME)$(suffix $(1)),$(basename $(1)))
+> 
+> IMAGE_LIB := lib$(addsuffix .a,$(basename $(IMAGE_FILE)))
+> ifeq ($(LST_SECTION_OPTS),)
+> IMAGE_LIB_LST := $(addsuffix .lst,$(basename $(IMAGE_LIB)))
+> else
+> IMAGE_LIB_LST := $(addsuffix $(LST_SECTION_NAME).lst,$(basename $(IMAGE_LIB)))
+> endif
+> 
+> IMAGE_CMSE_LIB := $(addsuffix _CMSE_Lib.o,$(basename $(IMAGE_FILE)))
+603c675
+< targets := $(LDS_TARGET) $(IMAGE_FILE) $(IMAGE_BIN) $(STR_BIN) $(IMAGE_LST) $(IMAGE_VER)
+---
+> targets := $(LDS_TARGET) $(IMAGE_FILE) $(IMAGE_BIN) $(STR_BIN) $(IMAGE_RCF) $(IMAGE_LST) $(IMAGE_VER) $(IMAGE_LIB)
+641c713
+<           --change-section-lma .trc_str=0x00008000 \
+---
+>           --change-section-lma .trc_str=0x00030000 \
+664a737,761
+> PHONY += rcf
+> rcf: $(IMAGE_RCF) ;
+> 
+> ifeq ($(filter 1,$(ROM_BUILD) $(PROGRAMMER)),)
+> ifeq ($(CHIP_SUBSYS),)
+> IMAGE_IN_FLASH := 1
+> endif
+> endif
+> ifneq ($(filter 1,$(ROM_IN_FLASH) $(PROGRAMMER_INFLASH) $(BTH_AS_MAIN_MCU)),)
+> IMAGE_IN_FLASH := 1
+> endif
+> ifeq ($(IMAGE_IN_FLASH),1)
+> ifeq ($(RAM_SIMU_FLASH),1)
+> RCF_OPTIONS := 4 -flash
+> else
+> RCF_OPTIONS := 1 -flash
+> endif
+> endif
+> 
+>       cmd_gen-IMAGE_RCF = $(TO_RCF) $< $@ $(RCF_OPTIONS)
+> quiet_cmd_gen-IMAGE_RCF = GENRCF  $@
+> 
+> $(IMAGE_RCF): $(IMAGE_BIN)
+> 	+$(call if_changed,gen-IMAGE_RCF)
+> 
+668c765,768
+< ifneq ($(filter lst_only,$(MAKECMDGOALS)),)
+---
+> PHONY += lib_lst lib_lst_only
+> lib_lst lib_lst_only: $(IMAGE_LIB_LST) ;
+> 
+> ifneq ($(filter lst_only lib_lst_only,$(MAKECMDGOALS)),)
+678c778
+<       cmd_gen-IMAGE_LST = $(OBJCOPY) $(LST_SECTION_OPTS) $< $(IMAGE_SEC) && $(OBJDUMP) -Sldx $(IMAGE_SEC) > $@
+---
+>       cmd_gen-IMAGE_LST = $(OBJCOPY) $(LST_SECTION_OPTS) $< $(call append_lst_sec_name,$<) && $(OBJDUMP) -Sldx $(call append_lst_sec_name,$<) > $@
+685a786,787
+> $(IMAGE_LIB_LST): $(IMAGE_LIB)
+> 	+$(call if_changed,gen-IMAGE_LST)
+704a807
+> ifneq ($(NUTTX_BUILD),1)
+705a809
+> endif
+708c812
+< KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
+---
+> #KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
+709a814
+> ifneq ($(TOOLCHAIN),armclang)
+710a816,817
+> KBUILD_CFLAGS   += $(call cc-option,-Wimplicit-fallthrough)
+> endif
+715,716c822,828
+< 		   -fno-strict-aliasing \
+< 		   -Wno-format-security
+---
+> 		   -fno-strict-aliasing
+> 
+> # Never change loops to C library calls like memcpy/memset
+> # (otherwise it will be enabled by -O2 in GCC 10)
+> ifneq ($(TOOLCHAIN),armclang)
+> KBUILD_CFLAGS	+= -fno-tree-loop-distribute-patterns
+> endif
+757a870,875
+> ifeq ($(ARM_CMNS),1)
+> ifneq ($(NUTTX_BUILD),1)
+> IMAGE_MAIN += ../$(ARM_CMSE_TARGET)/$(ARM_CMSE_TARGET)_CMSE_Lib.o
+> endif
+> endif
+> 
+773a892,895
+> ifneq ($(HW_VERSION_STRING),)
+> BUILD_INFO_FLAGS += -DHW_VERSION_STRING=$(HW_VERSION_STRING)
+> endif
+> 
+780,781c902,903
+< ifneq ($(OTA_BOOT_SIZE),0)
+< BUILD_INFO_FLAGS += -DOTA_BOOT_SIZE=$(OTA_BOOT_SIZE)
+---
+> ifneq ($(OTA_BOOT_SIZE),)
+> BUILD_INFO_FLAGS += -DOTA_BOOT_OFFSET=$(OTA_BOOT_OFFSET) -DOTA_BOOT_SIZE=$(OTA_BOOT_SIZE)
+830a953,963
+> ifeq ($(NUTTX_BUILD),1)
+> KBUILD_CPPFLAGS += -fno-builtin -DNUTTX_BUILD -D__NUTTX_SUPPORT__ -DFREE_WDATA_IN_HOOK
+> NUTTX_INCLUDE :=  \
+> 	-I$(NUTTX_ROOT)/include/libcxx \
+> 	-I$(NUTTX_ROOT)/include\
+> 
+> #NUTTX_INCLUDE += -include $(srctree)/platform/hal/hal_trace.h
+> C++_ONLY_FLAGS += -DCONFIG_WCHAR_BUILTIN $(NUTTX_INCLUDE) -std=c++17 -D__NuttX__ -nostdinc++ -fpermissive
+> C_ONLY_FLAGS += $(NUTTX_INCLUDE)
+> CPPFLAGS_$(LDS_FILE) += -I$(NUTTX_ROOT)/include
+> endif
+846a980
+> 
+850a985,987
+> ifeq ($(ARM_CMSE),1)
+> LDFLAGS_IMAGE += --import-cmse-lib-out=$(IMAGE_CMSE_LIB)
+> endif
+865c1002,1008
+< else
+---
+> 
+> else # TOOLCHAIN != armclang
+> 
+> ifeq ($(ARM_CMSE),1)
+> LDFLAGS_IMAGE += --cmse-implib --out-implib=$(IMAGE_CMSE_LIB)
+> endif
+> 
+875c1018
+< 	      $(IMAGE_INIT) $(IMAGE_MAIN) $(IMAGE_VER) \
+---
+> 	      $(NUTTX_LIBS) $(IMAGE_INIT) $(IMAGE_MAIN) $(IMAGE_VER) \
+878c1021
+< endif
+---
+> endif # TOOLCHAIN != armclang
+881d1023
+< 
+884c1026
+< $(IMAGE_FILE): $(IMAGE-deps) FORCE
+---
+> $(IMAGE_FILE): $(IMAGE-deps) $(NUTTX_LIBS) FORCE
+890a1033,1045
+> PHONY += lib
+> lib: $(IMAGE_LIB) ;
+> 
+>       cmd_gen_image_lib = $(call archive-cmd,$(IMAGE_INIT) $(IMAGE_MAIN) $(IMAGE_VER))
+> quiet_cmd_gen_image_lib = IMGLIB  $(@)
+> 
+> $(IMAGE_LIB): $(IMAGE-deps) $(NUTTX_LIBS) FORCE
+> ifneq ($(filter 1,$(COMPILE_ONLY) $(NO_COMPILE)),)
+> 	@:
+> else
+> 	@$(call if_changed,gen_image_lib)
+> endif
+> 
+917c1072
+< PHONY += $(clean-dirs) clean IMAGE-clean
+---
+> PHONY += $(clean-dirs) clean IMAGE-clean distclean subdir_clean
+923c1078,1084
+< 		$(IMAGE_BIN) $(STR_BIN) $(IMAGE_HEX) $(IMAGE_LST) \
+---
+> 		$(IMAGE_BIN) $(STR_BIN) $(IMAGE_HEX) $(IMAGE_RCF) $(IMAGE_LST) \
+> 		$(addsuffix *$(suffix $(IMAGE_FILE)),$(basename $(IMAGE_FILE))) \
+> 		$(addsuffix *$(suffix $(IMAGE_LST)),$(basename $(IMAGE_LST))) \
+> 		$(IMAGE_LIB) $(IMAGE_LIB_LST) $(call append_lst_sec_name,$(IMAGE_LIB)) \
+> 		$(addsuffix *$(suffix $(IMAGE_LIB)),$(basename $(IMAGE_LIB))) \
+> 		$(addsuffix *$(suffix $(IMAGE_LIB_LST)),$(basename $(IMAGE_LIB_LST))) \
+> 		$(IMAGE_CMSE_LIB) \
+925a1087,1089
+> distclean: clean
+> subdir_clean: clean
+> 
+940,941c1104,1105
+< quiet_cmd_clean    = RMDIR   $(KBUILD_OUTPUT)
+<       cmd_clean    = $(call CMDRMDIR,$(KBUILD_OUTPUT))
+---
+> quiet_cmd_allclean  = RMDIR   $(KBUILD_OUTPUT)
+>       cmd_allclean  = $(call CMDRMDIR,$(KBUILD_OUTPUT))
+944c1108
+< 	+$(call cmd,clean)
+---
+> 	+$(call cmd,allclean)
+949a1114,1120
+> PHONY += libclean
+> quiet_cmd_libclean	= RMDIR   $(srctree)/$(BES_LIB_DIR)
+>       cmd_libclean  = $(call CMDRMDIR,$(srctree)/$(BES_LIB_DIR))
+> 
+> libclean:
+> 	+$(call cmd,libclean)
+> 
+988c1159
+< endif # ifeq ($(skip-makefile),)
+---
+> endif # ifneq ($(skip-makefile),1)
+1039a1211,1238
+> 
+> # Debug makefile variables
+> ifneq ($(skip-makefile),1)
+> 
+> ifeq ($(VAR_VAL_QUOTE),1)
+> val_quote_l := [
+> val_quote_r := ]
+> else
+> val_quote_l :=
+> val_quote_r :=
+> endif
+> 
+> debug_var_list := $(patsubst get_var_%,%,$(filter get_var_%,$(MAKECMDGOALS)))
+> ifneq ($(debug_var_list),)
+> # Avoid expanding functions (e.g., shell functions) and recipe automatic variables
+> $(foreach v,$(debug_var_list),$(if $(filter $(v),$(.VARIABLES)),\
+> 	$(info $(v)=$(val_quote_l)$(value $(v))$(val_quote_r)),\
+> 	$(info $(v) is not set)))
+> endif
+> 
+> ifneq ($(filter get_all_var,$(MAKECMDGOALS)),)
+> # Avoid expanding functions (e.g., shell functions) and recipe automatic variables
+> $(foreach c,$(sort $(.VARIABLES)),$(info $(c)=$(val_quote_l)$(value $(c))$(val_quote_r)))
+> endif
+> 
+> get_var_%: FORCE ;
+> get_all_var: FORCE ;
+> endif

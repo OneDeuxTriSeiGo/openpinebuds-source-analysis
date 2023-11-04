@@ -1,0 +1,90 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/plat_addr_map.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/plat_addr_map.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+27a27,28
+> #elif defined(CHIP_BEST1305)
+> #define CHIP_ID_LITERAL                         best1305
+29a31,34
+> #elif defined(CHIP_BEST1501)
+> #define CHIP_ID_LITERAL                         best1501
+> #elif defined(CHIP_BEST1600)
+> #define CHIP_ID_LITERAL                         best1600
+33a39,42
+> #elif defined(CHIP_BEST2002)
+> #define CHIP_ID_LITERAL                         best2002
+> #elif defined(CHIP_BEST2003)
+> #define CHIP_ID_LITERAL                         best2003
+43a53,56
+> #elif defined(CHIP_BEST1501SIMU)
+> #define CHIP_ID_LITERAL                         best1501simu
+> #elif defined(CHIP_BEST1600SIMU)
+> #define CHIP_ID_LITERAL                         best1600simu
+60a74,90
+> #ifndef ROMX_BASE
+> #define ROMX_BASE                               ROM_BASE
+> #endif
+> 
+> #ifdef CHIP_HAS_TCM
+> 
+> #define RAM_TO_RAMX(d)                          (d)
+> #define RAMX_TO_RAM(d)                          (d)
+> 
+> #define FLASH_TO_FLASHX(d)                      (d)
+> #define FLASHX_TO_FLASH(d)                      (d)
+> 
+> #define PSRAM_TO_PSRAMX(d)                      (d)
+> #define PSRAMX_TO_PSRAM(d)                      (d)
+> 
+> #else /* !CHIP_HAS_TCM */
+> 
+67,69d96
+< #define FLASH_C_TO_NC(d)                        ((d) - FLASH_BASE + FLASH_NC_BASE)
+< #define FLASH_NC_TO_C(d)                        ((d) - FLASH_NC_BASE + FLASH_BASE)
+< 
+72a100,104
+> #endif /* !CHIP_HAS_TCM */
+> 
+> #define FLASH_C_TO_NC(d)                        ((d) - FLASH_BASE + FLASH_NC_BASE)
+> #define FLASH_NC_TO_C(d)                        ((d) - FLASH_NC_BASE + FLASH_BASE)
+> 
+76a109,115
+> 
+> #if (RAM_BASE & (0x400 - 1))
+> #error "RAM_BASE should be aligned on 0x400 boundary"
+> #endif
+> #if defined(RAMCP_BASE) && (RAMCP_BASE & (0x400 - 1))
+> #error "RAMCP_BASE should be aligned on 0x400 boundary"
+> #endif

@@ -1,0 +1,90 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/drivers/norflash/norflash_gd25q32c.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/drivers/norflash/norflash_gd25q32c.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+21a21,27
+> 
+> #if defined(FLASH_PAGE_MPM_ENABLE)
+> #define P25Q128L_PAGE_SIZE (1024)
+> #else
+> #define P25Q128L_PAGE_SIZE (256)
+> #endif
+> 
+26a33,36
+> #define P25Q16SL_TOTAL_SIZE (2*1024*1024)
+> 
+> #define P25Q32SL_TOTAL_SIZE (4*1024*1024)
+> 
+32a43,46
+> #define P25Q256L_TOTAL_SIZE  (32*1024*1024)
+> 
+> #define XM25QU128C_TOTAL_SIZE (16*1024*1024)
+> 
+36a51,56
+> #define ZB25VQ128B_TOTAL_SIZE (16*1024*1024)
+> 
+> #define W25Q32FW_TOTAL_SIZE (4*1024*1024)
+> 
+> #define SK25LE032_TOTAL_SIZE (4*1024*1024)
+> 
+52a73
+> #define GD25Q32C_CMD_FAST_DTR_QUAD_IO_READ 0xED
+60a82,83
+> #define GD25Q32C_CMD_ENABLE_QPI 0x38
+> #define GD25Q32C_CMD_DISABLE_QPI 0xFF
+71a95,97
+> #define GD_FLASH_CMD_ENTER_4BYTEADDR 0xB7
+> #define GD_FLASH_CMD_EXIT_4BYTEADDR 0xE9
+> 
+88c114,130
+< #endif /* NORFLASH_GD25Q32C_H */
+---
+> #define STATUS_LB_S11_S13_BIT_SHIFT         3
+> #define STATUS_LB_S11_S13_BIT_MASK          (7 << STATUS_LB_S11_S13_BIT_SHIFT)
+> #define STATUS_LB_S11_S13_BIT(n)            BITFIELD_VAL(STATUS_LB_S11_S13_BIT, n)
+> 
+> #define STATUS_LB_S10_BIT_SHIFT             2
+> #define STATUS_LB_S10_BIT_MASK              (1 << STATUS_LB_S10_BIT_SHIFT)
+> #define STATUS_LB_S10_BIT(n)                BITFIELD_VAL(STATUS_LB_S10_BIT, n)
+> 
+> #define STATUS_LB_S10_S13_BIT_SHIFT         2
+> #define STATUS_LB_S10_S13_BIT_MASK          (0xF << STATUS_LB_S10_S13_BIT_SHIFT)
+> #define STATUS_LB_S10_S13_BIT(n)            BITFIELD_VAL(STATUS_LB_S10_S13_BIT, n)
+> 
+> #define STATUS_LB_S12_S13_BIT_SHIFT         4
+> #define STATUS_LB_S12_S13_BIT_MASK          (3 << STATUS_LB_S12_S13_BIT_SHIFT)
+> #define STATUS_LB_S12_S13_BIT(n)            BITFIELD_VAL(STATUS_LB_S12_S13_BIT, n)
+> 
+> #endif

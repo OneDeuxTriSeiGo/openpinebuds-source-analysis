@@ -1,0 +1,3782 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/common/api/co_hci.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/common/api/co_hci.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+19d32
+< 
+21c34
+< 
+---
+> #include "co_bt_defines.h" // Common definitions
+23d35
+< #include "hci_api.h"
+50,51c62,63
+< ///UART header: event message type
+< #define HCI_TCI_MSG_TYPE                            0xFF
+---
+> ///UART header: ISO data message type
+> #define HCI_ISO_MSG_TYPE                            0x05
+75d86
+< 
+85d95
+< 
+87,88c97,98
+<     HCI_ACL_HDR_DATA_FLAG_LSB  = (12),
+<     HCI_ACL_HDR_DATA_FLAG_MASK = (0xF000),
+---
+>     HCI_ACL_HDR_DATA_FLAGS_LSB  = (12),
+>     HCI_ACL_HDR_DATA_FLAGS_MASK = (0xF000),
+100a111,123
+> enum hci_syn_hdr_fields
+> {
+>     /// bits[00:11]: Connection handle
+>     HCI_SYNC_HDR_HDL_LSB   = (0),
+>     HCI_SYNC_HDR_HDL_MASK  = (0x0FFF),
+>     /// bits[12:13]: Packet status flag
+>     HCI_SYNC_HDR_PSF_LSB   = (12),
+>     HCI_SYNC_HDR_PSF_MASK  = (0x3000),
+>     /// bits[14:15]: RFU
+>     HCI_SYNC_HDR_RFU_LSB   = (14),
+>     HCI_SYNC_HDR_RFU_MASK  = (0xC000),
+> };
+> 
+103,110c126
+< #define HCI_SYNC_HDR_HDL_POS        (0)
+< #define HCI_SYNC_HDR_HDL_MASK       (0x0FFF)
+< #define HCI_SYNC_HDR_PSF_FLAG_POS   (12)
+< #define HCI_SYNC_HDR_PSF_FLAG_MASK  (0x3000)
+< #define HCI_SYNC_HDR_RES_FLAG_POS   (14)
+< #define HCI_SYNC_HDR_RES_FLAG_MASK  (0xC000)
+< #define HCI_SYNC_HDR_DATA_FLAG_POS  (12)
+< #define HCI_SYNC_HDR_DATA_FLAG_MASK (0xF000)
+---
+> 
+154c170,304
+< #define HCI_ADV_DATA_FRAG_MAX_LEN        252
+---
+> #define HCI_ADV_DATA_FRAG_MAX_LEN        251
+> 
+> /// Maximum length of HCI periodic advertising data fragments
+> #define HCI_PER_ADV_DATA_FRAG_MAX_LEN    252
+> 
+> /// HCI ISO header: handle and flags decoding
+> enum  hci_iso_hdr_fields
+> {
+>     /// Connection handle (12 bits)
+>     HCI_ISO_HDR_HDL_LSB        = (0),
+>     HCI_ISO_HDR_HDL_MASK       = (0x0FFF),
+>     /// Packet boundary flag (2 bits)
+>     HCI_ISO_HDR_PB_FLAG_LSB    = (12),
+>     HCI_ISO_HDR_PB_FLAG_MASK   = (0x3000),
+>     /// Time_Stamp flag (1 bit)
+>     HCI_ISO_HDR_TS_FLAG_POS    = (14),
+>     HCI_ISO_HDR_TS_FLAG_BIT    = (0x4000),
+>     /// RFU (1 bit)
+>     HCI_ISO_HDR_RFU_FLAG_POS    = (0),
+>     HCI_ISO_HDR_RFU_FLAG_BIT    = (0x8000),
+>     /// ISO_Data_Load_Length (14 bits)
+>     HCI_ISO_HDR_ISO_DATA_LOAD_LEN_LSB  = (0),
+>     HCI_ISO_HDR_ISO_DATA_LOAD_LEN_MASK = (0x3FFF),
+>     /// RFU2 (2 bits)
+>     HCI_ISO_HDR_ISO_RFU2_LSB    = (14),
+>     HCI_ISO_HDR_ISO_RFU2_MASK   = (0xC000),
+> };
+> 
+> #define HCI_ISO_HDR_HDL_FLAGS_POS  (0)
+> #define HCI_ISO_HDR_HDL_FLAGS_LEN  (2)
+> /// HCI ISO header: ISO_Data_Load field length
+> #define HCI_ISO_HDR_ISO_DATA_LOAD_LEN_POS   (HCI_ISO_HDR_HDL_FLAGS_LEN)
+> #define HCI_ISO_HDR_ISO_DATA_LOAD_LEN_LEN   (2)
+> 
+> ///HCI ACL data packet header length
+> #define HCI_ISO_HDR_LEN            (HCI_ISO_HDR_HDL_FLAGS_LEN + HCI_ISO_HDR_ISO_DATA_LOAD_LEN_LEN)
+> 
+> /// Packet Boundary Flag   HCI:5.4.5
+> #define PB_FLAG_1ST_FRAG          0x00
+> #define PB_FLAG_CONT_FRAG         0x01
+> #define PB_FLAG_CMP_FRAG          0x02
+> #define PB_FLAG_LAST_FRAG         0x03
+> 
+> /// HCI ISO header: handle and flags decoding
+> enum  hci_iso_data_load_fields
+> {
+>     /// Time_Stamp (32 bits)
+>     HCI_ISO_DATA_LOAD_TIME_STAMP_POS        = (0),
+>     HCI_ISO_DATA_LOAD_TIME_STAMP_LSB        = (0),
+>     HCI_ISO_DATA_LOAD_TIME_STAMP_MASK       = (0xFFFFFFFF),
+>     /// Packet_Sequence_Number (16 bits)
+>     HCI_ISO_DATA_LOAD_PKT_SEQ_NB_POS    = (4),
+>     HCI_ISO_DATA_LOAD_PKT_SEQ_NB_LSB    = (0),
+>     HCI_ISO_DATA_LOAD_PKT_SEQ_NB_MASK   = (0xFFFF),
+>     /// ISO_SDU_Length (12 bits)
+>     HCI_ISO_DATA_LOAD_ISO_SDU_LEN_POS    = (6),
+>     HCI_ISO_DATA_LOAD_ISO_SDU_LEN_LSB    = (0),
+>     HCI_ISO_DATA_LOAD_ISO_SDU_LEN_MASK   = (0x0FFF),
+>     /// RFU (2 bits)
+>     HCI_ISO_DATA_LOAD_RFU_POS    = (6),
+>     HCI_ISO_DATA_LOAD_RFU_LSB    = (12),
+>     HCI_ISO_DATA_LOAD_RFU_MASK   = (0x3000),
+>     /// Packet_Status_Flag (2 bits)
+>     HCI_ISO_DATA_LOAD_PKT_STAT_FLAG_LSB  = (14),
+>     HCI_ISO_DATA_LOAD_PKT_STAT_FLAG_MASK = (0xC000),
+> };
+> 
+> /// HCI ISO_Data_Load - Length of Time_Stamp field
+> #define HCI_ISO_DATA_LOAD_TIME_STAMP_LEN    (4)
+> 
+> /// HCI ISO_Data_Load - Length of Packet Sequence Number field
+> #define HCI_ISO_DATA_LOAD_PKT_SEQ_NB_LEN    (2)
+> 
+> /// HCI ISO_Data_Load - Length of ISO SDU Length and packet status flags field
+> #define HCI_ISO_DATA_LOAD_ISO_SDU_LEN_LEN   (2)
+> 
+> /// HCI ISO_Data_Load - maximum header length
+> #define HCI_ISO_DATA_LOAD_HDR_LEN_MAX    (HCI_ISO_DATA_LOAD_TIME_STAMP_LEN + HCI_ISO_DATA_LOAD_PKT_SEQ_NB_LEN + HCI_ISO_DATA_LOAD_ISO_SDU_LEN_LEN)
+> 
+> /// HCI ISO_Data_Load - Packet Status Flag
+> enum  hci_iso_pkt_stat_flag
+> {
+>     /// Valid data. The complete ISO_SDU was received correctly
+>     HCI_ISO_PKT_STAT_FLAG_VALID   = (0),
+>     /// Possibly invalid data. The contents of the ISO_SDU may contain errors or part of the ISO_SDU may
+>     /// be missing. This is reported as "data with possible errors".
+>     HCI_ISO_PKT_STAT_FLAG_INVALID = (1),
+>     /// Part(s) of the ISO_SDU were not received correctly. This is reported as "lost data".
+>     HCI_ISO_PKT_STAT_FLAG_LOST    = (2),
+> };
+> 
+> ///HCI Command header components structure
+> struct hci_cmd_hdr
+> {
+>     /// Opcode field
+>     uint16_t opcode;
+>     ///Parameter length - the number of bytes of the command parameters
+>     uint8_t parlen;
+> };
+> 
+> ///HCI ACL data packets header structure
+> struct hci_acl_hdr
+> {
+>     ///Connection handle & Data Flags
+>     uint16_t hdl_flags;
+>     ///Data length in number of bytes
+>     uint16_t datalen;
+> };
+> 
+> ///HCI synchronous data packets header structure
+> struct hci_sync_hdr
+> {
+>     /// Connection handle & Data Flags
+>     uint16_t conhdl_flags;
+>     /// Data total length in number of bytes
+>     uint8_t data_total_len;
+> };
+> 
+> ///HCI Event header components structure - contains all details possible in an event
+> struct hci_evt_hdr
+> {
+>     ///Event code
+>     uint8_t  code;
+>     ///Event parameters length
+>     uint8_t  parlen;
+> };
+> 
+> ///HCI ISO data packets header structure
+> struct hci_iso_hdr
+> {
+>     /// Connection handle & Data Flags
+>     uint16_t conhdl_flags;
+>     /// ISO Data load length in number of bytes
+>     uint16_t iso_data_load_len;
+> };
+183d332
+< 
+197a347
+> /*@TRACE*/
+357a508,509
+>     HCI_SET_ECO_BASE_INTV_CMD_OPCODE          = 0x0C82,
+>     HCI_CONFIG_DATA_PATH_CMD_OPCODE           = 0x0C83,
+364c516
+<     HCI_RD_BUFF_SIZE_CMD_OPCODE               = 0x1005,
+---
+>     HCI_RD_BUF_SIZE_CMD_OPCODE                     = 0x1005,
+365a518
+>     HCI_RD_DATA_BLOCK_SIZE_CMD_OPCODE              = 0x100A,
+366a520,523
+>     HCI_RD_LOCAL_SP_OPT_CMD_OPCODE                 = 0x100C,
+>     HCI_RD_LOCAL_SUPP_CODECS_V2_CMD_OPCODE         = 0x100D,
+>     HCI_RD_LOCAL_SUPP_CODEC_CAP_CMD_OPCODE         = 0x100E,
+>     HCI_RD_LOCAL_SUPP_CTRL_DELAY_CMD_OPCODE        = 0x100F,
+382a540
+>     HCI_WR_SEC_CON_TEST_MODE_CMD_OPCODE            = 0x180A,
+386c544
+<     HCI_LE_RD_BUFF_SIZE_CMD_OPCODE                 = 0x2002,
+---
+>     HCI_LE_RD_BUF_SIZE_CMD_OPCODE                       = 0x2002,
+408c566
+<     HCI_LE_START_ENC_CMD_OPCODE                    = 0x2019,
+---
+>     HCI_LE_EN_ENC_CMD_OPCODE                            = 0x2019,
+412,413c570,571
+<     HCI_LE_RX_TEST_CMD_OPCODE                      = 0x201D,
+<     HCI_LE_TX_TEST_CMD_OPCODE                      = 0x201E,
+---
+>     HCI_LE_RX_TEST_V1_CMD_OPCODE                        = 0x201D,
+>     HCI_LE_TX_TEST_V1_CMD_OPCODE                        = 0x201E,
+421c579
+<     HCI_LE_GEN_DHKEY_CMD_OPCODE                    = 0x2026,
+---
+>     HCI_LE_GEN_DHKEY_V1_CMD_OPCODE                      = 0x2026,
+434,435c592,593
+<     HCI_LE_ENH_RX_TEST_CMD_OPCODE                  = 0x2033,
+<     HCI_LE_ENH_TX_TEST_CMD_OPCODE                  = 0x2034,
+---
+>     HCI_LE_RX_TEST_V2_CMD_OPCODE                        = 0x2033,
+>     HCI_LE_TX_TEST_V2_CMD_OPCODE                        = 0x2034,
+462c620,664
+<     HCI_LE_SET_MIN_NUM_USED_CHAN_CMD_OPCODE        = 0x204F,
+---
+>     HCI_LE_RX_TEST_V3_CMD_OPCODE                        = 0x204F,
+>     HCI_LE_TX_TEST_V3_CMD_OPCODE                        = 0x2050,
+>     HCI_LE_SET_CONLESS_CTE_TX_PARAM_CMD_OPCODE          = 0x2051,
+>     HCI_LE_SET_CONLESS_CTE_TX_EN_CMD_OPCODE             = 0x2052,
+>     HCI_LE_SET_CONLESS_IQ_SAMPL_EN_CMD_OPCODE           = 0x2053,
+>     HCI_LE_SET_CON_CTE_RX_PARAM_CMD_OPCODE              = 0x2054,
+>     HCI_LE_SET_CON_CTE_TX_PARAM_CMD_OPCODE              = 0x2055,
+>     HCI_LE_CON_CTE_REQ_EN_CMD_OPCODE                    = 0x2056,
+>     HCI_LE_CON_CTE_RSP_EN_CMD_OPCODE                    = 0x2057,
+>     HCI_LE_RD_ANTENNA_INF_CMD_OPCODE                    = 0x2058,
+>     HCI_LE_SET_PER_ADV_REC_EN_CMD_OPCODE                = 0x2059,
+>     HCI_LE_PER_ADV_SYNC_TRANSF_CMD_OPCODE               = 0x205A,
+>     HCI_LE_PER_ADV_SET_INFO_TRANSF_CMD_OPCODE           = 0x205B,
+>     HCI_LE_SET_PER_ADV_SYNC_TRANSF_PARAM_CMD_OPCODE     = 0x205C,
+>     HCI_LE_SET_DFT_PER_ADV_SYNC_TRANSF_PARAM_CMD_OPCODE = 0x205D,
+>     HCI_LE_GEN_DHKEY_V2_CMD_OPCODE                      = 0x205E,
+>     HCI_LE_MOD_SLEEP_CLK_ACC_CMD_OPCODE                 = 0x205F,
+>     HCI_LE_RD_BUF_SIZE_V2_CMD_OPCODE                    = 0x2060,
+>     HCI_LE_RD_ISO_TX_SYNC_CMD_OPCODE                    = 0x2061,
+>     HCI_LE_SET_CIG_PARAMS_CMD_OPCODE                    = 0x2062,
+>     HCI_LE_SET_CIG_PARAMS_TEST_CMD_OPCODE               = 0x2063,
+>     HCI_LE_CREATE_CIS_CMD_OPCODE                        = 0x2064,
+>     HCI_LE_REMOVE_CIG_CMD_OPCODE                        = 0x2065,
+>     HCI_LE_ACCEPT_CIS_REQ_CMD_OPCODE                    = 0x2066,
+>     HCI_LE_REJECT_CIS_REQ_CMD_OPCODE                    = 0x2067,
+>     HCI_LE_CREATE_BIG_CMD_OPCODE                        = 0x2068,
+>     HCI_LE_CREATE_BIG_TEST_CMD_OPCODE                   = 0x2069,
+>     HCI_LE_TERMINATE_BIG_CMD_OPCODE                     = 0x206A,
+>     HCI_LE_BIG_CREATE_SYNC_CMD_OPCODE                   = 0x206B,
+>     HCI_LE_BIG_TERMINATE_SYNC_CMD_OPCODE                = 0x206C,
+>     HCI_LE_REQ_PEER_SCA_CMD_OPCODE                      = 0x206D,
+>     HCI_LE_SETUP_ISO_DATA_PATH_CMD_OPCODE               = 0x206E,
+>     HCI_LE_REMOVE_ISO_DATA_PATH_CMD_OPCODE              = 0x206F,
+>     HCI_LE_ISO_TX_TEST_CMD_OPCODE                       = 0x2070,
+>     HCI_LE_ISO_RX_TEST_CMD_OPCODE                       = 0x2071,
+>     HCI_LE_ISO_READ_TEST_COUNTERS_CMD_OPCODE            = 0x2072,
+>     HCI_LE_ISO_TEST_END_CMD_OPCODE                      = 0x2073,
+>     HCI_LE_SET_HOST_FEATURE_CMD_OPCODE                  = 0x2074,
+>     HCI_LE_RD_ISO_LINK_QUALITY_CMD_OPCODE               = 0x2075,
+>     HCI_LE_ENH_RD_TX_PWR_LVL_CMD_OPCODE                 = 0x2076,
+>     HCI_LE_RD_REMOTE_TX_PWR_LVL_CMD_OPCODE              = 0x2077,
+>     HCI_LE_SET_PATH_LOSS_REP_PARAM_CMD_OPCODE           = 0x2078,
+>     HCI_LE_SET_PATH_LOSS_REP_EN_CMD_OPCODE              = 0x2079,
+>     HCI_LE_SET_TX_POWER_REP_EN_CMD_OPCODE               = 0x207A,
+>     HCI_LE_TX_TEST_V4_CMD_OPCODE                        = 0x207B,
+476a679
+>     HCI_DBG_SET_LOCAL_CLOCK_CMD_OPCODE             = 0xFC0F,
+480,485c683,688
+<     HCI_DBG_HW_REG_RD_CMD_OPCODE                = 0xFC30,
+<     HCI_DBG_HW_REG_WR_CMD_OPCODE                = 0xFC31,
+<     HCI_DBG_SET_BD_ADDR_CMD_OPCODE              = 0xFC32,
+<     HCI_DBG_SET_TYPE_PUB_CMD_OPCODE             = 0xFC33,
+<     HCI_DBG_SET_TYPE_RAND_CMD_OPCODE            = 0xFC34,
+<     HCI_DBG_SET_CRC_CMD_OPCODE                  = 0xFC35,
+---
+>     HCI_VS_SET_PREF_SLAVE_LATENCY_CMD_OPCODE       = 0xFC13,
+>     HCI_VS_SET_PREF_SLAVE_EVT_DUR_CMD_OPCODE       = 0xFC14,
+>     HCI_VS_SET_MAX_RX_SIZE_AND_TIME_CMD_OPCODE     = 0xFC15,
+>     HCI_DBG_BLE_REG_RD_CMD_OPCODE                  = 0xFC30,
+>     HCI_DBG_BLE_REG_WR_CMD_OPCODE                  = 0xFC31,
+>     HCI_DBG_SEND_LLCP_CMD_OPCODE                   = 0xFC35,
+487,488d689
+<     HCI_DBG_RESET_RX_CNT_CMD_OPCODE             = 0xFC37,
+<     HCI_DBG_RESET_TX_CNT_CMD_OPCODE             = 0xFC38,
+491d691
+<     HCI_DBG_SET_TX_PW_CMD_OPCODE                = 0xFC3B,
+497,512d696
+<     HCI_TESTER_SET_LE_PARAMS_CMD_OPCODE         = 0xFC40,
+<     HCI_DBG_WR_DLE_DFT_VALUE_CMD_OPCODE         = 0xFC41,
+< #if (BLE_EMB_PRESENT)
+< #if (BLE_TESTER)
+<     HCI_DBG_BLE_TST_LLCP_PT_EN_CMD_OPCODE       = 0xFC42,
+<     HCI_DBG_BLE_TST_SEND_LLCP_CMD_OPCODE        = 0xFC43,
+< #endif // (BLE_TESTER)
+< #if (BLE_AUDIO)
+<     HCI_DBG_AUDIO_CONFIGURE_CMD_OPCODE          = 0xFC50,
+<     HCI_DBG_AUDIO_SET_MODE_CMD_OPCODE           = 0xFC51,
+<     HCI_DBG_AUDIO_RESET_CMD_OPCODE              = 0xFC52,
+<     HCI_DBG_AUDIO_SET_POINTER_CMD_OPCODE        = 0xFC53,
+<     HCI_DBG_AUDIO_ALLOCATE_CMD_OPCODE           = 0xFC54,
+<     HCI_DBG_AUDIO_GET_VX_CH_CMD_OPCODE          = 0xFC55,
+< #endif
+< #endif // (BLE_EMB_PRESENT)
+519a704,719
+>     #if (BT_READ_PICONET_CLOCK)
+>     HCI_VS_RD_PICONET_CLOCK_CMD_OPCODE             = 0xFC50,
+>     #endif // (BT_READ_PICONET_CLOCK)
+> 
+>     #if (BLE_ISO_MODE_0)
+>     /// Vendor Specific commands for ISO Mode 0
+>     HCI_VS_MIC_LESS_SET_CMD_OPCODE                   = 0xFC51,
+>     HCI_VS_SETUP_AM0_DATA_PATH_CMD_OPCODE            = 0xFC52,
+>     HCI_VS_REMOVE_AM0_DATA_PATH_CMD_OPCODE           = 0xFC53,
+>     HCI_VS_SETUP_AM0_STREAM_CMD_OPCODE               = 0xFC54,
+>     HCI_VS_REMOVE_AM0_STREAM_CMD_OPCODE              = 0xFC55,
+>     #endif // (BLE_ISO_MODE_0)
+> 
+>     /// Debug commands for ISO
+>     HCI_DBG_ISO_SET_PARAM_CMD_OPCODE               = 0xFC57,
+>     HCI_VS_SET_ISO_DATA_PATH_TRIGGER_CMD_OPCODE    = 0xFC5A,
+523a724,746
+> 
+>     #if RW_DEBUG
+>     HCI_DBG_TEST_SCH_PLAN_SET_CMD_OPCODE           = 0xFC61,
+>     HCI_DBG_TEST_SCH_PLAN_REM_CMD_OPCODE           = 0xFC62,
+>     HCI_DBG_TEST_SCH_PLAN_CHK_CMD_OPCODE           = 0xFC63,
+>     HCI_DBG_TEST_SCH_PLAN_REQ_CMD_OPCODE           = 0xFC64,
+>     #endif //RW_DEBUG
+> 
+>     #if BLE_IQ_GEN
+>     HCI_DBG_IQGEN_CFG_CMD_OPCODE                   = 0xFC65,
+>     #endif //BLE_IQ_GEN
+> 
+>     #if (AUDIO_SYNC_SUPPORT)
+>     HCI_VS_AUSY_CON_EVT_CNT_GET_CMD_OPCODE        = 0xFC66,
+>     HCI_VS_AUSY_EVT_TX_TIME_GET_CMD_OPCODE        = 0xFC67,
+>     HCI_VS_AUSY_LAST_RX_TIME_GET_CMD_OPCODE       = 0xFC68,
+>     HCI_VS_AUSY_CLOCK_SAMPLE_GET_CMD_OPCODE       = 0xFC69,
+>     HCI_VS_AUSY_CLOCK_CONVERT_CMD_OPCODE          = 0xFC6A,
+>     HCI_VS_AUSY_CIS_EVT_CTRL_CMD_OPCODE           = 0xFC6B,
+>     #endif // (AUDIO_SYNC_SUPPORT)
+> 
+>     HCI_DBG_SET_DUAL_BD_ADDR_CMD_OPCODE           = 0xFC72,
+>     HCI_DBG_SET_BLE_PUBLIC_ADDR_CMD_OPCODE    = 0xFC77,
+530a754
+> /*@TRACE*/
+592c816,817
+<     HCI_MAX_EVT_MSK_PAGE_2_CODE                = 0x58,
+---
+>     HCI_SAM_STATUS_CHANGE_EVT_CODE             = 0x58,
+>     HCI_MAX_EVT_MSK_PAGE_2_CODE                = 0x59,
+593a819
+> };
+594a821,823
+> /*@TRACE*/
+> enum hci_le_evt_subcode
+> {
+609,611c838,840
+<     HCI_LE_PERIODIC_ADV_SYNC_EST_EVT_SUBCODE   = 0x0E,
+<     HCI_LE_PERIODIC_ADV_REPORT_EVT_SUBCODE     = 0x0F,
+<     HCI_LE_PERIODIC_ADV_SYNC_LOST_EVT_SUBCODE  = 0x10,
+---
+>     HCI_LE_PER_ADV_SYNC_EST_EVT_SUBCODE        = 0x0E,
+>     HCI_LE_PER_ADV_REPORT_EVT_SUBCODE          = 0x0F,
+>     HCI_LE_PER_ADV_SYNC_LOST_EVT_SUBCODE       = 0x10,
+615a845,859
+>     HCI_LE_CONLESS_IQ_REPORT_EVT_SUBCODE       = 0x15,
+>     HCI_LE_CON_IQ_REPORT_EVT_SUBCODE           = 0x16,
+>     HCI_LE_CTE_REQ_FAILED_EVT_SUBCODE          = 0x17,
+>     HCI_LE_PER_ADV_SYNC_TRANSF_REC_EVT_SUBCODE = 0x18,
+>     HCI_LE_CIS_ESTABLISHED_EVT_SUBCODE         = 0x19,
+>     HCI_LE_CIS_REQUEST_EVT_SUBCODE             = 0x1A,
+>     HCI_LE_CREATE_BIG_CMP_EVT_SUBCODE          = 0x1B,
+>     HCI_LE_TERMINATE_BIG_CMP_EVT_SUBCODE       = 0x1C,
+>     HCI_LE_BIG_SYNC_ESTABLISHED_EVT_SUBCODE    = 0x1D,
+>     HCI_LE_BIG_SYNC_LOST_EVT_SUBCODE           = 0x1E,
+>     HCI_LE_REQ_PEER_SCA_CMP_EVT_SUBCODE        = 0x1F,
+>     HCI_LE_PATH_LOSS_THRESHOLD_EVT_SUBCODE     = 0x20,
+>     HCI_LE_TX_POWER_REPORTING_EVT_SUBCODE      = 0x21,
+>     HCI_LE_BIG_INFO_ADV_REPORT_EVT_SUBCODE     = 0x22,
+> };
+617,620c861,864
+<     /// DBG Events Subcodes
+<     #if (BLE_EMB_PRESENT && BLE_TESTER)
+<     HCI_DBG_BLE_TST_LLCP_RECV_EVT_SUBCODE      = 0x01,
+<     #endif // (BLE_EMB_PRESENT && BLE_TESTER)
+---
+> /*@TRACE*/
+> enum hci_vs_evt_subcode
+> {
+>     HCI_DBG_TRACE_2_HOST_EVT_SUBCODE        = 0x01,
+622c866,867
+<     HCI_DBG_ASSERT_ERR_EVT_SUBCODE             = 0x02,
+---
+>     /// DBG Events Subcodes
+>     HCI_DBG_ASSERT_EVT_SUBCODE              = 0x02,
+623a869,879
+> 
+>     #if (BLE_ISOGEN)
+>     /// VS ISO Gen Statistics Status
+>     HCI_VS_ISOGEN_STAT_EVT_SUBCODE          = 0x03,
+>     #endif // (BLE_ISOGEN)
+> 
+>     #if (AUDIO_SYNC_SUPPORT)
+>     HCI_VS_AUSY_CIS_ESTAB_PARAM_EVT_SUBCODE = 0x04,
+>     #endif // (AUDIO_SYNC_SUPPORT)
+> 
+>     HCI_VS_INVALID_EVT_SUBCODE              = 0xFF,
+641,642c897,941
+< /// HCI ACL data RX  packet structure
+< struct hci_ble_acl_data_rx
+---
+> #if (BLE_ISO_PRESENT)
+> #if (BLE_ISO_MODE_0)
+> /// Current audio mode
+> enum iso_am0_ctrl
+> {
+>     // Stop Audio Mode 0 Stream
+>     ISO_AM0_CRL_DISABLE,
+>     // Start Audio Mode 0 Stream
+>     ISO_AM0_CRL_ENABLE,
+> };
+> #endif // (BLE_ISO_MODE_0)
+> 
+> /// Isochronous Channel data path selection
+> enum iso_dp_type
+> {
+>     /// ISO over HCI Data Path
+>     ISO_DP_ISOOHCI                  = 0x00,
+>     /// Data Path direction is disabled
+>     ISO_DP_DISABLE                  = 0xFF,
+> 
+>     // vendor specifics
+>     // @see enum dp_type
+>     // @see enum plf_dp_type
+> };
+> 
+> /// Isochronous Data Path Direction
+> enum iso_dp_direction
+> {
+>     /// Input (Host to Controller)
+>     ISO_DP_INPUT                     = 0x00,
+>     /// Output (Controller to Host)
+>     ISO_DP_OUTPUT                    = 0x01,
+> };
+> 
+> #endif // (BLE_ISO_PRESENT)
+> 
+> 
+> 
+> /**************************************************************************************
+>  **************                 HCI MESSAGE STRUCTURES                 ****************
+>  **************************************************************************************/
+> 
+> /// HCI ACL data packet structure
+> /*@TRACE*/
+> struct hci_acl_data
+656,657c955,957
+< /// HCI ACL data TX packet structure
+< struct hci_ble_acl_data_tx
+---
+> /// HCI Synchronous data packet structure
+> /*@TRACE*/
+> struct hci_sync_data
+660,662c960,961
+<     /// bits[12:13]: Packet boundary flag
+<     /// bits[14:15]: Broadcast flag
+<     uint16_t  conhdl_pb_bc_flag;
+---
+>     /// bits[12:13]: Packet status flag
+>     uint16_t  conhdl_psf;
+664,679c963
+<     uint16_t  length;
+<     /// Memory Pointer address
+<     uint32_t  buf_ptr;
+< };
+< 
+< #if (BT_EMB_PRESENT)
+< /// HCI ACL data packet structure
+< struct hci_bt_acl_data_tx
+< {
+<     /// Buffer element
+<     struct bt_em_acl_buf_elt* buf_elt;
+< };
+< 
+< /// HCI ACL data Rx packet structure
+< struct hci_bt_acl_data_rx
+< {
+---
+>     uint8_t  length;
+682,683d965
+<     /// Data length + Data Flags (PBF + BF)
+<     uint16_t data_len_flags;
+686,687c968,989
+< /// HCI Synchronous data packet structure
+< struct hci_bt_sync_data_tx
+---
+> #if (BLE_EMB_PRESENT || BLE_AUDIO_ENABLED)
+> #if BLE_ISO_PRESENT
+> /// ISO_Data_load structure
+> /*@TRACE*/
+> struct iso_data_load
+> {
+>     /// Time_Stamp
+>     uint32_t time_stamp;
+>     /// Packet Sequence Number
+>     uint16_t  pkt_seq_nb;
+>     /// length of the ISO SDU
+>     /// bits[00:11]: ISO SDU length
+>     /// bits[12:13]: RFU
+>     /// bits[14:15]: Packet_Status_Flag
+>     uint16_t  iso_sdu_length_psf;
+>     /// Pointer to the SDU
+>     uint8_t* iso_sdu_ptr;
+> };
+> 
+> /// HCI ISO data packet structure
+> /*@TRACE*/
+> struct hci_iso_data
+689,703c991,999
+<     /// Buffer element
+<     struct bt_em_sync_buf_elt* buf_elt;
+< };
+< 
+< /// HCI Synchronous data Rx packet structure
+< struct hci_bt_sync_data_rx
+< {
+<     /// EM buffer pointer
+<     uint16_t buf_ptr;
+<     /// Data length
+<     uint8_t data_len;
+<     /// Packet status flag
+<     uint8_t packet_status_flag;
+<     /// Synchronous link identifier
+<     uint8_t sync_link_id;
+---
+>     /// bits[00:11]: Connection handle
+>     /// bits[12:13]: Packet boundary flag
+>     /// bit[14]: Time_Stamp flag
+>     /// bit[15]: RFU
+>     uint16_t  conhdl_pbf_tsf;
+>     /// ISO_Data_Load_Length and 2 RFU bits
+>     uint16_t  iso_data_load_len;
+>     /// ISO_Data_Load
+>     struct  iso_data_load iso_data_load;
+705,707c1001,1002
+< #endif // (BT_EMB_PRESENT)
+< 
+< 
+---
+> #endif //BLE_ISO_PRESENT
+> #endif //BLE_EMB_PRESENT
+713a1009,1012
+> /*@TRACE
+>  * hci_rd_rssi_cmd = hci_basic_conhdl_cmd
+>  * hci_le_rd_chnl_map_cmd = hci_basic_conhdl_cmd
+>  * hci_le_ltk_req_neg_reply_cmd = hci_basic_conhdl_cmd*/
+727a1027
+> /*@TRACE*/
+736a1037
+> /*@TRACE*/
+755a1057
+> /*@TRACE*/
+787a1090
+> /*@TRACE*/
+796a1100
+> /*@TRACE*/
+805a1110
+> /*@TRACE*/
+814a1120
+> /*@TRACE*/
+825a1132
+> /*@TRACE*/
+834a1142
+> /*@TRACE*/
+855a1164
+> /*@TRACE*/
+875a1185
+> /*@TRACE*/
+884a1195
+> /*@TRACE*/
+893a1205
+> /*@TRACE*/
+904a1217
+> /*@TRACE*/
+913a1227
+> /*@TRACE*/
+918c1232
+<     ///Sniff max interval
+---
+>     /// Maximum interval (in slots)
+920c1234
+<     ///Sniff min interval
+---
+>     /// Minimum interval (in slots)
+922c1236
+<     ///Sniff attempt
+---
+>     /// Attempts (number of receive slots) (in slots)
+924c1238
+<     ///Sniff timeout
+---
+>     /// Timeout (number of receive slots) (in slots)
+928a1243
+> /*@TRACE*/
+933c1248
+<     ///Sniff max latency
+---
+>     /// Maximum latency used to calculate the maximum sniff subrate that the remote device may use (in slots)
+935c1250
+<     ///Minimun remote TO
+---
+>     /// Minimum base sniff subrate timeout that the remote device may use (in slots)
+937c1252
+<     ///Minimun local TO
+---
+>     /// Minimum base sniff subrate timeout that the local device may use (in slots)
+941a1257
+> /*@TRACE*/
+953a1270
+> /*@TRACE*/
+964a1282
+> /*@TRACE*/
+975a1294
+> /*@TRACE*/
+988a1308
+> /*@TRACE*/
+1001a1322
+> /*@TRACE*/
+1010a1332
+> /*@TRACE*/
+1021a1344
+> /*@TRACE*/
+1030a1354
+> /*@TRACE*/
+1038c1362
+<     uint8_t pw_gfsk;
+---
+>     int8_t pw_gfsk;
+1040c1364
+<     uint8_t pw_dqpsk;
+---
+>     int8_t pw_dqpsk;
+1042c1366
+<     uint8_t pw_8dpsk;
+---
+>     int8_t pw_8dpsk;
+1052a1377
+> /*@TRACE*/
+1057c1382
+<     ///Inquiry Length
+---
+>     ///Inquiry Length in units of 1.28 s
+1061a1387
+> /*@TRACE*/
+1070c1396
+<     ///Inquiry length
+---
+>     ///Inquiry length in units of 1.28 s
+1074a1401
+> /*@TRACE*/
+1098a1426
+> /*@TRACE*/
+1107a1436
+> /*@TRACE*/
+1114a1444
+> /*@TRACE*/
+1122a1453
+> /*@TRACE*/
+1142a1474
+> /*@TRACE*/
+1153a1486
+> /*@TRACE*/
+1172a1506
+> /*@TRACE*/
+1201a1536
+> /*@TRACE*/
+1215a1551
+> /*@TRACE*/
+1224a1561
+> /*@TRACE*/
+1233a1571
+> /*@TRACE*/
+1244a1583
+> /*@TRACE*/
+1253a1593
+> /*@TRACE*/
+1271a1612
+> /*@TRACE*/
+1278a1620
+> /*@TRACE*/
+1297a1640
+> /*@TRACE*/
+1308a1652
+> /*@TRACE*/
+1319c1663
+<     /// Clock_Offset (28 bits) - (CLKNslave � CLK) modulo 2^28
+---
+>     /// Clock_Offset (28 bits) - (CLKNslave - CLK) modulo 2^28
+1335a1680
+> /*@TRACE*/
+1346a1692
+> /*@TRACE*/
+1359a1706
+> /*@TRACE*/
+1373a1721,1726
+> /*@TRACE*/
+> struct hci_le_gen_dhkey_v1_cmd
+> {
+>     /// Remote P-256 public key
+>     uint8_t public_key[64];
+> };
+1375c1728,1729
+< struct hci_le_generate_dh_key_cmd
+---
+> /*@TRACE*/
+> struct hci_le_gen_dhkey_v2_cmd
+1376a1731
+>     /// Remote P-256 public key
+1377a1733,1735
+> 
+>     /// Private key type (@see enum priv_key_type)
+>     uint8_t key_type;
+1378a1737,1745
+> 
+> /*@TRACE*/
+> struct hci_le_mod_sleep_clk_acc_cmd
+> {
+>     /// Switch to more or less accurate clock (@see enum clk_acc_action)
+>     uint8_t action;
+> };
+> 
+> 
+1384a1752
+> /*@TRACE*/
+1403a1772
+> /*@TRACE*/
+1411a1781
+> /*@TRACE*/
+1423a1794
+> /*@TRACE*/
+1430a1802
+> /*@TRACE*/
+1513a1886
+> /*@TRACE*/
+1522a1896
+> /*@TRACE*/
+1530a1905
+> /*@TRACE*/
+1536a1912
+> /*@TRACE*/
+1545a1922
+> /*@TRACE*/
+1556a1934
+> /*@TRACE*/
+1567a1946
+> /*@TRACE*/
+1575a1955
+> /*@TRACE*/
+1584a1965
+> /*@TRACE*/
+1592a1974
+> /*@TRACE*/
+1599a1982
+> /*@TRACE*/
+1608a1992
+> /*@TRACE*/
+1616a2001
+> /*@TRACE*/
+1623a2009
+> /*@TRACE*/
+1631a2018
+> /*@TRACE*/
+1638a2026
+> /*@TRACE*/
+1646a2035
+> /*@TRACE*/
+1653a2043
+> /*@TRACE*/
+1663a2054
+> /*@TRACE*/
+1672a2064
+> /*@TRACE*/
+1682a2075
+> /*@TRACE*/
+1691a2085
+> /*@TRACE*/
+1699a2094
+> /*@TRACE*/
+1706a2102
+> /*@TRACE*/
+1714a2111
+> /*@TRACE*/
+1721a2119
+> /*@TRACE*/
+1729a2128
+> /*@TRACE*/
+1736a2136
+> /*@TRACE*/
+1744a2145
+> /*@TRACE*/
+1751a2153
+> /*@TRACE*/
+1759a2162
+> /*@TRACE*/
+1766a2170
+> /*@TRACE*/
+1773a2178
+> /*@TRACE*/
+1787a2193
+> /*@TRACE*/
+1798a2205
+> /*@TRACE*/
+1804c2211
+<     uint16_t    con_hdl[BLE_CONNECTION_MAX+1];     // ensure that at least 1 element is present
+---
+>     uint16_t    con_hdl[BLE_ACTIVITY_MAX+1];     // ensure that at least 1 element is present
+1806c2213
+<     uint16_t    nb_comp_pkt[BLE_CONNECTION_MAX+1]; // ensure that at least 1 element is present
+---
+>     uint16_t    nb_comp_pkt[BLE_ACTIVITY_MAX+1]; // ensure that at least 1 element is present
+1821a2229
+> /*@TRACE*/
+1830a2239
+> /*@TRACE*/
+1839a2249
+> /*@TRACE*/
+1850a2261
+> /*@TRACE*/
+1858a2270
+> /*@TRACE*/
+1865a2278
+> /*@TRACE*/
+1873a2287
+> /*@TRACE*/
+1880a2295
+> /*@TRACE*/
+1888a2304
+> /*@TRACE*/
+1895a2312
+> /*@TRACE*/
+1903a2321
+> /*@TRACE*/
+1910a2329
+> /*@TRACE*/
+1918a2338
+> /*@TRACE*/
+1925a2346
+> /*@TRACE*/
+1935a2357
+> /*@TRACE*/
+1944a2367
+> /*@TRACE*/
+1952a2376
+> /*@TRACE*/
+1959a2384
+> /*@TRACE*/
+1970a2396
+> /*@TRACE*/
+1978a2405
+> /*@TRACE*/
+1985a2413
+> /*@TRACE*/
+1993a2422
+> /*@TRACE*/
+2000a2430
+> /*@TRACE*/
+2011a2442
+> /*@TRACE*/
+2020a2452
+> /*@TRACE*/
+2037a2470
+> /*@TRACE*/
+2048,2051c2481,2482
+<     /// Period_Duration[i]
+<     uint16_t period_duration[__ARRAY_EMPTY];
+<     /// Period_Type[i]
+<     //uint8_t period_type[__ARRAY_EMPTY];
+---
+>     /// Period Durations & Types
+>     struct ext_fr_period period[1/*__ARRAY_EMPTY*/];
+2054a2486
+> /*@TRACE*/
+2089a2522
+> /*@TRACE*/
+2128a2562
+> /*@TRACE*/
+2139a2574
+> /*@TRACE*/
+2144,2147c2579,2580
+<     ///Scan_Frequency_Low[i]
+<     uint16_t scan_frequency_low[1/*__ARRAY_EMPTY*/];
+<     ///Scan_Frequency_High[i]
+<     uint16_t scan_frequency_high[1/*__ARRAY_EMPTY*/];
+---
+>     ///Scan_Frequencys Low & High
+>     struct mws_scan_freq scan_freq[1/*__ARRAY_EMPTY*/];
+2150a2584
+> /*@TRACE*/
+2156,2160c2590,2592
+<     uint8_t mws_pattern_num_intervals;
+<     ///MWS_PATTERN_IntervalDuration[i]
+<     uint16_t mws_pattern_interval_duration[1/*__ARRAY_EMPTY*/];
+<     ///MWS_PATTERN_IntervalType[i]
+<     uint8_t mws_pattern_interval_type[1/*__ARRAY_EMPTY*/];
+---
+>     uint8_t num_intervals;
+>     ///MWS_PATTERN_Interval Duration & Type
+>     struct mws_pattern_intv intv[1/*__ARRAY_EMPTY*/];
+2163a2596
+> /*@TRACE*/
+2170,2177c2603,2604
+<     ///Transport_Layer[i]
+<     uint8_t transport_layer[1/*__ARRAY_EMPTY*/];
+<     ///Num_Baud_Rates[i]
+<     uint8_t num_baud_rates[1/*__ARRAY_EMPTY*/];
+<     ///To_MWS_Baud_Rate[k]
+<     uint32_t to_mws_baud_rate[1/*__ARRAY_EMPTY*/];
+<     ///From_MWS_Baud_Rate[k]
+<     uint32_t from_mws_baud_rate[1/*__ARRAY_EMPTY*/];
+---
+>     ///Transport_Layers
+>     struct mws_transport tran[1/*__ARRAY_EMPTY*/];
+2180a2608
+> /*@TRACE*/
+2189a2618
+> /*@TRACE*/
+2195a2625,2644
+> /// HCI write Secure Connections Test Mode command
+> struct  hci_wr_sec_con_test_mode_cmd
+> {
+>     /// Connection handle
+>     uint16_t conhdl;
+>     /// DM1 ACL-U mode
+>     uint8_t dm1_acl_u_mode;
+>     /// eSCO loopback mode
+>     uint8_t esco_loopback_mode;
+> };
+> 
+> /// HCI write Secure Connections Test Mode complete event
+> struct  hci_wr_sec_con_test_mode_cmd_cmp_evt
+> {
+>     ///Status
+>     uint8_t status;
+>     /// Connection handle
+>     uint16_t conhdl;
+> };
+> 
+2196a2646
+> /*@TRACE*/
+2203a2654
+> /*@TRACE*/
+2212a2664
+> /*@TRACE*/
+2219a2672
+> /*@TRACE*/
+2228a2682
+> /*@TRACE*/
+2241a2696
+> /*@TRACE*/
+2250a2706
+> /*@TRACE*/
+2263a2720
+> /*@TRACE*/
+2276a2734
+> /*@TRACE*/
+2292a2751
+> /*@TRACE*/
+2299a2759
+> /*@TRACE*/
+2310a2771
+> /*@TRACE*/
+2325a2787
+> /*@TRACE*/
+2338a2801
+> /*@TRACE*/
+2349a2813
+> /*@TRACE*/
+2358a2823
+> /*@TRACE*/
+2364a2830,2851
+> /// HCI Set Ecosystem Base Interval command
+> /*@TRACE*/
+> struct hci_set_eco_base_intv_cmd
+> {
+>     /// Interval
+>     uint16_t interval;
+> };
+> 
+> /// HCI Configure Data Path command
+> /*@TRACE*/
+> struct hci_config_data_path_cmd
+> {
+>     /// Data Path Direction
+>     uint8_t data_path_direction;
+>     /// Data Path ID
+>     uint8_t data_path_id;
+>     /// Vendor Specific Config Length (in bytes)
+>     uint8_t vendor_specific_cfg_len;
+>     /// Vendor Specific Config
+>     uint8_t vendor_specific_cfg[__ARRAY_EMPTY];
+> };
+> 
+2370a2858
+> /*@TRACE*/
+2387a2876
+> /*@TRACE*/
+2396a2886
+> /*@TRACE*/
+2404a2895
+> /*@TRACE*/
+2411a2903
+> /*@TRACE*/
+2425c2917,2918
+< struct hci_rd_buff_size_cmd_cmp_evt
+---
+> /*@TRACE*/
+> struct hci_rd_buf_size_cmd_cmp_evt
+2439a2933
+> /*@TRACE*/
+2448a2943
+> /*@TRACE*/
+2459a2955,3028
+> /// HCI command complete event structure for read local supported codecs v2
+> /*@TRACE*/
+> struct hci_rd_local_supp_codecs_v2_cmd_cmp_evt
+> {
+>     /// Status of the command reception
+>     uint8_t               status;
+>     uint8_t               num_supp_standard_codecs;
+>     uint8_t               num_supp_vendor_specific_codecs;
+> 
+> //    ///Supported Codecs structure
+> //    struct supp_codecs    local_codecs;
+> };
+> 
+> /// HCI command complete event structure for read local simple pairing options
+> struct hci_rd_local_sp_opt_cmd_cmp_evt
+> {
+>     /// Status of the command reception
+>     uint8_t status;
+>     /// Simple Pairing options (bit 0: Remote public key validation)
+>     uint8_t sp_opt;
+>     /// Maximum Encryption Key Size (in octets)
+>     uint8_t max_enc_key_size;
+> };
+> 
+> /// HCI Read Local Supported Codec Capabilities command
+> struct hci_rd_local_supp_codec_cap_cmd
+> {
+>     /// Codec ID
+>     uint8_t codec_id[CODEC_ID_LEN];
+>     /// Logical Transport Type
+>     uint8_t logical_transport_type;
+>     /// Direction
+>     uint8_t direction;
+> };
+> 
+> /// HCI command complete event structure for Read Local Supported Codec Capabilities command
+> struct hci_rd_local_supp_codec_cap_cmd_cmp_evt
+> {
+>     /// Status of the command reception
+>     uint8_t status;
+>     /// Num Codec Capabilities
+>     uint8_t num_codec_cap;
+>     /// Codec Capability Length [i]
+>     uint8_t codec_cap_len; // TODO: update when the number of codecs is available
+>     /// Codec Capability [i]
+>     uint8_t codec_cap[__ARRAY_EMPTY]; // TODO: update when the number of codecs is available
+> };
+> 
+> /// HCI Read Local Supported Controller Delay command
+> struct hci_rd_local_supp_ctrl_delay_cmd
+> {
+>     /// Codec ID
+>     uint8_t codec_id[CODEC_ID_LEN];
+>     /// Logical Transport Type
+>     uint8_t logical_transport_type;
+>     /// Direction
+>     uint8_t direction;
+>     /// Codec Configuration Length
+>     uint8_t codec_cfg_len;
+>     /// Codec Configuration
+>     uint8_t codec_cfg[__ARRAY_EMPTY];
+> };
+> 
+> /// HCI command complete event structure for Read Local Supported Controller Delay command
+> struct hci_rd_local_supp_ctrl_delay_cmd_cmp_evt
+> {
+>     /// Status of the command reception
+>     uint8_t status;
+>     /// Min Controller Delay
+>     uint8_t min_ctrl_delay[3];
+>     /// Max Controller Delay
+>     uint8_t max_ctrl_delay[3];
+> };
+> 
+2465a3035
+> /*@TRACE*/
+2473c3043
+<     uint8_t rssi;
+---
+>     int8_t rssi;
+2475a3046
+> /*@TRACE*/
+2484a3056
+> /*@TRACE*/
+2503a3076
+> /*@TRACE*/
+2511a3085
+> /*@TRACE*/
+2516a3091,3092
+> 
+> /*@TRACE*/
+2524,2556d3099
+< /// * TCI Event subcodes
+< enum tci_evt_subcode 
+< {
+<      TCI_LMP_TX_EVENT    = 0x22,
+<      TCI_LMP_RX_EVENT    = 0x23,
+<      TCI_LC_TX_EVENT     = 0x24,
+<      TCI_LC_RX_EVENT     = 0x25,
+<      TCI_BB_TX_EVENT     = 0x26,
+<      TCI_BB_RX_EVENT     = 0x27,
+<      TCI_HW_ERROR_EVENT  = 0x28,
+<      TCI_RADIO_EVENT     = 0x30,
+<      TCI_INTERRUPT_EVENT = 0x40,
+< };
+< 
+< /// LMP direction
+< #define TCI_LMP_DIR_TX	0
+< #define TCI_LMP_DIR_RX	1
+< 
+< /// HCI tci lmp exchange event structure
+< struct hci_tci_lmp_evt
+< {
+<     ///code
+<     uint8_t  tci_code;
+<     ///length
+<     uint8_t  evt_len;
+<     ///subcode
+<     uint8_t  subcode;
+<     ///evt direction
+<     uint8_t  direction;
+<     ///lmp evt body
+<     uint8_t  body[17];
+< };
+< 
+2562a3106
+> /*@TRACE*/
+2569a3114
+> /*@TRACE*/
+2576a3122
+> /*@TRACE*/
+2597a3144
+> /*@TRACE*/
+2606a3154
+> /*@TRACE*/
+2615a3164
+> /*@TRACE*/
+2622a3172
+> /*@TRACE*/
+2637a3188
+> /*@TRACE*/
+2643c3194
+<     uint8_t        filter_duplic_en;
+---
+>     uint8_t        filter_duplic;
+2646a3198
+> /*@TRACE*/
+2675a3228
+> /*@TRACE*/
+2684a3238
+> /*@TRACE*/
+2693a3248
+> /*@TRACE*/
+2714a3270
+> /*@TRACE*/
+2720,2721c3276,3277
+<     uint8_t             filter_duplic_en;
+<     ///Scan duration (Time=N*10ms)
+---
+>     uint8_t             filter_duplic;
+>     ///Scan duration (Time=N*10ms)  | 0x0000: Scan continuously until explicitly disable
+2723c3279
+<     ///Scan period (Time=N*1.28sec)
+---
+>     ///Scan period (Time=N*1.28sec) | 0x0000: Periodic scanning disabled
+2727,2740c3283
+< ///HCI LE Extended Create Connection Command parameters strucuture
+< struct hci_le_ext_create_con_cmd
+< {
+<     ///Initiator filter policy
+<     uint8_t         init_filter_policy;
+<     ///Own address type public/random/rpa
+<     uint8_t         own_addr_type;
+<     ///Peer address type public/random/rpa
+<     uint8_t         peer_addr_type;
+<     ///Peer address
+<     struct bd_addr  peer_addr;
+<     ///Indicates the PHY(s) on which the advertising packets should be received
+<     uint8_t         init_phys;
+<     ///Paramaters for PHY(s)
+---
+> /*@TRACE*/
+2759d3301
+<     } phy[MAX_INIT_PHYS];
+2762c3304,3323
+< ///HCI LE Periodic Advertising Create Sync Command parameters strucutre
+---
+> ///HCI LE Extended Create Connection Command parameters structure
+> /*@TRACE*/
+> struct hci_le_ext_create_con_cmd
+> {
+>     ///Initiator filter policy
+>     uint8_t         init_filter_policy;
+>     ///Own address type public/random/rpa
+>     uint8_t         own_addr_type;
+>     ///Peer address type public/random/rpa
+>     uint8_t         peer_addr_type;
+>     ///Peer address
+>     struct bd_addr  peer_addr;
+>     ///Indicates the PHY(s) on which the advertising packets should be received
+>     uint8_t         init_phys;
+>     ///Paramaters for PHY(s)
+>     struct init_phy_param phy[MAX_INIT_PHYS];
+> };
+> 
+> ///HCI LE Periodic Advertising Create Sync Command parameters structure
+> /*@TRACE*/
+2765,2766c3326,3327
+<     ///Filter policy
+<     uint8_t         filter_policy;
+---
+>     /// Options (@see enum per_sync_opt)
+>     uint8_t         options;
+2776a3338,3339
+>     /// Sync CTE type (@see enum sync_cte_type)
+>     uint8_t         sync_cte_type;
+2779a3343
+> /*@TRACE*/
+2786a3351
+> /*@TRACE*/
+2797a3363
+> /*@TRACE*/
+2808a3375
+> /*@TRACE*/
+2819a3387
+> /*@TRACE*/
+2827,2828c3395,3397
+< ///HCI LE Receiver Test Command parameters structure
+< struct hci_le_rx_test_cmd
+---
+> ///HCI LE Receiver Test v1 Command parameters structure
+> /*@TRACE*/
+> struct hci_le_rx_test_v1_cmd
+2830,2831c3399,3400
+<     ///RX frequency for Rx test
+<     uint8_t        rx_freq;
+---
+>     /// RX channel, range: 0x00 to 0x27
+>     uint8_t     rx_channel;
+2834,2835c3403,3405
+< ///HCI LE Transmitter Test Command parameters structure
+< struct hci_le_tx_test_cmd
+---
+> ///HCI LE Transmitter Test v1 Command parameters structure
+> /*@TRACE*/
+> struct hci_le_tx_test_v1_cmd
+2837,2839c3407,3409
+<     ///TX frequency for Tx test
+<     uint8_t        tx_freq;
+<     ///TX test data length
+---
+>     /// TX channel, range: 0x00 to 0x27
+>     uint8_t     tx_channel;
+>     /// Length of test data in bytes, range: 0x00 to 0xFF
+2841,2842c3411,3423
+<     ///TX test payload type - see enum
+<     uint8_t        pk_payload_type;
+---
+>     /**
+>      * Packet payload
+>      * 0x00 PRBS9 sequence "11111111100000111101" (in transmission order) as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x01 Repeated "11110000" (in transmission order) sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x02 Repeated "10101010" (in transmission order) sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x03 PRBS15 sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x04 Repeated "11111111" (in transmission order) sequence
+>      * 0x05 Repeated "00000000" (in transmission order) sequence
+>      * 0x06 Repeated "00001111" (in transmission order) sequence
+>      * 0x07 Repeated "01010101" (in transmission order) sequence
+>      * 0x08-0xFF Reserved for future use
+>      */
+>     uint8_t     pkt_payl;
+2845a3427
+> /*@TRACE*/
+2854a3437
+> /*@TRACE*/
+2873,2874c3456,3458
+< /// HCI LE Start Encryption Command parameters structure
+< struct hci_le_start_enc_cmd
+---
+> /// HCI LE Enable Encryption Command parameters structure
+> /*@TRACE*/
+> struct hci_le_en_enc_cmd
+2886a3471
+> /*@TRACE*/
+2895a3481
+> /*@TRACE*/
+2902a3489
+> /*@TRACE*/
+2921a3509
+> /*@TRACE*/
+2931a3520
+> /*@TRACE*/
+2944a3534
+> /*@TRACE*/
+2953a3544
+> /*@TRACE*/
+2966a3558
+> /*@TRACE*/
+2975a3568
+> /*@TRACE*/
+2984a3578
+> /*@TRACE*/
+2993a3588
+> /*@TRACE*/
+3000a3596
+> /*@TRACE*/
+3012a3609
+> /*@TRACE*/
+3020a3618
+> /*@TRACE*/
+3041a3640
+> /*@TRACE*/
+3056,3057c3655,3656
+<     ///Rssi
+<     uint8_t      rssi;
+---
+>     ///RSSI
+>     int8_t       rssi;
+3061a3661
+> /*@TRACE*/
+3076,3077c3676,3677
+<     ///RSSi
+<     uint8_t         rssi;
+---
+>     ///RSSI
+>     int8_t          rssi;
+3082a3683
+> /*@TRACE*/
+3093a3695,3720
+> /*@TRACE
+>  * hci_dbg_wr_par_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_dbg_llcp_discard_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_reset_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_set_evt_mask_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_per_adv_en_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_create_con_cancel_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_evt_mask_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_host_ch_class_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_wr_suggted_dft_data_len_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_dft_phy_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_rmv_dev_from_wlst_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_adv_param_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_adv_data_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_scan_rsp_data_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_adv_en_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_scan_param_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_scan_en_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_rand_addr_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_addr_resol_en_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_set_rslv_priv_addr_to_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_rmv_dev_from_rslv_list_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_create_con_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_dbg_plf_reset_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * hci_le_wr_rf_path_comp_cmd_cmp_evt = hci_basic_cmd_cmp_evt
+>  * */
+3100a3728
+> /*@TRACE*/
+3134a3763
+> /*@TRACE*/
+3141a3771
+> /*@TRACE*/
+3152a3783
+> /*@TRACE*/
+3159a3791
+> /*@TRACE*/
+3177a3810,3811
+> /*@TRACE
+>  * hci_enc_key_refresh_evt = hci_enc_key_ref_cmp_evt */
+3186a3821
+> /*@TRACE*/
+3193a3829
+> /*@TRACE*/
+3208a3845
+> /*@TRACE*/
+3229a3867
+> /*@TRACE*/
+3252a3891
+> /*@TRACE*/
+3263a3903
+> /*@TRACE*/
+3274a3915
+> /*@TRACE*/
+3281a3923
+> /*@TRACE*/
+3290a3933
+> /*@TRACE*/
+3307a3951
+> /*@TRACE*/
+3322a3967
+> /*@TRACE*/
+3331a3977
+> /*@TRACE*/
+3342a3989
+> /*@TRACE*/
+3357a4005
+> /*@TRACE*/
+3368a4017
+> /*@TRACE*/
+3381a4031
+> /*@TRACE*/
+3390a4041
+> /*@TRACE*/
+3399a4051
+> /*@TRACE*/
+3408a4061
+> /*@TRACE*/
+3417a4071
+> /*@TRACE*/
+3427a4082
+> /*@TRACE*/
+3451a4107
+> /*@TRACE*/
+3468a4125
+> /*@TRACE*/
+3479a4137
+> /*@TRACE*/
+3488a4147
+> /*@TRACE*/
+3495a4155
+> /*@TRACE*/
+3504a4165
+> /*@TRACE*/
+3515a4177
+> /*@TRACE*/
+3522a4185
+> /*@TRACE*/
+3536a4200
+> /*@TRACE*/
+3543a4208
+> /*@TRACE*/
+3554a4220
+> /*@TRACE*/
+3561a4228
+> /*@TRACE*/
+3568a4236
+> /*@TRACE*/
+3577a4246
+> /*@TRACE*/
+3584a4254
+> /*@TRACE*/
+3593a4264
+> /*@TRACE*/
+3602a4274
+> /*@TRACE*/
+3612a4285,4303
+> /// HCI SAM status change event strucutre
+> struct hci_sam_status_change_evt
+> {
+>     ///Connection handle
+>     uint16_t    conhdl;
+>     ///Local SAM index
+>     uint8_t     loc_idx;
+>     ///Local SAM TX availability
+>     uint8_t     loc_tx_av;
+>     ///Local SAM RX availability
+>     uint8_t     loc_rx_av;
+>     ///Remote SAM index
+>     uint8_t     rem_idx;
+>     ///Remote SAM TX availability
+>     uint8_t     rem_tx_av;
+>     ///Remote SAM RX availability
+>     uint8_t     rem_rx_av;
+> };
+> 
+3622a4314
+> /*@TRACE*/
+3631a4324,4325
+> /*@TRACE
+>  * hci_le_rd_adv_chnl_tx_pw_cmd_cmp_evt = hci_rd_adv_chnl_tx_pw_cmd_cmp_evt*/
+3640a4335
+> /*@TRACE*/
+3650c4345,4346
+< struct hci_le_rd_buff_size_cmd_cmp_evt
+---
+> /*@TRACE*/
+> struct hci_le_rd_buf_size_cmd_cmp_evt
+3660a4357
+> /*@TRACE*/
+3670c4367,4368
+< struct hci_rd_supp_states_cmd_cmp_evt
+---
+> /*@TRACE*/
+> struct hci_le_rd_supp_states_cmd_cmp_evt
+3678,3688d4375
+< ///HCI command complete event structure for Read Transmit Power Command
+< struct hci_rd_tx_pwr_cmd_cmp_evt
+< {
+<     /// Status of the command reception
+<     uint8_t             status;
+<     /// Minimum transmit power
+<     uint8_t             min_tx_pwr;
+<     /// Maximum transmit power
+<     uint8_t             max_tx_pwr;
+< };
+< 
+3689a4377,4378
+> /*@TRACE
+>  *  * hci_le_test_end_cmd_cmp_evt = hci_test_end_cmd_cmp_evt*/
+3698a4388
+> /*@TRACE*/
+3708a4399
+> /*@TRACE*/
+3719a4411
+> /*@TRACE*/
+3730a4423,4424
+> /*@TRACE
+>  * hci_le_periodic_adv_sync_est_evt = hci_le_per_adv_sync_est_evt*/
+3745c4439
+<     /// Advertiser PHY
+---
+>     /// Advertiser PHY (@enum le_phy_value)
+3749c4443
+<     /// Advertiser clock accuracy
+---
+>     /// Advertiser clock accuracy (@see enum SCA)
+3753a4448,4449
+> /*@TRACE
+>  * hci_le_periodic_adv_report_evt = hci_le_per_adv_report_evt*/
+3763c4459,4461
+<     uint8_t             rssi;
+---
+>     int8_t              rssi;
+>     /// CTE type
+>     uint8_t             cte_type;
+3770,3771d4467
+<     ///Unused
+<     uint8_t             unused;
+3774a4471,4472
+> /*@TRACE
+>  * hci_le_periodic_adv_sync_lost_evt = hci_le_per_adv_sync_lost_evt*/
+3783a4482
+> /*@TRACE*/
+3792a4492
+> /*@TRACE*/
+3803a4504
+> /*@TRACE*/
+3812a4514
+> /*@TRACE*/
+3821a4524
+> /*@TRACE*/
+3831a4535
+> /*@TRACE*/
+3846a4551
+> /*@TRACE*/
+3855a4561
+> /*@TRACE*/
+3864a4571
+> /*@TRACE*/
+3874a4582
+> /*@TRACE*/
+3883a4592
+> /*@TRACE*/
+3892a4602
+> /*@TRACE*/
+3909a4620
+> /*@TRACE*/
+3934a4646
+> /*@TRACE*/
+3941a4654
+> /*@TRACE*/
+3954a4668
+> /*@TRACE*/
+3963a4678
+> /*@TRACE*/
+3971c4686
+<     uint8_t     tx_pow_lvl;
+---
+>     int8_t     tx_pow_lvl;
+3974a4690
+> /*@TRACE*/
+3981a4698
+> /*@TRACE*/
+3999a4717
+> /*@TRACE*/
+4028d4745
+< 
+4039d4755
+< 
+4052a4769
+> /*@TRACE*/
+4063a4781,4789
+> /// Connected LE event
+> struct hci_le_con_evt
+> {
+>     ///LE Subevent code
+>     uint8_t             subcode;
+>     ///Connection handle
+>     uint16_t            conhdl;
+> };
+> 
+4064a4791
+> /*@TRACE*/
+4077a4805
+> /*@TRACE*/
+4095a4824
+> /*@TRACE*/
+4116a4846
+> /*@TRACE*/
+4137a4868
+> /*@TRACE*/
+4146a4878
+> /*@TRACE*/
+4153,4154c4885,4886
+< 
+< struct hci_le_generate_dhkey_cmp_evt
+---
+> /*@TRACE*/
+> struct hci_le_gen_dhkey_cmp_evt
+4162c4894,4895
+< struct hci_le_generate_p256_public_key_cmp_evt
+---
+> /*@TRACE*/
+> struct hci_le_rd_loc_p256_pub_key_cmp_evt
+4169a4903,5355
+> 
+> /// HCI command structure for the LE receiver test v3 command
+> /*@TRACE*/
+> struct hci_le_rx_test_v3_cmd
+> {
+>     /// RX channel, range: 0x00 to 0x27
+>     uint8_t     rx_channel;
+>     /// PHY (@enum le_phy_value)
+>     uint8_t     phy;
+>     /// Modulation index (0: standard | 1: stable)
+>     uint8_t     mod_idx;
+>     /// Expected CTE length in 8us units, range: 0x02 to 0x14
+>     uint8_t     exp_cte_len;
+>     /// Expected CTE type (0: AOA | 1: AOD-1us | 2: AOD-2us)
+>     uint8_t     exp_cte_type;
+>     /// Slot durations (1: 1 us | 2: 2 us)
+>     uint8_t     slot_dur;
+>     /// Length of switching pattern (number of antenna IDs in the pattern), range: 0x02 to 0x4B
+>     uint8_t     switching_pattern_len;
+>     /// Antenna IDs
+>     uint8_t     antenna_id[MAX_SWITCHING_PATTERN_LEN];
+> };
+> 
+> /// HCI command structure for the LE transmitter test v3 command
+> /*@TRACE*/
+> struct hci_le_tx_test_v3_cmd
+> {
+>     /// TX channel, range: 0x00 to 0x27
+>     uint8_t     tx_channel;
+>     /// Length of test data in bytes, range: 0x00 to 0xFF
+>     uint8_t     test_data_len;
+>     /**
+>      * Packet payload
+>      * 0x00 PRBS9 sequence "11111111100000111101" (in transmission order) as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x01 Repeated "11110000" (in transmission order) sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x02 Repeated "10101010" (in transmission order) sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x03 PRBS15 sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x04 Repeated "11111111" (in transmission order) sequence
+>      * 0x05 Repeated "00000000" (in transmission order) sequence
+>      * 0x06 Repeated "00001111" (in transmission order) sequence
+>      * 0x07 Repeated "01010101" (in transmission order) sequence
+>      * 0x08-0xFF Reserved for future use
+>      */
+>     uint8_t     pkt_payl;
+>     /// PHY (@enum le_phy_value)
+>     uint8_t     phy;
+>     /// CTE length (in 8us unit)
+>     uint8_t     cte_len;
+>     /// CTE type (0: AOA | 1: AOD-1us | 2: AOD-2us)
+>     uint8_t     cte_type;
+>     /// Length of switching pattern (number of antenna IDs in the pattern)
+>     uint8_t     switching_pattern_len;
+>     /// Antenna IDs
+>     uint8_t     antenna_id[MAX_SWITCHING_PATTERN_LEN];
+> };
+> 
+> /// HCI command structure for the LE transmitter test v4 command
+> /*@TRACE*/
+> struct hci_le_tx_test_v4_cmd
+> {
+>     /// TX channel, range: 0x00 to 0x27
+>     uint8_t     tx_channel;
+>     /// Length of test data in bytes, range: 0x00 to 0xFF
+>     uint8_t     test_data_len;
+>     /**
+>      * Packet payload
+>      * 0x00 PRBS9 sequence "11111111100000111101" (in transmission order) as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x01 Repeated "11110000" (in transmission order) sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x02 Repeated "10101010" (in transmission order) sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x03 PRBS15 sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x04 Repeated "11111111" (in transmission order) sequence
+>      * 0x05 Repeated "00000000" (in transmission order) sequence
+>      * 0x06 Repeated "00001111" (in transmission order) sequence
+>      * 0x07 Repeated "01010101" (in transmission order) sequence
+>      * 0x08-0xFF Reserved for future use
+>      */
+>     uint8_t     pkt_payl;
+>     /// PHY (@enum le_phy_value)
+>     uint8_t     phy;
+>     /// CTE length (in 8us unit)
+>     uint8_t     cte_len;
+>     /// CTE type (0: AOA | 1: AOD-1us | 2: AOD-2us)
+>     uint8_t     cte_type;
+>     /// Length of switching pattern (number of antenna IDs in the pattern)
+>     uint8_t     switching_pattern_len;
+>     /// Antenna IDs
+>     uint8_t     antenna_id[MAX_SWITCHING_PATTERN_LEN];
+>     /// Transmit power level in dBm (0x7E: minimum | 0x7F: maximum | range: -127 to +20)
+>     int8_t     tx_pwr_lvl;
+> };
+> 
+> /// HCI command structure for the LE set connectionless CTE transmit parameters command
+> /*@TRACE*/
+> struct hci_le_set_conless_cte_tx_param_cmd
+> {
+>     /// Advertising handle
+>     uint8_t     adv_hdl;
+>     /// CTE length (in 8us unit)
+>     uint8_t     cte_len;
+>     /// CTE type (0: AOA | 1: AOD-1us | 2: AOD-2us)
+>     uint8_t     cte_type;
+>     /// CTE count (number of CTEs to transmit in each periodic advertising interval, range 0x01 to 0x10)
+>     uint8_t     cte_count;
+>     /// Length of switching pattern (number of antenna IDs in the pattern)
+>     uint8_t     switching_pattern_len;
+>     /// Antenna IDs
+>     uint8_t     antenna_id[MAX_SWITCHING_PATTERN_LEN];
+> };
+> 
+> /// HCI command structure for the LE set connectionless CTE transmit enable command
+> /*@TRACE*/
+> struct hci_le_set_conless_cte_tx_en_cmd
+> {
+>     /// Advertising handle
+>     uint8_t     adv_hdl;
+>     /// CTE enable
+>     uint8_t     cte_en;
+> };
+> 
+> /// HCI command structure for LE set connectionless IQ sampling enable command
+> /*@TRACE*/
+> struct hci_le_set_conless_iq_sampl_en_cmd
+> {
+>     /// Sync handle
+>     uint16_t    sync_hdl;
+>     /// Sampling enable
+>     uint8_t     sampl_en;
+>     /// Slot durations (1: 1us | 2: 2us)
+>     uint8_t     slot_dur;
+>     /// Max sampled CTEs
+>     uint8_t     max_sampl_cte;
+>     /// Length of switching pattern
+>     uint8_t     switching_pattern_len;
+>     /// Antenna IDs
+>     uint8_t     antenna_id[MAX_SWITCHING_PATTERN_LEN];
+> };
+> 
+> /// HCI command structure for the LE set connection CTE receive parameters command
+> /*@TRACE*/
+> struct hci_le_set_con_cte_rx_param_cmd
+> {
+>     /// Connection handle
+>     uint16_t    conhdl;
+>     /// Sampling enable
+>     uint8_t     sampl_en;
+>     /// Slot durations (1: 1us | 2: 2us)
+>     uint8_t     slot_dur;
+>     /// Length of switching pattern (number of antenna IDs in the pattern)
+>     uint8_t     switching_pattern_len;
+>     /// Antenna IDs
+>     uint8_t     antenna_id[MAX_SWITCHING_PATTERN_LEN];
+> };
+> 
+> /// HCI command structure for the LE set connection CTE transmit parameters command
+> /*@TRACE*/
+> struct hci_le_set_con_cte_tx_param_cmd
+> {
+>     /// Connection handle
+>     uint16_t    conhdl;
+>     /// CTE types (bit0: AOA | bit1: AOD-1us | bit2: AOD-2us)
+>     uint8_t     cte_types;
+>     /// Length of switching pattern (number of antenna IDs in the pattern)
+>     uint8_t     switching_pattern_len;
+>     /// Antenna IDs
+>     uint8_t     antenna_id[MAX_SWITCHING_PATTERN_LEN];
+> };
+> 
+> /// HCI command structure for the LE connection CTE request enable command
+> /*@TRACE*/
+> struct hci_le_con_cte_req_en_cmd
+> {
+>     /// Connection handle
+>     uint16_t    conhdl;
+>     /// Enable
+>     uint8_t     en;
+>     /// CTE request interval (in number of connection events)
+>     uint16_t    cte_req_intv;
+>     /// Requested CTE length (in 8us unit)
+>     uint8_t     req_cte_len;
+>     /// Requested CTE type (0: AOA | 1: AOD-1us | 2: AOD-2us)
+>     uint8_t     req_cte_type;
+> };
+> 
+> /// HCI command structure for the LE connection CTE response enable command
+> /*@TRACE*/
+> struct hci_le_con_cte_rsp_en_cmd
+> {
+>     /// Connection handle
+>     uint16_t    conhdl;
+>     /// Enable
+>     uint8_t     en;
+> };
+> 
+> /// HCI command structure for LE set connectionless IQ sampling enable command complete event
+> /*@TRACE*/
+> struct hci_le_set_conless_iq_sampl_en_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t     status;
+>     /// Sync handle
+>     uint16_t    sync_hdl;
+> };
+> 
+> /// HCI command structure for LE read antenna information command complete event
+> /*@TRACE*/
+> struct hci_le_rd_antenna_inf_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t     status;
+>     /// Supported switching sampling rates
+>     uint8_t     supp_switching_sampl_rates;
+>     /// Number of antennae
+>     uint8_t     antennae_num;
+>     /// Max length of switching pattern (number of antenna IDs in the pattern)
+>     uint8_t     max_switching_pattern_len;
+>     /// Max CTE length
+>     uint8_t     max_cte_len;
+> };
+> 
+> /// HCI command structure for the LE set periodic advertising receive enable command
+> /*@TRACE*/
+> struct hci_le_set_per_adv_rec_en_cmd
+> {
+>     /// Sync handle
+>     uint16_t sync_hdl;
+>     /// Enable
+>     uint8_t en;
+> };
+> 
+> /// HCI command structure for the LE set periodic advertising receive enable command
+> /*@TRACE*/
+> struct hci_le_per_adv_sync_transf_cmd
+> {
+>     /// Connection handle
+>     uint16_t conhdl;
+>     /// Service data (value provided by the Host)
+>     uint16_t serv_data;
+>     /// Sync handle
+>     uint16_t sync_hdl;
+> };
+> 
+> /// HCI command structure for the LE Periodic Advertising Set Info Transfer command
+> /*@TRACE*/
+> struct hci_le_per_adv_set_info_transf_cmd
+> {
+>     /// Connection handle
+>     uint16_t conhdl;
+>     /// Service data (value provided by the Host)
+>     uint16_t serv_data;
+>     /// Advertising handle
+>     uint8_t adv_hdl;
+> };
+> 
+> /// HCI command structure for the LE Set Periodic Advertising Sync Transfer Parameters command
+> /*@TRACE*/
+> struct hci_le_set_per_adv_sync_transf_param_cmd
+> {
+>     /// Connection handle
+>     uint16_t  conhdl;
+>     /// Mode (@see enum per_adv_sync_info_rec_mode)
+>     uint8_t   mode;
+>     /// The number of periodic advertising packets that can be skipped after a successful receive
+>     uint16_t  skip;
+>     /// Sync timeout (Time=N*10ms)
+>     uint16_t  sync_to;
+>     /// CTE type (@see enum sync_cte_type)
+>     uint8_t   cte_type;
+> };
+> 
+> /// HCI command structure for the LE Set Default Periodic Advertising Sync Transfer Parameters command
+> /*@TRACE*/
+> struct hci_le_set_dft_per_adv_sync_transf_param_cmd
+> {
+>     /// Mode (@see enum per_adv_sync_info_rec_mode)
+>     uint8_t   mode;
+>     /// The number of periodic advertising packets that can be skipped after a successful receive
+>     uint16_t  skip;
+>     /// Sync timeout (Time=N*10ms)
+>     uint16_t  sync_to;
+>     /// CTE type (@see enum sync_cte_type)
+>     uint8_t   cte_type;
+> };
+> 
+> /// HCI command structure for the LE Periodic Advertising Sync Transfer Received event
+> /*@TRACE*/
+> struct hci_le_per_adv_sync_transf_rec_evt
+> {
+>     /// LE Subevent code
+>     uint8_t        subcode;
+>     /// Status
+>     uint8_t        status;
+>     /// Connection handle
+>     uint16_t       conhdl;
+>     /// Service data (value provided by the Host)
+>     uint16_t       serv_data;
+>     /// Sync handle
+>     uint16_t       sync_hdl;
+>     /// Advertising SID
+>     uint8_t        adv_sid;
+>     ///Advertising address type: public/random
+>     uint8_t        adv_addr_type;
+>     ///Advertising address value
+>     struct bd_addr adv_addr;
+>     /// Advertiser PHY (@enum le_phy_value)
+>     uint8_t        phy;
+>     /// Advertising interval (Time=N*1.25ms)
+>     uint16_t       interval;
+>     /// Advertiser clock accuracy (@see enum SCA)
+>     uint8_t        adv_ca;
+> };
+> 
+> /// HCI command structure for the LE enhanced read transmit power level command
+> /*@TRACE*/
+> struct hci_le_enh_rd_tx_pwr_lvl_cmd
+> {
+>     /// Connection handle
+>     uint16_t        conhdl;
+>     /// PHY (@see enum le_phy_pwr_value)
+>     uint8_t        phy;
+> };
+> 
+> /// HCI command structure for the LE enhanced read transmit power level command complete event
+> /*@TRACE*/
+> struct hci_le_enh_rd_tx_pwr_lvl_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t     status;
+>     /// Connection handle
+>     uint16_t        conhdl;
+>     /// PHY (@see enum le_phy_pwr_value)
+>     uint8_t         phy;
+>     /// Current transmit power level (dBm)
+>     int8_t         curr_tx_pwr_lvl;
+>     /// Max transmit power level (dBm)
+>     int8_t         max_tx_pwr_lvl;
+> };
+> 
+> /// HCI command structure for the LE read remote transmit power level command
+> /*@TRACE*/
+> struct hci_le_rd_remote_tx_pwr_lvl_cmd
+> {
+>     /// Connection handle
+>     uint16_t        conhdl;
+>     /// PHY (@see le_phy_pwr_value)
+>     uint8_t         phy;
+> };
+> 
+> /// HCI command structure for the LE set path loss reporting parameters command
+> /*@TRACE*/
+> struct hci_le_set_path_loss_rep_param_cmd
+> {
+>     /// Connection handle
+>     uint16_t        conhdl;
+>     /// High threshold (dB)
+>     uint8_t         hi_thr;
+>     /// High hysteresis (dB)
+>     uint8_t         hi_hyst;
+>     /// Low threshold (dB)
+>     uint8_t         lo_thr;
+>     /// Low hysteresis (dB)
+>     uint8_t         lo_hyst;
+>     /// Min time spent (conn events)
+>     uint16_t        min_time;
+> };
+> 
+> /// HCI command structure for the LE set path loss reporting parameters command complete event
+> /*@TRACE*/
+> struct hci_le_set_path_loss_rep_param_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t     status;
+>     /// Connection handle
+>     uint16_t        conhdl;
+> };
+> 
+> /// HCI command structure for the LE set path loss reporting enable command
+> /*@TRACE*/
+> struct hci_le_set_path_loss_rep_en_cmd
+> {
+>     /// Connection handle
+>     uint16_t        conhdl;
+>     /// Enable (@see enum pwr_report_en)
+>     uint8_t         en;
+> };
+> 
+> /// HCI command structure for the LE set path loss reporting enable command complete event
+> /*@TRACE*/
+> struct hci_le_set_path_loss_rep_en_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t     status;
+>     /// Connection handle
+>     uint16_t        conhdl;
+> };
+> 
+> /// HCI command structure for the LE set transmit power reporting enable command
+> /*@TRACE*/
+> struct hci_le_set_tx_power_rep_en_cmd
+> {
+>     /// Connection handle
+>     uint16_t        conhdl;
+>     /// Local Enable (@see enum pwr_report_en)
+>     uint8_t         local_en;
+>     /// Remote Enable (@ see enum pwr_report_en)
+>     uint8_t         remote_en;
+> };
+> 
+> /// HCI command structure for the LE set transmit power reporting enable command complete event
+> /*@TRACE*/
+> struct hci_le_set_tx_power_rep_en_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t     status;
+>     /// Connection handle
+>     uint16_t        conhdl;
+> };
+> 
+> /// HCI command structure for the LE Path Loss Threshold event
+> /*@TRACE*/
+> struct hci_le_path_loss_threshold_evt
+> {
+>     /// LE Subevent code
+>     uint8_t         subcode;
+>     /// Connection handle
+>     uint16_t        conhdl;
+>     /// Current path loss (dB)
+>     uint8_t         curr_path_loss;
+>     /// Zone entered (@see enum le_path_loss_zone)
+>     uint8_t         zone_entered;
+> };
+> 
+> /// HCI command strucutre for the LE Transmit Power Reporting event
+> /*@TRACE*/
+> struct hci_le_tx_power_rep_evt
+> {
+>     /// LE Subevent code
+>     uint8_t         subcode;
+>     /// Status
+>     uint8_t        status;
+>     /// Connection handle
+>     uint16_t        conhdl;
+>     /// Reason (@see enum pwr_report_reason)
+>     uint8_t         reason;
+>     /// PHY (@see enum le_phy_pwr_value)
+>     uint8_t         phy;
+>     /// Transmit Power level (dBm)
+>     int8_t         tx_pwr;
+>     /// Transmit Power level flags (@see enum pwr_ctrl_flags)
+>     uint8_t         flags;
+>     /// Delta (dB)
+>     int8_t         delta;
+> };
+> 
+4175a5362
+> /*@TRACE*/
+4184a5372,5376
+> /*@TRACE
+>  * hci_dbg_rd_mem_cmd_cmp_evt = hci_dbg_basic_rd_data_cmd_cmp_evt
+>  * hci_dbg_rd_flash_cmd_cmp_evt = hci_dbg_basic_rd_data_cmd_cmp_evt
+>  * hci_dbg_rd_par_cmd_cmp_evt = hci_dbg_basic_rd_data_cmd_cmp_evt
+>  * */
+4193a5386
+> /*@TRACE*/
+4204a5398
+> /*@TRACE*/
+4215a5410,5411
+> /*@TRACE
+>  * hci_dbg_del_par_cmd = hci_dbg_del_param_cmd*/
+4222a5419
+> /*@TRACE*/
+4233a5431
+> /*@TRACE*/
+4244a5443
+> /*@TRACE*/
+4255a5455
+> /*@TRACE*/
+4262a5463
+> /*@TRACE*/
+4271a5473,5474
+> ///HCI Debug Test cryptographic functions command parameters - vendor specific
+> /*@TRACE*/
+4280a5484,5596
+> #if (BT_READ_PICONET_CLOCK)
+> struct hci_vs_rd_piconet_clock_cmd
+> {
+>     ///Connection handle of the link
+>     uint16_t conhdl;
+>     ///Pulse trigger management
+>     uint8_t trig_pulse;
+>     ///Clock type (0=native clock, 1=piconet clock of conhndl)
+>     uint8_t clk_type;
+> };
+> 
+> struct hci_vs_rd_piconet_clock_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t status;
+>     ///Connection handle of the link
+>     uint16_t conhdl;
+>     /// Local timestamp(position in half slots)
+>     uint32_t loc_clk_hslt;
+>     /// Local timestamp fractional part (in half us)
+>     uint16_t loc_clk_hus;
+>     /// Piconet timestamp(position in half slots)
+>     uint32_t pic_clk_off_hslt;
+>     /// Piconet bit offset (in half us)
+>     uint16_t pic_bit_off_hus;
+> };
+> #endif //(BT_READ_PICONET_CLOCK)
+> 
+> 
+> #if RW_DEBUG
+> ///HCI Debug Test scheduling planner set function command parameters - vendor specific
+> /*@TRACE*/
+> struct hci_dbg_test_sch_plan_set_cmd
+> {
+>     /// Activity identifier
+>     uint32_t id;
+>     /// Interval (in half-slots)
+>     uint32_t interval;
+>     /// Offset (in half-slots)
+>     uint32_t offset;
+>     /// Minimum duration (in half-slots)
+>     uint32_t duration_min;
+>     /// Maximum duration (in half-slots)
+>     uint32_t duration_max;
+>     /// Indicate activity is movable
+>     bool mobility_level;
+> };
+> 
+> ///HCI Debug Test scheduling planner set function command complete event parameters - vendor specific
+> /*@TRACE*/
+> struct hci_dbg_test_sch_plan_set_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t status;
+>     /// Activity identifier
+>     uint32_t moved_id;
+> };
+> 
+> ///HCI Debug Test scheduling planner remove function command parameters - vendor specific
+> /*@TRACE*/
+> struct hci_dbg_test_sch_plan_rem_cmd
+> {
+>     /// Activity identifier
+>     uint32_t id;
+> };
+> 
+> ///HCI Debug Test scheduling planner check function command parameters - vendor specific
+> /*@TRACE*/
+> struct hci_dbg_test_sch_plan_chk_cmd
+> {
+>     /// Activity identifier
+>     uint32_t id;
+>     /// Interval (in half-slots)
+>     uint32_t interval;
+>     /// Offset (in half-slots)
+>     uint32_t offset;
+>     /// Minimum duration (in half-slots)
+>     uint32_t duration_min;
+> };
+> 
+> ///HCI Debug Test scheduling planner request function command parameters - vendor specific
+> /*@TRACE*/
+> struct hci_dbg_test_sch_plan_req_cmd
+> {
+>     /// Activity identifier
+>     uint32_t id;
+>     /// Minimum interval (in half-slots)
+>     uint32_t interval_min;
+>     /// Maximum interval (in half-slots)
+>     uint32_t interval_max;
+>     /// Minimum duration (in half-slots)
+>     uint32_t duration_min;
+>     /// Maximum duration (in half-slots)
+>     uint32_t duration_max;
+>     /// Period (in half-slots)
+>     uint8_t period;
+> };
+> 
+> ///HCI Debug Test scheduling planner request function command complete event parameters - vendor specific
+> /*@TRACE*/
+> struct hci_dbg_test_sch_plan_req_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t status;
+>     /// Interval (in half-slots)
+>     uint32_t interval;
+>     /// Minimum offset (in half-slots)
+>     uint32_t offset_min;
+>     /// Maximum offset (in half-slots)
+>     uint32_t offset_max;
+> };
+> #endif //RW_DEBUG
+> 
+4281a5598
+> /*@TRACE*/
+4299a5617
+> /*@TRACE*/
+4310a5629
+> /*@TRACE*/
+4319a5639
+> /*@TRACE*/
+4326a5647
+> /*@TRACE*/
+4337a5659
+> /*@TRACE*/
+4346a5669
+> /*@TRACE*/
+4355a5679
+> /*@TRACE*/
+4363c5687,5688
+< /// Discard LMP Packets
+---
+> /// Send LMP Packets
+> /*@TRACE*/
+4372a5698
+> /*@TRACE*/
+4379a5706,5713
+> 
+> /// Set local clock
+> /*@TRACE*/
+> struct hci_dbg_set_local_clock_cmd
+> {
+>     /// Clock (in half-slots)
+>     uint32_t clock;
+> };
+4383a5718
+> /*@TRACE*/
+4390a5726
+> /*@TRACE*/
+4400a5737
+> /*@TRACE*/
+4407a5745
+> /*@TRACE*/
+4415a5754,5879
+> #if BLE_IQ_GEN
+> ///HCI Debug I&Q samples generator command parameters - vendor specific
+> /// Maximum number of supported antenna patterns
+> #define DBG_IQGEN_MAX_ANTENNA (8)
+> /*@TRACE*/
+> struct hci_dbg_iqgen_cfg_cmd
+> {
+>     /// Number of antenna patterns
+>     uint8_t nb_antenna;
+>     /// Antenna switch/sample control
+>     // bit[0]: 0: up-sweep; 1: up-down sweep (internal switching mode)
+>     // bit[1]: 0: 1us intervals; 1: 2us intervals (internal switching mode)
+>     // bit[2]: 0: internal switching mode; 1: baseband switching mode
+>     uint8_t mode;
+>     /// I/Q sample control
+>     struct
+>     {
+>         /// I-sample control
+>         /// 0: up-count from 0x01
+>         /// 1: down-count from 0xFF
+>         /// 2: Fixed value 0x00
+>         /// 3: PRBS pattern
+>         /// 4..0xFF: Fixed value
+>         uint8_t i;
+>         /// Q-sample control
+>         /// 0: up-count from 0x01
+>         /// 1: down-count from 0xFF
+>         /// 2: Fixed value 0x00
+>         /// 3: PRBS pattern
+>         /// 4..0xFF: Fixed value
+>         uint8_t q;
+>     } iq_ctrl[DBG_IQGEN_MAX_ANTENNA];
+> };
+> #endif //BLE_IQ_GEN
+> 
+> /// Used to force parameters used for an CIS channel
+> /*@TRACE*/
+> struct hci_dbg_iso_set_param_cmd
+> {
+>     /// Preferred sub event margin between two sub events (IFS + margin)
+>     uint32_t sub_evt_margin;
+> };
+> 
+> #if (BLE_ISO_MODE_0)
+> /// HCI VS Mic-Less Set command parameters
+> /*@TRACE*/
+> struct hci_vs_mic_less_set_cmd
+> {
+>     /// Handle that identify an ACL link that is requesting MIC-less mode
+>     uint16_t    conhdl;
+> };
+> 
+> /// HCI VS Setup AM0 Data Path command parameters
+> struct hci_vs_setup_am0_data_path_cmd
+> {
+>     /// Channel_Handle to be used to identify an Audio Mode 0 Channel (range 0x0000-0x0EFF)
+>     uint16_t am0_hdl;
+>     /// Data path direction
+>     /// 0x00       Input (Host to Controller)
+>     /// 0x01       Output (Controller to Host)
+>     /// Others     Reserved for future use
+>     uint8_t  data_path_direction;
+>     /// Data path ID
+>     /// 0x00       HCI
+>     /// 0x01-0xFE  Logical_Channel_Number. The meaning of the logical channel is vendor specific.
+>     /// 0xFF       Test Mode
+>     uint8_t  data_path_id;
+>     /// Controller delay in ms (Range: 0x000000 to 0x3D0900)
+>     uint32_t  ctrl_delay;
+> };
+> 
+> /// HCI VS Remove AM0 Data Path command parameters
+> struct hci_vs_remove_am0_data_path_cmd
+> {
+>     /// Channel_Handle to be used to identify an Audio Mode 0 Channel (range 0x0000-0x0EFF)
+>     uint16_t am0_hdl;
+>     /// Bit[0]: Input data path, Bit[1]: Output data path
+>     uint8_t  direction;
+> };
+> 
+> /// HCI VS Setup Audio Mode 0 channel command parameters
+> /*@TRACE*/
+> struct hci_vs_setup_am0_stream_cmd
+> {
+>     /// Handle that identify an ACL link between a Master and a Slave device that is requesting
+>     /// an Audio Mode 0 Channel (range 0x0000-0x0EFF)
+>     uint16_t    conhdl;
+>     /// The number of bits in each unit of data received from the Host over the data transport. (Range 0x01 - 0xFB)
+>     uint8_t     tx_size;
+>     /// The number of bits in each unit of data sent to the Host over the data transport. (Range 0x01 - 0xFB)
+>     uint8_t     rx_size;
+> };
+> 
+> /// Used to read the maximum size of the data portion of isochronous packets
+> /// no parameter on command, only need to specify returned parameters
+> struct hci_vs_setup_am0_stream_cmd_cmp_evt
+> {
+>     /// 0x00 - Request succeed ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Handle that identify an ACL link between a Master and a Slave device that is requesting
+>     /// an Audio Mode 0 Channel (range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// Channel_Handle to be used to identify an Audio Mode 0 Channel (range 0x0000-0x0EFF)
+>     uint16_t am0_hdl;
+> };
+> 
+> /// Removes existing Audio Mode 0 channel command parameters
+> /*@TRACE*/
+> struct hci_vs_remove_am0_stream_cmd
+> {
+>     /// Channel_Handles used to identify Audio Mode 0 Channel (range 0x0000-0x0EFF)
+>     uint16_t am0_hdl;
+> };
+> 
+> /// HCI basic command complete event structure with AM0 Channel handle
+> /*@TRACE*/
+> struct hci_vs_basic_am0_cmd_cmp_evt
+> {
+>     /// status
+>     uint8_t     status;
+>     /// Channel_Handles used to identify Audio Mode 0 Channel (range 0x0000-0x0EFF)
+>     uint16_t    am0_hdl;
+> };
+> #endif // (BLE_ISO_MODE_0)
+> 
+> 
+4417c5881,5882
+< struct hci_dbg_hw_reg_rd_cmd
+---
+> /*@TRACE*/
+> struct hci_dbg_ble_reg_rd_cmd
+4424c5889,5890
+< struct hci_dbg_hw_reg_wr_cmd
+---
+> /*@TRACE*/
+> struct hci_dbg_ble_reg_wr_cmd
+4435c5901,5902
+< struct hci_dbg_hw_reg_rd_cmd_cmp_evt
+---
+> /*@TRACE*/
+> struct hci_dbg_ble_reg_rd_cmd_cmp_evt
+4446c5913,5914
+< struct hci_dbg_hw_reg_wr_cmd_cmp_evt
+---
+> /*@TRACE*/
+> struct hci_dbg_ble_reg_wr_cmd_cmp_evt
+4454,4509c5922,5924
+< ///HCI Debug write DLE default value command parameters - vendor specific
+< struct hci_dbg_wr_dle_dft_value_cmd
+< {
+<     /// Max transmit packet size supported
+<     uint16_t suppted_max_tx_octets;
+<     /// Max transmit packet time supported
+<     uint16_t suppted_max_tx_time;
+<     /// Max receive packet size supported
+<     uint16_t suppted_max_rx_octets;
+<     /// Max receive packet time supported
+<     uint16_t suppted_max_rx_time;
+< 
+< };
+< 
+< #if (BLE_EMB_PRESENT || BLE_HOST_PRESENT)
+< ///HCI Debug bd address write command parameters - vendor specific
+< struct hci_dbg_set_bd_addr_cmd
+< {
+<     ///bd address to set
+<     struct bd_addr addr;
+< };
+< 
+< ///HCI Debug crc write command parameters - vendor specific
+< struct hci_dbg_set_crc_cmd
+< {
+<     /// Handle pointing to the connection for which CRC has to be modified
+<     uint16_t conhdl;
+<     /// CRC to set
+<     struct crc_init crc;
+< };
+< 
+< ///HCI Debug LLC discard command parameters - vendor specific
+< struct hci_dbg_llcp_discard_cmd
+< {
+<     /// Handle pointing to the connection for which LLCP commands have to be discarded
+<     uint16_t conhdl;
+<     /// Flag indicating if the discarding has to be enabled or disabled
+<     uint8_t enable;
+< };
+< 
+< ///HCI Debug reset RX counter command parameters - vendor specific
+< struct hci_dbg_reset_rx_cnt_cmd
+< {
+<     /// Handle pointing to the connection for which the counter have to be reseted
+<     uint16_t conhdl;
+< };
+< 
+< ///HCI Debug reset TX counter command parameters - vendor specific
+< struct hci_dbg_reset_tx_cnt_cmd
+< {
+<     /// Handle pointing to the connection for which the counter have to be reseted
+<     uint16_t conhdl;
+< };
+< 
+< ///HCI Debug Set TX Power Level Command parameters
+< struct hci_dbg_set_tx_pw_cmd
+---
+> ///HCI Vendor Specific Set Preferred Slave Latency command parameters
+> /*@TRACE*/
+> struct hci_vs_set_pref_slave_latency_cmd
+4513,4567c5928,5929
+<     /// Power level
+<     uint8_t  pw_lvl;
+< };
+< 
+< ///HCI Debug configure audio command parameters - vendor specific
+< 
+< struct hci_dbg_audio_configure_audio_cmd
+< {
+<     /// Voice channel to be updated
+<     uint8_t     voice_channel;
+<     /// Configure transmitter size in bytes
+<     uint8_t     tx_size;
+<     /// Configure receiver size in bytes
+<     uint8_t     rx_size;
+<     /// Configure transmitter rate
+<     uint8_t     tx_rate;
+<     /// Configure receiver rate
+<     uint8_t     rx_rate;
+<     /// Configure number of retransmission
+<     uint8_t     nb_retx;
+<     /// Audio link priority
+<     uint8_t     priority;
+<     /// Encryption mode
+<     uint8_t     mode;
+<     /// Channel and mute configuration (@see enum audio_cfg)
+<     uint8_t     chan_mute_cfg;
+<     /// Mute Pattern
+<     uint8_t     mute_pattern;
+< };
+< 
+< struct hci_dbg_audio_set_pointer_cmd
+< {
+<     /// Voice channel to be updated
+<     uint8_t voice_channel;
+<     /// Rx or Tx selection
+<     uint8_t rx_tx_select;
+<     /// Tog to be updated
+<     uint8_t tog;
+<     /// Exchange memory pointer
+<     uint16_t    em_ptr;
+< };
+< ///HCI Debug set audio mode command parameters - vendor specific
+< struct hci_audio_set_mode_cmd
+< {
+<     /// Voice channel to be updated
+<     uint8_t voice_channel;
+<     /// Mode
+<     uint8_t   mode;
+< };
+< 
+< ///HCI Debug set audio mode command parameters - vendor specific
+< struct hci_dbg_audio_reset_cmd
+< {
+<     /// Voice channel to be updated
+<     uint8_t voice_channel;
+---
+>     /// Preferred latency (in number of connection events)
+>     uint16_t latency;
+4570,4571c5932,5934
+< ///HCI Debug set audio mode command parameters - vendor specific
+< struct hci_dbg_audio_allocate_cmd
+---
+> ///HCI Vendor Specific Set Preferred Slave event duration command parameters
+> /*@TRACE*/
+> struct hci_vs_set_pref_slave_evt_dur_cmd
+4575,4576c5938,5941
+<     /// Audio mode
+<     uint8_t mode;
+---
+>     /// Preferred event duration (N * 0.625 ms)
+>     uint16_t duration;
+>     /// Slave transmits a single packet per connection event (False/True)
+>     uint8_t single_tx;
+4579,4580c5944,5946
+< ///HCI Debug set audio mode command parameters - vendor specific
+< struct hci_dbg_audio_get_vx_ch_cmd
+---
+> ///HCI Vendor Specific Set Maximum RX size and time command parameters
+> /*@TRACE*/
+> struct hci_vs_set_max_rx_size_and_time_cmd
+4584,4605c5950,5953
+< };
+< ///HCI Tester set LE parameters
+< struct hci_tester_set_le_params_cmd
+< {
+<     /// Connection handle
+<     uint16_t conhdl;
+<     /// Tester features
+<     uint8_t  tester_feats;
+<     /// Preferred periodicity
+<     uint8_t  pref_period;
+<     /// Offset0
+<     uint16_t  offset0;
+<     /// Offset1
+<     uint16_t  offset1;
+<     /// Offset2
+<     uint16_t  offset2;
+<     /// Offset3
+<     uint16_t  offset3;
+<     /// Offset4
+<     uint16_t  offset4;
+<     /// Offset5
+<     uint16_t  offset5;
+---
+>     /// Maximum RX size (in B)
+>     uint16_t rx_octets;
+>     /// Maximum RX time (in us)
+>     uint16_t rx_time;
+4608,4609c5956,5958
+< /// HCI BLE Tester: enable LLCP pass through mechanism
+< struct hci_dbg_ble_tst_llcp_pt_en_cmd
+---
+> /// Send LLCP Packets
+> /*@TRACE*/
+> struct hci_dbg_send_llcp_cmd
+4613,4614c5962,5963
+<     /// Enable or not LLCP pass through mechanism
+<     uint8_t  enable;
+---
+>     ///buffer structure to return
+>     struct buffer_tag buf;
+4617,4618c5966,5968
+< /// HCI BLE Tester: send an LLCP PDU
+< struct hci_dbg_ble_tst_send_llcp_cmd
+---
+> ///HCI Debug LLC discard command parameters - vendor specific
+> /*@TRACE*/
+> struct hci_dbg_llcp_discard_cmd
+4620c5970
+<     /// Connection handle
+---
+>     /// Handle pointing to the connection for which LLCP commands have to be discarded
+4622,4625c5972,5973
+<     /// length of LLCP PDU
+<     uint8_t  length;
+<     /// LLCP PDU data
+<     uint8_t data[26];
+---
+>     /// Flag indicating if the discarding has to be enabled or disabled
+>     uint8_t enable;
+4629,4630c5977,5979
+< /// HCI DBG Meta Event trigg when LLCP message received with LLCP pass through mechanism
+< struct hci_dbg_ble_tst_llcp_recv_evt
+---
+> /// Vendor specific command used to set a periodic trigger
+> /*@TRACE*/
+> struct hci_vs_set_iso_data_path_trigger_cmd
+4632,4633d5980
+<     ///DBG Subevent code
+<     uint8_t             subcode;
+4636,4639c5983,5990
+<     /// length of LLCP message
+<     uint8_t             length;
+<     /// LLCP data
+<     uint8_t             data[26];
+---
+>     /// TX = 0, RX = 1
+>     uint8_t  direction;
+>     /// 0 Disable, 1 Enable
+>     uint8_t  enable;
+>     /// trigger offset in microseconds
+>     /// for TX direction, trigger offset is applied using SDU at source reference
+>     /// for RX direction, trigger offset is applied using SDU at destination reference (sdu at source + transport latency)
+>     int32_t  trigger_offset;
+4642,4643d5992
+< #endif //BLE_EMB_PRESENT || BLE_HOST_PRESENT
+< 
+4645,4646c5994,5997
+< /// HCI DBG Meta Event indicating a SW assertion error
+< struct hci_dbg_assert_err_evt
+---
+> /// HCI DBG Meta Event indicating a SW assertion
+> //TODO[AAL] exception (associated to HCI_DBG_EVT)
+> /*@TRACE*/
+> struct hci_dbg_assert_evt
+4649a6001,6003
+>     /// Assert type (warning/error)
+>     //@trc_ref assert_type
+>     uint8_t             type;
+4660a6015,6050
+> #if(BLE_ISOGEN)
+> /// Event is used to provide statistics about ISO Gen
+> /*@TRACE*/
+> struct hci_vs_isogen_stat_evt
+> {
+>     /// VS Subevent code
+>     uint8_t  subcode;
+> 
+>     /// ISO Handle of the isochronous channel (Range 0x0000-0x0EFF)
+>     uint16_t iso_hdl;
+> 
+>     /// Statistics - Number of transmission attempts
+>     uint32_t nb_tx;
+>     /// Statistics - Number of transmission attempts that succeed
+>     uint32_t nb_tx_ok;
+>     /// Statistics - Number of Not granted packet packets
+>     uint32_t nb_tx_not_granted;
+> 
+>     /// Statistics - Number of reception attempt
+>     uint32_t nb_rx;
+>     /// Statistics - Number of reception attempts that succeed
+>     uint32_t nb_rx_ok;
+>     /// Statistics - Number of Not granted packet packets
+>     uint32_t nb_rx_not_granted;
+>     /// Statistics - Number of wrongly received packet (invalid data)
+>     uint32_t nb_rx_data_err;
+>     /// Statistics - Number of CRC Errors
+>     uint32_t nb_rx_crc_err;
+>     /// Statistics - Number of SYNC Errors
+>     uint32_t nb_rx_sync_err;
+>     /// Statistics - Number of received empty packets
+>     uint32_t nb_rx_empty;
+> };
+> #endif // (BLE_ISOGEN)
+> 
+> 
+4661a6052
+> /*@TRACE*/
+4668a6060
+> /*@TRACE*/
+4679a6072
+> /*@TRACE*/
+4694a6088
+> /*@TRACE*/
+4700c6094
+<     uint8_t            sel_tx_pwr;
+---
+>     int8_t             sel_tx_pwr;
+4703,4704c6097,6099
+< /// HCI LE Enhanced Receiver Test Command
+< struct hci_le_enh_rx_test_cmd
+---
+> /// HCI LE Receiver Test v2 Command
+> /*@TRACE*/
+> struct hci_le_rx_test_v2_cmd
+4706,4711c6101,6106
+<     /// Reception channel value
+<     uint8_t            channel;
+<     /// Reception PHY rate
+<     uint8_t            phys;
+<     /// Modulation index
+<     uint8_t            modulation_idx;
+---
+>     /// RX channel, range: 0x00 to 0x27
+>     uint8_t     rx_channel;
+>     /// PHY (@enum le_phy_value)
+>     uint8_t     phy;
+>     /// Modulation index (0: standard | 1: stable)
+>     uint8_t     mod_idx;
+4714,4715c6109,6111
+< /// HCI LE Enhanced Transmitter Test Command
+< struct hci_le_enh_tx_test_cmd
+---
+> /// HCI LE Transmitter Test v2 Command
+> /*@TRACE*/
+> struct hci_le_tx_test_v2_cmd
+4717,4724c6113,6131
+<     /// Transmit channel value
+<     uint8_t            channel;
+<     /// Length of the data to be transmitted in a packet
+<     uint8_t            payload_length;
+<     /// Type of the data contained in a packet
+<     uint8_t            payload_type;
+<     /// Transmit PHY rate
+<     uint8_t            phys;
+---
+>     /// TX channel, range: 0x00 to 0x27
+>     uint8_t     tx_channel;
+>     /// Length of test data in bytes, range: 0x00 to 0xFF
+>     uint8_t     test_data_len;
+>     /**
+>      * Packet payload
+>      * 0x00 PRBS9 sequence "11111111100000111101" (in transmission order) as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x01 Repeated "11110000" (in transmission order) sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x02 Repeated "10101010" (in transmission order) sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x03 PRBS15 sequence as described in [Vol 6] Part F, Section 4.1.5
+>      * 0x04 Repeated "11111111" (in transmission order) sequence
+>      * 0x05 Repeated "00000000" (in transmission order) sequence
+>      * 0x06 Repeated "00001111" (in transmission order) sequence
+>      * 0x07 Repeated "01010101" (in transmission order) sequence
+>      * 0x08-0xFF Reserved for future use
+>      */
+>     uint8_t     pkt_payl;
+>     /// PHY (@enum le_phy_value)
+>     uint8_t     phy;
+4727a6135
+> /*@TRACE*/
+4736a6145
+> /*@TRACE*/
+4771a6181
+> /*@TRACE*/
+4799a6210
+> /*@TRACE*/
+4827c6238,6240
+< ///HCI LE Set Extended Advertising Enbale Command parameters structure
+---
+> #if BLE_EMB_PRESENT || BLE_HOST_PRESENT
+> ///HCI LE Set Extended Advertising Enable Command parameters structure
+> /*@TRACE*/
+4840a6254
+> #endif //BLE_EMB_PRESENT || BLE_HOST_PRESENT
+4842a6257
+> /*@TRACE*/
+4851a6267,6268
+> /*@TRACE
+>  * hci_le_rmv_adv_set_cmd = hci_le_rem_adv_set_cmd*/
+4858a6276
+> /*@TRACE*/
+4866a6285,6318
+> ///HCI LE Read Transmit Power Command complete event
+> /*@TRACE*/
+> struct hci_le_rd_tx_pwr_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t status;
+>     /// Minimum TX Power
+>     int8_t min_tx_pwr;
+>     /// Maximum TX Power
+>     int8_t max_tx_pwr;
+> };
+> 
+> ///HCI LE Read RF Path Compensation Command complete event
+> /*@TRACE*/
+> struct hci_le_rd_rf_path_comp_cmd_cmp_evt
+> {
+>     /// Status
+>     uint8_t status;
+>     /// RF TX Path Compensation
+>     int16_t tx_path_comp;
+>     /// RF RX Path Compensation
+>     int16_t rx_path_comp;
+> };
+> 
+> ///HCI LE Write RF Path Compensation Command complete event
+> /*@TRACE*/
+> struct hci_le_wr_rf_path_comp_cmd
+> {
+>     /// RF TX Path Compensation
+>     int16_t tx_path_comp;
+>     /// RF RX Path Compensation
+>     int16_t rx_path_comp;
+> };
+> 
+4867a6320
+> /*@TRACE*/
+4872c6325
+<     /// Minimum advertising interval for periodic advertising
+---
+>     /// Minimum advertising interval for periodic advertising (units of 1.25 ms)
+4874c6327
+<     /// Maximum advertising interval for periodic advertising
+---
+>     /// Maximum advertising interval for periodic advertising (units of 1.25 ms)
+4880a6334
+> /*@TRACE*/
+4900a6355
+> /*@TRACE*/
+4909a6365,6366
+> /*@TRACE
+>  * hci_le_adv_set_terminated_evt = hci_le_adv_set_term_evt*/
+4924a6382
+> /*@TRACE*/
+4937a6396
+> /*@TRACE*/
+4946a6406
+> /*@TRACE*/
+4957a6418
+> /*@TRACE*/
+4964a6426
+>     //@trc_ref le_phy_value
+4966a6429
+>     //@trc_ref le_phy_value
+4970,4971c6433,6435
+< /// HCI command complete event structure for HCI LE PHY Update Command
+< struct hci_le_phy_update_cmp_evt
+---
+> /// HCI LE PHY Update Complete event
+> /*@TRACE*/
+> struct hci_le_phy_upd_cmp_evt
+4979a6444
+>     //@trc_ref le_phy_value
+4981a6447
+>     //@trc_ref le_phy_value
+4982a6449,7331
+> };
+> 
+> ///HCI LE Connectionless IQ Report event
+> /*@TRACE*/
+> struct hci_le_conless_iq_report_evt
+> {
+>     /// LE Subevent code
+>     uint8_t  subcode;
+>     /// Sync handle
+>     uint16_t sync_hdl;
+>     /// Data channel index
+>     uint8_t  channel_idx;
+>     /// RSSI (in 0.1 dBm)
+>     int16_t rssi;
+>     /// RSSI antenna ID
+>     uint8_t rssi_antenna_id;
+>     /// CTE type (0: AOA | 1: AOD-1us | 2: AOD-2us)
+>     uint8_t cte_type;
+>     /// Slot durations (1: 1us | 2: 2us)
+>     uint8_t slot_dur;
+>     /// Packet status
+>     uint8_t pkt_status;
+>     /// paEventCounter
+>     uint16_t pa_evt_cnt;
+>     /// Sample_count
+>     uint8_t sample_cnt;
+>     /// I/Q sample
+>     struct
+>     {
+>         /// I sample
+>         int8_t i;
+>         /// Q sample
+>         int8_t q;
+>     } iq_sample[MAX_SAMPLE_CNT];
+> };
+> 
+> ///HCI LE Connection IQ Report event
+> /*@TRACE*/
+> struct hci_le_con_iq_report_evt
+> {
+>     /// LE Subevent code
+>     uint8_t  subcode;
+>     /// Connection handle
+>     uint16_t conhdl;
+>     /// Rx PHY  (@see enum le_phy_value)
+>     uint8_t  rx_phy;
+>     /// Data channel index
+>     uint8_t  data_channel_idx;
+>     /// RSSI (in 0.1 dBm)
+>     int16_t rssi;
+>     /// RSSI antenna ID
+>     uint8_t rssi_antenna_id;
+>     /// CTE type (0: AOA | 1: AOD-1us | 2: AOD-2us)
+>     uint8_t cte_type;
+>     /// Slot durations (1: 1us | 2: 2us)
+>     uint8_t slot_dur;
+>     /// Packet status
+>     uint8_t pkt_status;
+>     /// connEventCounter
+>     uint16_t con_evt_cnt;
+>     /// Sample_count
+>     uint8_t sample_cnt;
+>     /// I/Q sample
+>     struct
+>     {
+>         /// I sample
+>         int8_t i;
+>         /// Q sample
+>         int8_t q;
+>     } iq_sample[MAX_SAMPLE_CNT];
+> };
+> 
+> ///HCI LE CTE Request Failed event
+> /*@TRACE*/
+> struct hci_le_cte_req_failed_evt
+> {
+>     /// LE Subevent code
+>     uint8_t  subcode;
+>     /// Status
+>     uint8_t  status;
+>     /// Connection handle
+>     uint16_t  conhdl;
+> };
+> 
+> ///Commands Opcodes: OGF(6b) | OCF(10b)
+> /* Some Abbreviation used in names:
+>  *  - LK   = Link Key
+>  *  - RD   = Read
+>  *  - WR   = Write
+>  *  - REM  = Remote
+>  *  - STG  = Settings
+>  *  - CON  = Connection
+>  *  - CHG  = Change
+>  *  - DFT  = Default
+>  *  - PER  = Periodic
+>  *  - CHAN = Channel
+>  *  - REQ  = Request
+>  */
+> 
+> /// Used to read the maximum size of the data portion of ACL data packets and isochronous data packets
+> /// no parameter on command, only need to specify returned parameters
+> /*@TRACE*/
+> struct hci_le_rd_buf_size_v2_cmd_cmp_evt
+> {
+>     /// 0x00 - Request succeed ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Maximum length (in octets) of the data portion of each HCI ACL (0x0000: No dedicated LE buffer, 0x0001-0x001A RFU, Range 0x001B-0xFFFF)
+>     uint16_t le_acl_data_packet_length;
+>     /// The total number of HCI ACL data packets that can be stored in the data buffers of the Controller (0x00: No dedicated LE buffer, Range 0x01-0xFF)
+>     uint8_t  total_num_le_acl_data_packets;
+>     /// The maximum length (in octets) of the data portion of each HCI ISO data packet (0x0000: No dedicated ISO buffer, Range 0x0001-0xFFFF)
+>     uint16_t iso_data_packet_length;
+>     /// The total number of HCI ISO data packets that can be stored in the ISO buffers of the Controller (0x00: No dedicated ISO buffer, Range 0x01-0xFF)
+>     uint8_t  total_num_iso_data_packets;
+> };
+> 
+> /// Command Complete event of HCI_LE_RD_ISO_TX_SYNC_CMD
+> /*@TRACE*/
+> struct hci_le_rd_iso_tx_sync_cmd_cmp_evt
+> {
+>     /// 0x00 - Command succeeded ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Connection handle of the CIS or BIS (12 bits meaningful - Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// The packet sequence number of an SDU (Range 0x0000-0xFFFF)
+>     uint16_t pkt_seq_nb;
+>     /// The time stamp, in microseconds, of the reference anchor point of a transmitted SDU (Range 0x00000000-0xFFFFFFFF)
+>     uint32_t time_stamp;
+>     /// The time offset, in microseconds, that is associated with a transmitted SDU (Range 0x000000-0xFFFFFF)
+>     uint32_t time_offset;
+> };
+> 
+> /// Description of CIS parameters
+> /*@TRACE*/
+> struct hci_le_cis_param
+> {
+>     /// Used to identify a Connected Isochronous Stream. (Range 0x00-0xEF)
+>     uint8_t  cis_id;
+>     /// Maximum size of an SDU in octets from the master Host (12 bits meaningful - Range 0x000-0xFFF).
+>     uint16_t max_sdu_m2s;
+>     /// Maximum size of an SDU in octets from the master Host (12 bits meaningful - Range 0x000-0xFFF).
+>     uint16_t max_sdu_s2m;
+>     /// Master to slave PHY, bit 0: 1Mbps, bit 1: 2Mbps, bit 2: LE-Coded
+>     uint8_t  phy_m2s;
+>     /// Slave to master PHY, bit 0: 1Mbps, bit 1: 2Mbps, bit 2: LE-Coded
+>     uint8_t  phy_s2m;
+>     /// Maximum number of times every CIS Data PDU should be retransmitted from the master to slave (range 0x00-0x0F)
+>     uint8_t  rtn_m2s;
+>     /// Maximum number of times every CIS Data PDU should be retransmitted from the slave to master (range 0x00-0x0F)
+>     uint8_t  rtn_s2m;
+> #if BLE_AUDIO_ENABLED
+> }__attribute ((packed));
+> #else
+> };
+> #endif
+> 
+> /// Used by a master Host to set the parameters of all Connected Isochronous Streams associated with a Connected
+> /// Isochronous Group in the Controller
+> /*@TRACE*/
+> struct hci_le_set_cig_params_cmd
+> {
+>     /// Used to identify the Connected Isochronous Group (range 0x00 to 0xEF).
+>     uint8_t  cig_id;
+>     #if BLE_AUDIO_ENABLED
+>     /// Interval in microseconds of periodic SDUs master to slave (20 bits meaningful Range 0x000FF - 0xFFFFF).
+>     uint8_t sdu_interval_m2s[3];
+>     /// Interval in microseconds of periodic SDUs slave to master (20 bits meaningful Range 0x000FF - 0xFFFFF).
+>     uint8_t sdu_interval_s2m[3];
+>     #else
+>     /// Interval in microseconds of periodic SDUs master to slave (20 bits meaningful Range 0x000FF - 0xFFFFF).
+>     uint32_t sdu_interval_m2s;
+>     /// Interval in microseconds of periodic SDUs slave to master (20 bits meaningful Range 0x000FF - 0xFFFFF).
+>     uint32_t sdu_interval_s2m;    
+>     #endif
+>     /// Slave Clock Accuracy:
+>     /// 0x00: 251 ppm to 500 ppm,  0x01: 151 ppm to 250 ppm, 0x02: 101 ppm to 150 ppm, 0x03: 76 ppm to 100 ppm
+>     /// 0x04:  51 ppm to  75 ppm,  0x05:  31 ppm to  50 ppm, 0x06:  21 ppm to  30 ppm, 0x07:  0 ppm to  20 ppm
+>     uint8_t  sca;
+>     /// Scheduling method, 0: Sequential, 1: Interleaved
+>     uint8_t  packing;
+>     /// ISOAL Framing mode, 0: Unframed, 1: Framed
+>     uint8_t  framing;
+>     /// The maximum time in milliseconds for an SDU to be transported from the master Controller to slave Controller.
+>     /// (range 0x0005 to 0x0FA0)
+>     uint16_t max_trans_latency_m2s;
+>     /// The maximum time in milliseconds for an SDU to be transported from the slave Controller to master Controller.
+>     /// (range 0x0005 to 0x0FA0)
+>     uint16_t max_trans_latency_s2m;
+>     /// Total number of CISs in the CIG being added or modified. (Range 0x01-0x10)
+>     uint8_t  cis_count;
+>     /// CIS Parameters
+>     struct hci_le_cis_param params[0x10];
+> #if BLE_AUDIO_ENABLED
+> }__attribute ((packed));
+> #else
+> };
+> #endif
+> 
+> /// Command Complete event of HCI_LE_SET_CIG_PARAMS_CMD
+> /*@TRACE*/
+> struct hci_le_set_cig_params_cmd_cmp_evt
+> {
+>     /// 0x00 - The Broadcast Isochronous Group has been completed ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Used to identify the Connected Isochronous Group. (Range 0x00-0xEF)
+>     uint8_t  cig_id;
+>     /// Total number of CISs added or modified by this command (Range 0x01-0x10)
+>     uint8_t  cis_count;
+>     /// List of connection handles of CISs in the CIG. The connection handle list order is the same as the list order
+>     /// of the CISs in the command  (Range 0x0000-0x0EFF)
+>     uint16_t conhdl[0x10];
+> };
+> 
+> /// Description of CIS parameters
+> /*@TRACE*/
+> struct hci_le_cis_test_param
+> {
+>     /// Used to identify a Connected Isochronous Stream. (Range 0x00-0xEF)
+>     uint8_t  cis_id;
+>     /// Maximum number of subevents in each interval of Connected Isochronous Stream (Range 0x00-0x1F)
+>     uint8_t  nse;
+>     /// Maximum size of an SDU in octets from the master Host (12 bits meaningful - Range 0x000-0xFFF).
+>     uint16_t max_sdu_m2s;
+>     /// Maximum size of an SDU in octets from the master Host (12 bits meaningful - Range 0x000-0xFFF).
+>     uint16_t max_sdu_s2m;
+>     /// Maximum size of payload from master Link Layer to slave Link Layer (Range 0x01-0xFB).
+>     uint16_t  max_pdu_m2s;
+>     /// Maximum size of payload from slave Link Layer to master Link Layer (Range 0x01-0xFB).
+>     uint16_t  max_pdu_s2m;
+>     /// Master to slave PHY, bit 0: 1Mbps, bit 1: 2Mbps, bit 2: LE-Coded
+>     uint8_t  phy_m2s;
+>     /// Slave to master PHY, bit 0: 1Mbps, bit 1: 2Mbps, bit 2: LE-Coded
+>     uint8_t  phy_s2m;
+>     /// The burst number for master to slave transmission (Range 0x00-0x0F).
+>     /// 0x00 - No isochronous data from the master to the slave
+>     uint8_t  bn_m2s;
+>     /// The burst number for slave to master transmission (Range 0x00-0x0F).
+>     /// 0x00 - No isochronous data from the slave to the master
+>     uint8_t  bn_s2m;
+> #if BLE_AUDIO_ENABLED
+> } __attribute__((__packed__));
+> #else
+> };
+> #endif
+> 
+> /// Used by a master Host to set the parameters of all Connected Isochronous Streams associated with a Connected
+> /// Isochronous Group in the Controller
+> /*@TRACE*/
+> struct hci_le_set_cig_params_test_cmd
+> {
+>     /// Used to identify the Connected Isochronous Group. (Range 0x00-0xEF)
+>     uint8_t  cig_id;
+>     #if BLE_AUDIO_ENABLED
+>     /// Interval in microseconds of periodic SDUs master to slave (20 bits meaningful Range 0x000FF - 0xFFFFF).
+>     uint8_t sdu_interval_m2s[3];
+>     /// Interval in microseconds of periodic SDUs slave to master (20 bits meaningful Range 0x000FF - 0xFFFFF).
+>     uint8_t sdu_interval_s2m[3];
+>     #else
+>     /// Interval in microseconds of periodic SDUs master to slave (20 bits meaningful Range 0x000FF - 0xFFFFF).
+>     uint32_t sdu_interval_m2s;
+>     /// Interval in microseconds of periodic SDUs slave to master (20 bits meaningful Range 0x000FF - 0xFFFFF).
+>     uint32_t sdu_interval_s2m;
+>     #endif
+>     /// The maximum flush timeout for each payload from the master (Range 0x01-0x1F).
+>     uint8_t  ft_m2s;
+>     /// The maximum flush timeout for each payload from the slave (Range 0x01-0x1F).
+>     uint8_t  ft_s2m;
+>     /// The duration of the isochronous interval in multiples of 1.25 ms (Range 0x0004-0xC80).
+>     uint16_t iso_interval;
+>     /// Slave Clock Accuracy:
+>     /// 0x00: 251 ppm to 500 ppm,  0x01: 151 ppm to 250 ppm, 0x02: 101 ppm to 150 ppm, 0x03: 76 ppm to 100 ppm
+>     /// 0x04:  51 ppm to  75 ppm,  0x05:  31 ppm to  50 ppm, 0x06:  21 ppm to  30 ppm, 0x07:  0 ppm to  20 ppm
+>     uint8_t  sca;
+>     /// Scheduling method, 0: Sequential, 1: Interleaved
+>     uint8_t  packing;
+>     /// ISOAL Framing mode, 0: Unframed, 1: Framed
+>     uint8_t  framing;
+>     /// Total number of CISs in the CIG being added or modified. (Range 0x00-0x10)
+>     uint8_t  cis_count;
+>     /// CIS Parameters
+>     struct hci_le_cis_test_param params[0x10];
+> #if BLE_AUDIO_ENABLED
+> } __attribute__((__packed__));
+> #else
+> };
+> #endif
+> 
+> /// Command Complete event of HCI_LE_SET_CIG_PARAMS_TEST_CMD
+> /*@TRACE*/
+> struct hci_le_set_cig_params_test_cmd_cmp_evt
+> {
+>     /// 0x00 - The Broadcast Isochronous Group has been completed ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Used to identify the Connected Isochronous Group. (Range 0x00-0xEF)
+>     uint8_t  cig_id;
+>     /// Total number of CISs added or modified by this command (Range 0x00-0x10)
+>     uint8_t  cis_count;
+>     /// List of connection handles of CISs in the CIG. The connection handle list order is the same as the list order
+>     /// of the CISs in the command  (Range 0x0000-0x0EFF)
+>     uint16_t conhdl[0x10];
+> };
+> 
+> /// Create CIS parameter
+> /*@TRACE*/
+> struct hci_le_cis_create_param
+> {
+>     /// Connection handle of Connected Isochronous Stream (Range 0x0000-0x0EFF)
+>     uint16_t cis_conhdl;
+>     /// Connection handle of ACL Link (Range 0x0000-0x0EFF)
+>     uint16_t acl_conhdl;
+> #if BLE_AUDIO_ENABLED
+> }__attribute ((packed));
+> #else
+> };
+> #endif
+> 
+> /// Used by the master Host to establish one or more Connected Isochronous Streams using the connections identified
+> /// by the ACL_Connection_Handle
+> /*@TRACE*/
+> struct hci_le_create_cis_cmd
+> {
+>     /// Total number of CISs to be established. (Range 0x01-0x1F)
+>     uint8_t  cis_count;
+>     /// Create CIS Parameters
+>     struct hci_le_cis_create_param params[0x1F];
+> #if BLE_AUDIO_ENABLED
+> }__attribute ((packed));
+> #else
+> };
+> #endif
+> 
+> /// Removes all the Connected Isochronous Streams which have previously been set up in the Controller by using the
+> /// HCI_LE_Set_CIG_Parameters or the HCI_LE_Set_CIG_Parameters_Test command.
+> /*@TRACE*/
+> struct hci_le_remove_cig_cmd
+> {
+>     /// Used to identify the Connected Isochronous Group. (Range 0x00-0xEF)
+>     uint8_t  cig_id;
+> };
+> 
+> /// Command Complete event of HCI_LE_REMOVE_CIG_CMD
+> /*@TRACE*/
+> struct hci_le_remove_cig_cmd_cmp_evt
+> {
+>     /// 0x00 - The HCI_LE_Remove_CIG command succeeded ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Identifier of a CIG. (Range 0x00-0xEF)
+>     uint8_t  cig_id;
+> };
+> 
+> /// Used by the slave Host to inform the Controller to accept the request for the Connected Isochronous Stream that is
+> /// identified by the Connection_Handle
+> /*@TRACE*/
+> struct hci_le_accept_cis_req_cmd
+> {
+>     /// Connection handle of the Connected Isochronous Stream (Range: 0x0000-0x0EFF)
+>     uint16_t conhdl;
+> };
+> 
+> /// Used by the slave Host to reject the request for the Connected Isochronous Stream that is identified by the
+> /// Connection_Handle
+> /*@TRACE*/
+> struct hci_le_reject_cis_req_cmd
+> {
+>     /// Connection handle of the Connected Isochronous Stream (Range: 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// The reason for rejecting the Connected Isochronous Stream
+>     uint8_t  reason;
+> };
+> 
+> /// Used to transmit data PDUs of one or more Broadcast Isochronous Streams of the Broadcast Isochronous Group
+> /*@TRACE*/
+> struct hci_le_create_big_cmd
+> {
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+>     /// Used to identify the Periodic Advertising set (Range 0x00-0xEF)
+>     uint8_t  adv_hdl;
+>     /// Total number of Broadcast Isochronous Streams in the Broadcast Isochronous Group. (Range 0x01-0x1F)
+>     uint8_t  num_bis;
+>     /// Interval of periodic SDUs in microseconds (20 bits meaningful - range 0x000FF-0xFFFFF).
+>     uint32_t sdu_interval;
+>     /// Maximum size of an SDU (12 bits meaningful Range 0x000 to 0xFFF).
+>     uint16_t max_sdu;
+>     /// The maximum time in milliseconds for a SDU to be transported (Range 0x0000-0x0FA0)
+>     uint16_t trans_latency;
+>     /// Number of times every BIS Data PDU should be retransmitted (Range 0x00-0x0F)
+>     uint8_t  rtn;
+>     /// PHY, bit 0: 1Mbps, bit 1: 2Mbps, bit 2: LE-Coded
+>     uint8_t  phy;
+>     /// Scheduling method, 0: Sequential, 1: Interleaved
+>     uint8_t  packing;
+>     /// ISOAL Framing mode, 0: Unframed, 1: Framed
+>     uint8_t  framing;
+>     /// 0: Unencrypted, 1: Encrypted
+>     uint8_t  encryption;
+>     /// Code used for deriving the session key for encrypting and decrypting payloads of BISs.
+>     uint8_t  broadcast_code[KEY_LEN];
+> };
+> 
+> /// Prepares the CL-Master Controller to set up a new BIG.
+> /*@TRACE*/
+> struct hci_le_create_big_test_cmd
+> {
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+>     /// Used to identify the Periodic Advertising set (Range 0x00-0xEF)
+>     uint8_t  adv_hdl;
+>     /// Total number of Broadcast Isochronous Streams in the Broadcast Isochronous Group. (Range 0x01-0x1F)
+>     uint8_t  num_bis;
+>     /// Interval of periodic SDUs in microseconds (20 bits meaningful - range 0x000FF-0xFFFFF).
+>     uint32_t sdu_interval;
+>     /// Isochronous Interval in multiples of 1.25 ms (Range 0x0004-0xC80)
+>     uint16_t iso_interval;
+>     /// Total number of subevents in each interval of each BIS in the BIG (Range 0x01-0x1F)
+>     uint8_t  nse;
+>     /// Maximum size of an SDU (12 bits meaningful Range 0x000 to 0xFFF).
+>     uint16_t max_sdu;
+>     /// Maximum size of payload (Range 0x01-0xFB)
+>     uint16_t  max_pdu;
+>     /// PHY, bit 0: 1Mbps, bit 1: 2Mbps, bit 2: LE-Coded
+>     uint8_t  phy;
+>     /// Scheduling method, 0: Sequential, 1: Interleaved
+>     uint8_t  packing;
+>     /// ISOAL Framing mode, 0: Unframed, 1: Framed
+>     uint8_t  framing;
+>     /// Number of new payloads in each interval for each Broadcast Isochronous Stream (Burst Number) (Range 0x01-0x07)
+>     uint8_t  bn;
+>     /// Number of times the scheduled payload(s) should be transmitted (Range 0x01-0x0F)
+>     uint8_t  irc;
+>     /// Isochronous Interval spacing of payloads transmitted in the Pre_Transmission_Subevents (Range 0x00-0x0F)
+>     uint8_t  pto;
+>     /// 0: Unencrypted, 1: Encrypted
+>     uint8_t  encryption;
+>     /// Code used for encrypting or decrypting payloads of an encrypted Broadcast Isochronous Stream
+>     uint8_t  broadcast_code[KEY_LEN];
+> };
+> 
+> /// Terminate transmission of all Broadcast Isochronous Streams of a Broadcast Isochronous Group or to cancel
+> /// the process of creating a Broadcast Isochronous Group
+> /*@TRACE*/
+> struct hci_le_terminate_big_cmd
+> {
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+>     /// Termination reason
+>     uint8_t  reason;
+> };
+> 
+> /// Used to synchronize and receive PDUs from one or more Broadcast Isochronous Streams within a Broadcast Isochronous
+> /// Group.
+> /*@TRACE*/
+> struct hci_le_big_create_sync_cmd
+> {
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+>     /// Used to identify the periodic advertising set (Range 0x0000-0x0EFF)
+>     uint16_t sync_hdl;
+>     /// 0: Unencrypted, 1: Encrypted
+>     uint8_t  encryption;
+>     /// 128-bit code used for deriving the session key for decrypting payloads of encrypted BISs.
+>     uint8_t  broadcast_code[16];
+>     /// Maximum number of subevents that should be used to receive data payloads in each isochronous interval (0x00-0xFF)
+>     /// 0x00 - The Controller can  schedule reception of any number of subevents up to NSE
+>     uint8_t  mse;
+>     /// Synchronization timeout for a Broadcast Isochronous Group (step 10ms, range 0x000A-0x4000)
+>     uint16_t big_sync_timeout;
+>     /// Total number of BISs to synchronize. (Range 0x01-0x1F)
+>     uint8_t  num_bis;
+>     /// List of indices of BISs (bis_id Range 0x01-0x1F)
+>     uint8_t  bis_id[0x1F];
+> };
+> 
+> /// Stop synchronization with Broadcast Isochronous Streams or to cancel the process of synchronization to Broadcast Isochronous Streams
+> /*@TRACE*/
+> struct hci_le_big_terminate_sync_cmd
+> {
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+> };
+> 
+> /// Command Complete event of HCI_LE_BIG_TERMINATE_SYNC_CMD
+> /*@TRACE*/
+> struct hci_le_big_terminate_sync_cmd_cmp_evt
+> {
+>     /// 0x00 - Command succeeded ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+> };
+> 
+> /// Stop synchronization with Broadcast Isochronous Streams or to cancel the process of synchronization to Broadcast Isochronous Streams
+> /*@TRACE*/
+> struct hci_le_req_peer_sca_cmd
+> {
+>     /// Connection handle of the CIS or BIS (12 bits meaningful - Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+> };
+> 
+> /// The command is used to identify and create the isochronous data path between the Host and the Controller.
+> /// It can also be used to configure a codec for each data path.
+> /*@TRACE*/
+> struct hci_le_setup_iso_data_path_cmd
+> {
+>     /// Connection handle of a CIS or BIS. (Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// Data path direction
+>     /// 0x00       Input (Host to Controller)
+>     /// 0x01       Output (Controller to Host)
+>     /// Others     Reserved for future use
+>     uint8_t  data_path_direction;
+>     /// Data path ID
+>     /// 0x00       HCI
+>     /// 0x01-0xFE  Logical_Channel_Number. The meaning of the logical channel is vendor specific.
+>     /// 0xFF       Reserved for future use
+>     uint8_t  data_path_id;
+>     /// Codec ID (5 octets)
+>     uint8_t  codec_id[CODEC_ID_LEN];
+>     /// Controller delay in ms (Range: 0x000000 to 0x3D0900)
+>     #if BLE_AUDIO_ENABLED
+>     uint8_t  ctrl_delay[3];
+>     #else
+>     uint32_t  ctrl_delay;
+>     #endif
+>     /// Codec configuration length
+>     uint8_t  codec_cfg_len;
+>     /// Codec configuration
+>     uint8_t  codec_cfg[__ARRAY_EMPTY];
+> #if BLE_AUDIO_ENABLED
+> }__attribute ((packed));
+> #else
+> };
+> #endif
+> 
+> /// Command Complete event of HCI_LE_SETUP_ISO_DATA_PATH_CMD
+> /*@TRACE*/
+> struct hci_le_setup_iso_data_path_cmd_cmp_evt
+> {
+>     /// 0x00 - Command succeeded ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Connection handle of the CIS or BIS (12 bits meaningful - Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+> };
+> 
+> /// The command remove the data path between the Host and Controller and vice versa.
+> /*@TRACE*/
+> struct hci_le_remove_iso_data_path_cmd
+> {
+>     /// Connection handle of a CIS or BIS. (Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// Bit[0]: Input data path, Bit[1]: Output data path
+>     uint8_t  direction;
+> };
+> 
+> /// Command Complete event of HCI_LE_REMOVE_ISO_DATA_PATH_CMD
+> /*@TRACE*/
+> struct hci_le_remove_iso_data_path_cmd_cmp_evt
+> {
+>     /// 0x00 - Command succeeded ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Connection handle of the CIS or BIS (12 bits meaningful - Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+> };
+> 
+> /// Used to configure an established CIS or BIS specified by the Connection_Handle parameter, and transmit test payloads which are generated by the Controller.
+> /*@TRACE*/
+> struct hci_le_iso_tx_test_cmd
+> {
+>     /// Connection handle of the CIS or BIS (12 bits meaningful - Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// 0x00: Zero length payload 0x01: Variable length payload 0x02: Maximum length payload
+>     /// All other values: RFU
+>     uint8_t  payload_type;
+> };
+> 
+> /// Used to configure an established CIS or a synchronized BIG specified by the Connection_Handle parameter to receive payloads.
+> /*@TRACE*/
+> struct hci_le_iso_rx_test_cmd
+> {
+>     /// Connection handle of the CIS or BIS. (Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// 0x00: Zero length payload 0x01: Variable length payload 0x02: Maximum length payload
+>     /// All other values: RFU
+>     uint8_t  payload_type;
+> };
+> 
+> /// Used to read the test counters in the Controller which are configured in ISO Receive Test mode for a CIS or BIS specified by the Connection_Handle.
+> /*@TRACE*/
+> struct hci_le_iso_read_test_counters_cmd
+> {
+>     /// Connection handle of the CIS or BIS. (Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+> };
+> 
+> /// Command Complete event of HCI_LE_ISO_READ_TEST_COUNTERS_CMD
+> /*@TRACE*/
+> struct hci_le_iso_read_test_counters_cmd_cmp_evt
+> {
+>     /// 0x00 - Command succeeded ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Connection handle of the CIS or BIS (12 bits meaningful - Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// Number in the Received_Packet_Count (0xXXXXXXXX)
+>     uint32_t received_packet_count;
+>     /// Number in the Missed_Packet_Count (0xXXXXXXXX)
+>     uint32_t missed_packet_count;
+>     /// Number in the Failed_Packet_Count (0xXXXXXXXX)
+>     uint32_t failed_packet_count;
+> };
+> 
+> /// Used to terminate the ISO Transmit and/or Receive Test mode for a CIS or BIS specified by the Connection_Handle parameter but does not terminate the CIS or BIS.
+> /*@TRACE*/
+> struct hci_le_iso_test_end_cmd
+> {
+>     /// Connection handle of the CIS or BIS. (Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+> };
+> 
+> /// Command Complete event of HCI_LE_ISO_TEST_END_CMD
+> /*@TRACE*/
+> struct hci_le_iso_test_end_cmd_cmp_evt
+> {
+>     /// 0x00 - Command succeeded ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Connection handle of the CIS or BIS (12 bits meaningful - Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// Number in the Received_Packet_Count (0xXXXXXXXX)
+>     uint32_t received_packet_count;
+>     /// Number in the Missed_Packet_Count (0xXXXXXXXX)
+>     uint32_t missed_packet_count;
+>     /// Number in the Failed_Packet_Count (0xXXXXXXXX)
+>     uint32_t failed_packet_count;
+> };
+> 
+> /// Returns the values of various counters related to link quality that are associated with the isochronous stream specified by the Connection_Handle parameter.
+> /*@TRACE*/
+> struct hci_le_rd_iso_link_quality_cmd
+> {
+>     /// Connection handle of the CIS or BIS. (Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+> };
+> 
+> /// Used by the Host to set or clear a bit of the feature controlled by the Host in the Link Layer FeatureSet stored in the Controller.
+> struct hci_le_set_host_feature_cmd
+> {
+>     /// Bit position in the FeatureSet. (Range 0x00-0x3F)
+>     uint8_t bit_number;
+>     /// Bit value. (0x00: feature disabled 0x01: feature enabled All other values: RFU)
+>     uint8_t bit_value;
+> };
+> 
+> /// Command Complete event of HCI_LE_RD_ISO_LINK_QUALITY_CMD
+> /*@TRACE*/
+> struct hci_le_rd_iso_link_quality_cmd_cmp_evt
+> {
+>     /// 0x00 - Command succeeded ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Connection handle of the CIS or BIS (12 bits meaningful - Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// Value of the Tx_UnACKed_Packets counter (0xXXXXXXXX)
+>     uint32_t tx_unacked_packets;
+>     /// Value of the Tx_Flushed_Packets counter (0xXXXXXXXX)
+>     uint32_t tx_flushed_packets;
+>     /// Value of the Tx_Last_Subevent_Packets counter (0xXXXXXXXX)
+>     uint32_t tx_last_subevent_packets;
+>     /// Value of the Retransmitted_Packets counter (0xXXXXXXXX)
+>     uint32_t retransmitted_packets;
+>     /// Value of the CRC_Error_Packets counter (0xXXXXXXXX)
+>     uint32_t crc_error_packets;
+>     /// Value of the Rx_Unreceived_Packets counter (0xXXXXXXXX)
+>     uint32_t rx_unreceived_packets;
+>     /// Value of the Duplicate_Packets counter (0xXXXXXXXX)
+>     uint32_t duplicate_packets;
+> };
+> 
+> /**************************************************************************************
+>  **************                   HCI EVENT TRUCTURES                  ****************
+>  **************************************************************************************/
+> 
+> /// Basic LE event sutrcture
+> /*@TRACE*/
+> struct hci_le_basic_evt
+> {
+>     /// LE Subevent code
+>     uint8_t subcode;
+> };
+> 
+> /// Event indicates that the Connected Isochronous Stream with the Connection_Handle has been established.
+> /*@TRACE*/
+> struct hci_le_cis_established_evt
+> {
+>     ///LE Subevent code
+>     uint8_t  subcode;
+>     /// 0x00 - The Broadcast Isochronous Group has been completed ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Connection handle of the Connected Isochronous Stream (Range: 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// The CIG synchronization delay time in microseconds
+>     uint32_t cig_sync_delay;
+>     /// The CIS synchronization delay time in microseconds
+>     uint32_t cis_sync_delay;
+>     /// The maximum time, in microseconds, for transmission of SDUs of all CISes from master to slave
+>     /// (range 0x0000EA to 0x7FFFFF)
+>     uint32_t trans_latency_m2s;
+>     /// The maximum time, in microseconds, for transmission of SDUs of all CISes from slave to master
+>     /// (range 0x0000EA to 0x7FFFFF)
+>     uint32_t trans_latency_s2m;
+>     /// Master to slave PHY, 0x01: 1Mbps, 0x02: 2Mbps, 0x03: LE-Coded
+>     uint8_t  phy_m2s;
+>     /// Slave to master PHY, 0x01: 1Mbps, 0x02: 2Mbps, 0x03: LE-Coded
+>     uint8_t  phy_s2m;
+>     /// Maximum number of subevents in each isochronous event (Range: 0x01-0x1E)
+>     uint8_t  nse;
+>     /// The burst number for master to slave transmission (0x00: no isochronous data from the master to the slave, range 0x01-0x0F)
+>     uint8_t  bn_m2s;
+>     /// The burst number for slave to master transmission (0x00: no isochronous data from the slave to the master, range 0x01-0x0F)
+>     uint8_t  bn_s2m;
+>     /// The flush timeout, in multiples of the ISO_Interval, for each payload sent from the master to the slave (Range: 0x01-0x1F)
+>     uint8_t  ft_m2s;
+>     /// The flush timeout, in multiples of the ISO_Interval, for each payload sent from the slave to the master (Range: 0x01-0x1F)
+>     uint8_t  ft_s2m;
+>     /// Maximum size, in octets, of the payload from master to slave (Range: 0x00-0xFB)
+>     uint16_t  max_pdu_m2s;
+>     /// Maximum size, in octets, of the payload from slave to master (Range: 0x00-0xFB)
+>     uint16_t  max_pdu_s2m;
+>     /// ISO interval (1.25ms unit, range: 5ms to 4s)
+>     uint16_t iso_interval;
+> };
+> 
+> /// Event indicates that the Connected Isochronous Stream with the Connection_Handle has been established.
+> /*@TRACE*/
+> struct hci_le_cis_request_evt
+> {
+>     ///LE Subevent code
+>     uint8_t  subcode;
+>     /// Connection handle of the ACL (Range: 0x0000-0x0EFF)
+>     uint16_t acl_conhdl;
+>     /// Connection handle of the Connected Isochronous Stream (Range: 0x0000-0x0EFF)
+>     uint16_t cis_conhdl;
+>     /// Used to identify the Connected Isochronous Group. (Range 0x00-0xEF)
+>     uint8_t  cig_id;
+>     /// Used to identify a Connected Isochronous Stream. (Range 0x00-0xEF)
+>     uint8_t  cis_id;
+> };
+> 
+> /// Event Generated in the Isochronous Broadcaster when all the Broadcast Isochronous Streams in the Group are being
+> /// transmitted
+> /*@TRACE*/
+> struct hci_le_create_big_cmp_evt
+> {
+>     ///LE Subevent code
+>     uint8_t  subcode;
+>     /// 0x00 - The Broadcast Isochronous Group has been completed ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+>     /// Transmission delay time in microseconds of all BISs in the BIG (in us range 0x0000EA-0x7FFFFF)
+>     uint32_t big_sync_delay;
+>     /// The maximum delay time, in microseconds, for transmission of SDUs of all BISes (in us range 0x0000EA-0x7FFFFF)
+>     uint32_t big_trans_latency;
+>     /// PHY used, bit 0: 1Mbps, bit 1: 2Mbps, bit 2: LE-Coded
+>     uint8_t  phy;
+>     /// The number of subevents in each BIS event in the BIG, range 0x01-0x1E
+>     uint8_t  nse;
+>     /// The number of new payloads in each BIS event, range 0x01-0x07
+>     uint8_t  bn;
+>     /// Offset used for pre-transmissions, range 0x00-0x0F
+>     uint8_t  pto;
+>     /// The number of times a payload is transmitted in a BIS event, range 0x01-0x0F
+>     uint8_t  irc;
+>     /// Maximum size of the payload in octets, range 0x00-0xFB
+>     uint16_t  max_pdu;
+>     /// ISO interval (1.25ms unit, range: 5ms to 4s)
+>     uint16_t iso_interval;
+>     /// Total number of BISs in the BIG (Range 0x01-0x1F)
+>     uint8_t  num_bis;
+>     /// The connection handles of the BISs (Range 0x0000-0x0EFF)
+>     uint16_t conhdl[0x1F];
+> };
+> 
+> /// Event is generated when transmissions of all the Broadcast Isochronous Streams in the Broadcast Isochronous Group
+> /// are terminated
+> /*@TRACE*/
+> struct hci_le_terminate_big_cmp_evt
+> {
+>     ///LE Subevent code
+>     uint8_t  subcode;
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+>     /// Reason for termination (0xXX)
+>     uint8_t  reason;
+> };
+> 
+> /// Event is generated in a scanning device when the Controller has synchronized with the requested Broadcast
+> /// Isochronous Streams.
+> /*@TRACE*/
+> struct hci_le_big_sync_est_evt
+> {
+>     ///LE Subevent code
+>     uint8_t  subcode;
+>     /// 0x00 - The Broadcast Isochronous Group has been completed ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+>     /// The maximum delay time, in microseconds, for transmission of SDUs of all BISes (in us range 0x0000EA-0x7FFFFF)
+>     uint32_t big_trans_latency;
+>     /// The number of subevents in each BIS event in the BIG, range 0x01-0x1E
+>     uint8_t  nse;
+>     /// The number of new payloads in each BIS event, range 0x01-0x07
+>     uint8_t  bn;
+>     /// Offset used for pre-transmissions, range 0x00-0x0F
+>     uint8_t  pto;
+>     /// The number of times a payload is transmitted in a BIS event, range 0x01-0x0F
+>     uint8_t  irc;
+>     /// Maximum size of the payload in octets, range 0x00-0xFB
+>     uint16_t  max_pdu;
+>     /// ISO interval (1.25ms unit, range: 5ms to 4s)
+>     uint16_t iso_interval;
+>     /// Total number of BISs in the BIG (Range 0x01-0x1F)
+>     uint8_t  num_bis;
+>     /// The connection handles of the BISs (Range 0x0000-0x0EFF)
+>     uint16_t conhdl[0x1F];
+> };
+> 
+> /// Event indicates that the Controller has not received any payload from any Broadcast Isochronous Stream within a
+> /// Broadcast Isochronous Group to which it was synchronized within the timeout period (BIS_Sync_Timeout).
+> /*@TRACE*/
+> struct hci_le_big_sync_lost_evt
+> {
+>     ///LE Subevent code
+>     uint8_t  subcode;
+>     /// BIG_Handle is used to identify the BIS Group. (Range 0x00-0xEF)
+>     uint8_t  big_hdl;
+>     /// Reason of synchronization to BIG termination
+>     uint8_t  reason;
+> };
+> 
+> /// Event indicates that the HCI_LE_Request_Peer_SCA command has been completed.
+> /*@TRACE*/
+> struct hci_le_req_peer_sca_cmp_evt
+> {
+>     ///LE Subevent code
+>     uint8_t  subcode;
+>     /// 0x00 - The Peer_Clock_Accuracy parameter is successfully received ; 0x01-0xFF Failed reason
+>     uint8_t  status;
+>     /// Connection handle of the ACL (12 bits meaningful Range 0x0000-0x0EFF)
+>     uint16_t conhdl;
+>     /// Peer clock accuracy (@see enum SCA)
+>     uint8_t  peer_clock_accuracy;
+> };
+> 
+> /// Event is generated in a scanning device when the Controller has received an advertising PDU that contained a BIGInfo field.
+> /*@TRACE*/
+> struct hci_le_big_info_adv_report_evt
+> {
+>     ///LE Subevent code
+>     uint8_t  subcode;
+>     /// Sync_Handle identifying the periodic advertising train (Range 0x0000-0x0EFF)
+>     uint16_t  sync_hdl;
+>     /// Value of the Num_BIS subfield of the BIGInfo field (Range 0x01-0x1F)
+>     uint8_t  num_bis;
+>     /// Value of the NSE subfield of the BIGInfo field (Range 0x01-0x1F)
+>     uint8_t  nse;
+>     /// Value of the ISO_Interval subfield of the BIGInfo field (0xXXXX)
+>     uint16_t  iso_interval;
+>     /// Value of the BN subfield of the BIGInfo field (Range 0x01-0x07)
+>     uint8_t  bn;
+>     /// Value of the PTO subfield of the BIGInfo field (Range 0x00-0x0F)
+>     uint8_t  pto;
+>     /// Value of the IRC subfield of the BIGInfo field (Range 0x01-0x0F)
+>     uint8_t  irc;
+>     /// Value of the Max_PDU subfield of the BIGInfo field (Range 0x0000-0x00FB)
+>     uint16_t  max_pdu;
+>     /// Value of the SDU_Interval subfield of the BIGInfo field (Range 0x0000FF-0x0FFFFF)
+>     uint8_t  sdu_interval[3];
+>     /// Value of the Max_SDU subfield of the BIGInfo field (Range 0x0000-0x0FFF)
+>     uint16_t max_sdu;
+>     /// Value of the PHY subfield of the BIGInfo field (0x01: 1M, 0x02: 2M, 0x03: Coded, All other values: RFU)
+>     uint8_t  phy;
+>     /// Value of the Framing subfield of the BIGInfo field (0x00: Unframed, 0x01: Framed, All other values: RFU)
+>     uint8_t  framing;
+>     /// Value of the Encryption subfield of the BIGInfo field (0x00: Unencrypted, 0x01: Encrypted, All other values: RFU)
+>     uint8_t  encryption;

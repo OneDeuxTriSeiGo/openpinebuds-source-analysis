@@ -1,0 +1,386 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/common/api/co_utils.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/common/api/co_utils.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+24a39
+> #include "rwip.h"         // SW configuration
+51c66
+< #define HCI_CMD_HANDLER_C(cmd_name, param_struct)   __STATIC int hci_##cmd_name##_cmd_handler(param_struct const *param,  \
+---
+> #define HCI_CMD_HANDLER_C(cmd_name, param_struct)   __STATIC int hci_##cmd_name##_cmd_lc_handler(param_struct const *param,  \
+66d80
+< 
+68,69c82,105
+< //#define CONTAINER_OF(ptr, type, member)    ((type *)( (char *)ptr - offsetof(type,member) ))
+< 
+---
+> #ifndef CONTAINER_OF
+> #define CONTAINER_OF(ptr, type, member) ((type *)( (char *)ptr - OFFSETOF(type,member) ))
+> #endif
+> 
+> /// count number of bit into a long field
+> #define CO_BIT_CNT(val) (co_bit_cnt((uint8_t*) &(val), sizeof(val)))
+> 
+> /// Increment value and make sure it's never greater or equals max (else wrap to 0)
+> #define CO_VAL_INC(_val, _max)      \
+>     (_val) = (_val) + 1;            \
+>     if((_val) >= (_max)) (_val) = 0
+> 
+> 
+> /// Add value and make sure it's never greater or equals max (else wrap)
+> /// _add must be less that _max
+> #define CO_VAL_ADD(_val, _add, _max)      \
+>     (_val) = (_val) + (_add);             \
+>     if((_val) >= (_max)) (_val) -= (_max)
+> 
+> /// sub value and make sure it's never greater or equals max (else wrap)
+> /// _sub must be less that _max
+> #define CO_VAL_SUB(_val, _sub, _max)      \
+>     if((_val) < (_sub)) (_val) += _max;   \
+>     (_val) = (_val) - (_sub)
+86a123,141
+> /// Rate information
+> /*@TRACE*/
+> enum phy_rate
+> {
+>     /// 1 Mbits/s Rate
+>     CO_RATE_1MBPS   = 0,
+>     /// 2 Mbits/s Rate
+>     CO_RATE_2MBPS   = 1,
+>     /// 125 Kbits/s Rate
+>     CO_RATE_125KBPS = 2,
+>     /// 500 Kbits/s Rate
+>     CO_RATE_500KBPS = 3,
+>     /// Undefined rate (used for reporting when no packet is received)
+>     CO_RATE_UNDEF   = 4,
+> 
+>     CO_RATE_MAX     = 4,
+> };
+> 
+> 
+114a170,212
+> /// NULL Key
+> extern const uint8_t co_null_key[KEY_LEN];
+> 
+> /// Table for converting rate to PHY
+> extern const uint8_t co_rate_to_phy[];
+> 
+> /// Table for converting PHY to rate (Warning: the coded PHY is converted to 125K by default)
+> extern const uint8_t co_phy_to_rate[];
+> 
+> /// Convert PHY mask (with one single bit set) to a value
+> extern const uint8_t co_phy_mask_to_value[];
+> 
+> /// Convert PHY a value to the corresponding mask bit
+> extern const uint8_t co_phy_value_to_mask[];
+> 
+> /// Convert Rate value to the corresponding PHY mask bit
+> extern const uint8_t co_rate_to_phy_mask[];
+> 
+> /// Convert PHY mask bit to the corresponding Rate value
+> extern const uint8_t co_phy_mask_to_rate[];
+> 
+> #if BLE_PWR_CTRL
+> 
+> /// Convert PHY rate value of power control to the corresponding PHY mask bit
+> extern const uint8_t co_phypwr_value_to_mask[];
+> 
+> /// Convert PHY mask bit of power control to the corresponding PHY rate value
+> extern const uint8_t co_phypwr_mask_to_value[];
+> 
+> /// Convert PHY rate value of power control to Rate value
+> extern const uint8_t co_phypwr_to_rate[];
+> 
+> /// Convert Rate value to PHY rate value of power control
+> extern const uint8_t co_rate_to_phypwr[];
+> 
+> /// Convert Rate value to PHY mask value of power control
+> extern const uint8_t co_rate_to_phypwr_mask[];
+> 
+> #endif // BLE_PWR_CTRL
+> 
+> /// Convert Rate value to byte duration in us
+> extern const uint8_t co_rate_to_byte_dur_us[];
+> 
+125,127c223,225
+<  * @param[in]   clock_a   1st operand value (in BT slots)
+<  * @param[in]   clock_b   2nd operand value (in BT slots)
+<  * @return      result    operation result (in BT slots)
+---
+>  * @param[in]   clock_a   1st operand value (in BT half-slots)
+>  * @param[in]   clock_b   2nd operand value (in BT half-slots)
+>  * @return      result    operation result (in BT half-slots)
+136,139c234,237
+<  * @param[in]   clock_a   1st operand value (in BT slots)
+<  * @param[in]   clock_b   2nd operand value (in BT slots)
+<  * @param[in]   clock_c   3rd operand value (in BT slots)
+<  * @return      result    operation result (in BT slots)
+---
+>  * @param[in]   clock_a   1st operand value (in BT half-slots)
+>  * @param[in]   clock_b   2nd operand value (in BT half-slots)
+>  * @param[in]   clock_c   3rd operand value (in BT half-slots)
+>  * @return      result    operation result (in BT half-slots)
+148,150c246,248
+<  * @param[in]   clock_a   1st operand value (in BT slots)
+<  * @param[in]   clock_b   2nd operand value (in BT slots)
+<  * @return      result    operation result (in BT slots)
+---
+>  * @param[in]   clock_a   1st operand value (in BT half-slots)
+>  * @param[in]   clock_b   2nd operand value (in BT half-slots)
+>  * @return      result    operation result (in BT half-slots)
+156a255,276
+>  * @brief Bluetooth timestamp Clocks subtraction
+>  *
+>  * @param[in]   clock_a   1st operand value (in microseconds)
+>  * @param[in]   clock_b   2nd operand value (in microseconds)
+>  * @return      result    operation result (in microseconds)
+>  ****************************************************************************************
+>  */
+> #define CLK_BTS_SUB(clock_a, clock_b)     (((int32_t) ((clock_a) - (clock_b))))
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Check if clock_a is lower than or equal to clock_b
+>  *
+>  * @param[in]   clock_a   Clock A value (in BT half-slots)
+>  * @param[in]   clock_b   Clock B value (in BT half-slots)
+>  * @return      result    True: clock_a lower than or equal to clock_b | False: else
+>  ****************************************************************************************
+>  */
+> #define CLK_BTS_LOWER_EQ(clock_a, clock_b) (CLK_BTS_SUB(clock_b, clock_a) < (RWIP_MAX_BTS_TIME >> 1))
+> 
+> /**
+>  ****************************************************************************************
+204,205c324,333
+<         ASSERT_ERR( ( ( ( (__v) << (__b##_POS) ) & ( ~(__b##_BIT) ) ) ) == 0 ); \
+<         __r = (((__r) & ~(__b##_BIT)) | (__v) << (__b##_POS));                  \
+---
+>         ASSERT_ERR( ( ( ( (__v ? 1 : 0) << (__b##_POS) ) & ( ~(__b##_BIT) ) ) ) == 0 ); \
+>         __r = (((__r) & ~(__b##_BIT)) | (__v ? 1 : 0) << (__b##_POS));                  \
+>     } while (0)
+> 
+> /// macro to toggle a bit into a value containing several bits.
+> /// @param[in] __r bit field value
+> /// @param[in] __b bit field name
+> #define TOGB(__r, __b)                                                           \
+>     do {                                                                         \
+>         __r = ((__r) ^ (__b##_BIT));                                             \
+208d335
+< #if (BLE_EMB_PRESENT)
+210,215c337,367
+<  ******************************************************************************
+<  * @brief Compare 2 BLE instants (connection event counter)
+<  * @param[in]   instant_a   1st operand value (connection event counter)
+<  * @param[in]   instant_b   2nd operand value (connection event counter)
+<  * @return      result      True: B is greater or equal to A | False: B is smaller than A
+<  ******************************************************************************
+---
+>  ****************************************************************************************
+>  * @brief Check if clock_a is equal to clock_b
+>  *
+>  * @param[in]   clock_a   Clock A value (in BT half-slots)
+>  * @param[in]   clock_b   Clock B value (in BT half-slots)
+>  * @return      result    True: clock_a lower than or equal to clock_b | False: else
+>  ****************************************************************************************
+>  */
+> #define CLK_EQ(clock_a, clock_b)      (clock_b == clock_a)
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Check if clock_a is lower than or equal to clock_b
+>  *
+>  * @param[in]   clock_a   Clock A value (in BT half-slots)
+>  * @param[in]   clock_b   Clock B value (in BT half-slots)
+>  * @return      result    True: clock_a lower than or equal to clock_b | False: else
+>  ****************************************************************************************
+>  */
+> #define CLK_LOWER_EQ(clock_a, clock_b)      (CLK_SUB(clock_b, clock_a) < (RWIP_MAX_CLOCK_TIME >> 1))
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Check if clock A is lower than or equal to clock B (with half-us precision)
+>  *
+>  * @param[in]   int_a     Integer part of clock A (in BT half-slots)
+>  * @param[in]   fract_a   Fractional part of clock A (in half-us) (range: 0 to 624)
+>  * @param[in]   int_b     Integer part of clock B (in BT half-slots)
+>  * @param[in]   fract_b   Fractional part of clock B (in half-us) (range: 0 to 624)
+>  * @return      result    True: clock A lower than or equal to clock B | False: else
+>  ****************************************************************************************
+217,218c369,371
+< #define CO_BLE_INSTANT_PASSED(instant_a, instant_b)    ((uint16_t)(instant_b - instant_a) < 32767)
+< #endif //BLE_EMB_PRESENT
+---
+> #define CLK_LOWER_EQ_HUS(int_a, fract_a, int_b, fract_b)      (  CLK_GREATER_THAN(int_b, int_a)  \
+>                                                                  || (   CLK_EQ(int_a, int_b)     \
+>                                                                      && (fract_a <= fract_b) ) ) \
+219a373,397
+> /**
+>  ****************************************************************************************
+>  * @brief Check if clock_a is greater than clock_b
+>  *
+>  * @param[in]   clock_a   Clock A value (in BT half-slots)
+>  * @param[in]   clock_b   Clock B value (in BT half-slots)
+>  * @return      result    True: clock_a is greater than clock_b | False: else
+>  ****************************************************************************************
+>  */
+> #define CLK_GREATER_THAN(clock_a, clock_b)    !(CLK_LOWER_EQ(clock_a, clock_b))
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Check if clock A is greater than clock B (with half-us precision)
+>  *
+>  * @param[in]   int_a     Integer part of clock A (in BT half-slots)
+>  * @param[in]   fract_a   Fractional part of clock A (in half-us) (range: 0 to 624)
+>  * @param[in]   int_b     Integer part of clock B (in BT half-slots)
+>  * @param[in]   fract_b   Fractional part of clock B (in half-us) (range: 0 to 624)
+>  * @return      result    True: clock A greater than clock B | False: else
+>  ****************************************************************************************
+>  */
+> #define CLK_GREATER_THAN_HUS(int_a, fract_a, int_b, fract_b)      (  CLK_GREATER_THAN(int_a, int_b)  \
+>                                                                      || (   CLK_EQ(int_a, int_b)     \
+>                                                                          && (fract_a > fract_b) ) )  \
+233c411
+< __STATIC __INLINE uint32_t co_read32(void const *ptr32)
+---
+> static __INLINE uint32_t co_read32(void const *ptr32)
+245c423
+< __STATIC __INLINE uint16_t co_read16(void const *ptr16)
+---
+> static __INLINE uint16_t co_read16(void const *ptr16)
+257c435
+< __STATIC __INLINE void co_write32(void const *ptr32, uint32_t value)
+---
+> static __INLINE void co_write32(void const *ptr32, uint32_t value)
+269c447
+< __STATIC __INLINE void co_write16(void const *ptr16, uint32_t value)
+---
+> static __INLINE void co_write16(void const *ptr16, uint32_t value)
+281c459
+< __STATIC __INLINE void co_write8(void const *ptr8, uint32_t value)
+---
+> static __INLINE void co_write8(void const *ptr8, uint32_t value)
+293c471
+< __STATIC __INLINE uint16_t co_read16p(void const *ptr16)
+---
+> static __INLINE uint16_t co_read16p(void const *ptr16)
+306,307c484
+<  
+< __STATIC __INLINE uint32_t co_read24p(void const *ptr24)
+---
+> static __INLINE uint32_t co_read24p(void const *ptr24)
+322,323c499
+<  
+< __STATIC __INLINE void co_write24p(void const *ptr24, uint32_t value)
+---
+> static __INLINE void co_write24p(void const *ptr24, uint32_t value)
+339c515
+< __STATIC __INLINE uint32_t co_read32p(void const *ptr32)
+---
+> static __INLINE uint32_t co_read32p(void const *ptr32)
+353c529
+< __STATIC __INLINE void co_write32p(void const *ptr32, uint32_t value)
+---
+> static __INLINE void co_write32p(void const *ptr32, uint32_t value)
+370c546
+< __STATIC __INLINE void co_write16p(void const *ptr16, uint16_t value)
+---
+> static __INLINE void co_write16p(void const *ptr16, uint16_t value)
+378c554,575
+< #if RW_DEBUG
+---
+> /**
+>  ****************************************************************************************
+>  * Count number of bit set to 1 in a value with variable length
+>  *
+>  * @param[in] p_val Pointer to value
+>  * @param[in] size  Number of Bytes
+>  * @return Number of bit counted
+>  ****************************************************************************************
+>  */
+> static __INLINE uint8_t co_bit_cnt(const uint8_t* p_val, uint8_t size)
+> {
+>     uint8_t nb_bit = 0;
+>     while(size-- > 0)
+>     {
+>         nb_bit += NB_ONE_BITS(*p_val);
+>         p_val++;
+>     }
+>     return (nb_bit);
+> }
+> 
+> #if (RW_DEBUG || DISPLAY_SUPPORT)
+> 
+389c586
+< #endif //RW_DEBUG
+---
+> #endif //(RW_DEBUG || DISPLAY_SUPPORT)
+405,415d601
+< #if (BLE_EMB_PRESENT)
+< /**
+<  ******************************************************************************
+<  * @brief Count the number of good channels in a LE map
+<  * @param[in]  map  Channel Map (bit fields for the 40 BT RF channels)
+<  * @return  Number of good channels
+<  ******************************************************************************
+<  */
+< uint8_t co_nb_good_le_channels(const struct le_chnl_map* map);
+< #endif //BLE_EMB_PRESENT
+< 
+425c611
+< uint32_t co_slot_to_duration(uint16_t slot_cnt);
+---
+> uint32_t co_slot_to_duration(uint32_t slot_cnt);
+444a631,634
+>  * By default output format is LSB but it can be changed with first character of format string
+>  *     - <  : LSB output format
+>  *     - >  : MSB output format
+>  *
+449a640
+>  *     - D  : 24 bits value
+450a642,644
+>  *     - XXG: Number of several bytes, where XX is the byte number, in decimal - subject to be swapped according to endianess
+>  *     - nB : table size over 1 byte, followed by the table of bytes
+>  *     - NB : table size over 2 bytes, followed by the table of bytes
+452c646
+<  * Example:   "BBLH12BL" => 1 byte | 1 byte | 1 long | 1 short | 12-bytes table | 1 long
+---
+>  * Example:   "BBLH12BLnB" => 1 byte | 1 byte | 1 long | 1 short | 12-bytes table | 1 long | table size over 1 byte | n-bytes table
+465c659
+< enum CO_UTIL_PACK_STATUS co_util_pack(uint8_t* out, uint8_t* in, uint16_t* out_len, uint16_t in_len, const char* format);
+---
+> uint8_t co_util_pack(uint8_t* out, uint8_t* in, uint16_t* out_len, uint16_t in_len, const char* format);
+473a668,671
+>  * By default input format is LSB but it can be changed with first character of format string
+>  *     - <  : LSB input format
+>  *     - >  : MSB input format
+>  *
+478a677
+>  *     - D  : 24 bits value
+479a679,681
+>  *     - XXG: Number of several bytes, where XX is the byte number, in decimal - subject to be swapped according to endianess
+>  *     - nB : table size over 1 byte, followed by the table of bytes
+>  *     - NB : table size over 2 bytes, followed by the table of bytes
+481c683
+<  * Example:   "BBLH12BL" => 1 byte | 1 byte | 1 long | 1 short | 12-bytes table | 1 long
+---
+>  * Example:   "BBLH12BLnB" => 1 byte | 1 byte | 1 long | 1 short | 12-bytes table | 1 long | table size over 1 byte | n-bytes table
+497c699
+< enum CO_UTIL_PACK_STATUS co_util_unpack(uint8_t* out, uint8_t* in, uint16_t* out_len, uint16_t in_len, const char* format);
+---
+> uint8_t co_util_unpack(uint8_t* out, uint8_t* in, uint16_t* out_len, uint16_t in_len, const char* format);

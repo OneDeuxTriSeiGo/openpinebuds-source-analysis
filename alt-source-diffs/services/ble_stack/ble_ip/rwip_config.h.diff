@@ -1,0 +1,1319 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/ble_ip/rwip_config.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/rwip/api/rwip_config.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+3a18,22
+> #include "rwapp_config.h"     // Audio Mode 0 configuration
+> #include "os_api.h"
+> #include "cmsis.h"
+> #include "besble_debug.h"
+> 
+28,33c47
+< #include "rwapp_config.h"     // Audio Mode 0 configuration
+< #include "os_api.h"
+< #include "cmsis.h"
+< #include "besble_debug.h"
+< 
+< //#if (__IAG_BLE_INCLUDE__ == XA_ENABLED)
+---
+> #define DBG_SWDIAG(bank , field , value)
+35c49
+< #ifdef __IAG_BLE_INCLUDE__
+---
+> #if defined(__IAG_BLE_INCLUDE__)
+38a53
+> 
+43,46c58,64
+< #if defined(BISTO_ENABLED)
+< #ifndef CFG_APP_SEC
+< #define CFG_APP_SEC
+< #endif
+---
+> #if BLE_AUDIO_ENABLED
+> #define CFG_CIS
+> #define CFG_BIS
+> #define CFG_BLE_GAF
+> 
+> #define CFG_ISO_CON 3
+> #define CFG_ISOOHCI
+49a68
+> 
+56,75d74
+< /* --------------------------   GENERAL SETUP       --------------------------------------*/
+< /******************************************************************************************/
+< 
+< /// Flag indicating if stack is compiled in dual or single mode
+< #if defined(CFG_BT)
+<     #define BLE_STD_MODE                     0
+<     #if defined(CFG_BLE)
+<         #define BT_DUAL_MODE                 1
+<         #define BT_STD_MODE                  0
+<     #else // CFG_BLE
+<         #define BT_DUAL_MODE                 0
+<         #define BT_STD_MODE                  1
+<     #endif // CFG_BLE
+< #elif defined(CFG_BLE)
+<     #define BT_DUAL_MODE                     0
+<     #define BT_STD_MODE                      0
+<     #define BLE_STD_MODE                     1
+< #endif // CFG_BT
+< 
+< /******************************************************************************************/
+79,85c78
+< #if (BT_DUAL_MODE)
+<     #define BT_EMB_PRESENT              1
+<     #define BLE_EMB_PRESENT             1
+<     #define HCI_PRESENT                 1
+<     #define BLE_HOST_PRESENT            0
+<     #define BLE_APP_PRESENT             0
+< #elif (BT_STD_MODE)
+---
+> #if defined(CFG_BT)
+87,91c80
+<     #define BLE_EMB_PRESENT             0
+<     #define HCI_PRESENT                 1
+<     #define BLE_HOST_PRESENT            0
+<     #define BLE_APP_PRESENT             0
+< #elif (BLE_STD_MODE)
+---
+> #else // defined(CFG_BT)
+93,94c82,84
+<     #define HCI_PRESENT                 1
+<     #if defined(CFG_EMB)
+---
+> #endif // defined(CFG_BT)
+> 
+> #if defined(CFG_BLE) && defined(CFG_EMB)
+96c86
+<     #else
+---
+> #else // defined(CFG_BLE) && defined(CFG_EMB)
+98,99c88,90
+<     #endif //CFG_EMB
+<     #if defined(CFG_HOST)
+---
+> #endif // defined(CFG_BLE) && defined(CFG_EMB)
+> 
+> #if defined(CFG_BLE) && defined(CFG_HOST)
+101c92
+<     #else
+---
+> #else // defined(CFG_BLE) && defined(CFG_HOST)
+103,104c94,96
+<     #endif //CFG_HOST
+<     #if defined(CFG_APP)
+---
+> #endif // defined(CFG_BLE) && defined(CFG_HOST)
+> 
+> #if defined(CFG_BLE) && defined(CFG_APP)
+106c98
+<     #else
+---
+> #else // defined(CFG_BLE) && defined(CFG_APP)
+108,109c100,103
+<     #endif //CFG_APP
+< #endif // BT_DUAL_MODE / BT_STD_MODE / BLE_STD_MODE
+---
+> #endif // defined(CFG_BLE) && defined(CFG_APP)
+> 
+> #define BT_DUAL_MODE                (BT_EMB_PRESENT && BLE_EMB_PRESENT)
+> #define HCI_PRESENT                 1
+111c105,117
+< #define EA_PRESENT                      (BT_EMB_PRESENT || BLE_EMB_PRESENT)
+---
+> /// Flag indicating that Mesh is supported
+> #if defined(CFG_BLE_MESH)
+> #define BLE_MESH      1
+> #else  // !defined(CFG_BLE_MESH)
+> #define BLE_MESH      0
+> #endif // defined(CFG_BLE_MESH)
+> 
+> /// Flag indicating that Generic Audio Framework is supported
+> #if defined(CFG_BLE_GAF)
+> #define BLE_GAF_PRESENT      1
+> #else //defined(CFG_BLE_GAF)
+> #define BLE_GAF_PRESENT      0
+> #endif //defined(CFG_BLE_GAF)
+136,140c142
+< #if BLE_EMB_PRESENT
+< #define H4TL_SUPPORT      (AHI_TL_SUPPORT)
+< #else // !BLE_EMB_PRESENT
+< #define H4TL_SUPPORT      0//((AHI_TL_SUPPORT) + (HCI_TL_SUPPORT))
+< #endif // BLE_EMB_PRESENT
+---
+> #define H4TL_SUPPORT      ((AHI_TL_SUPPORT) + (HCI_TL_SUPPORT))
+145,146c147,148
+< /// TCI LMP trace support
+< #define TCI_LMP_ENABLED                             0
+---
+> /// Number of HCI commands the stack can handle simultaneously
+> #define HCI_NB_CMD_PKTS   (5 * HCI_TL_SUPPORT)
+154a157
+> #define CFG_PERIPHERAL
+157,161d159
+< /// Application role definitions
+< #define BLE_BROADCASTER  (defined(CFG_BROADCASTER) || defined(CFG_PERIPHERAL) || defined(CFG_ALLROLES))
+< #define BLE_OBSERVER     (defined(CFG_OBSERVER)    || defined(CFG_CENTRAL)    || defined(CFG_ALLROLES))
+< #define BLE_PERIPHERAL   (defined(CFG_PERIPHERAL)  || defined(CFG_ALLROLES))
+< #define BLE_CENTRAL      (defined(CFG_CENTRAL)     || defined(CFG_ALLROLES))
+163,165c161,166
+< #if (!BLE_BROADCASTER) && (!BLE_OBSERVER) && (!BLE_PERIPHERAL) && (!BLE_CENTRAL)
+<     #error "No application role defined"
+< #endif /* #if (!BLE_BROADCASTER) && (!BLE_OBSERVER) && (!BLE_PERIPHERAL) && (!BLE_CENTRAL) */
+---
+> /// Broadcaster
+> #if (defined(CFG_BROADCASTER) || defined(CFG_PERIPHERAL) || defined(CFG_ALLROLES))
+> #define BLE_BROADCASTER      1
+> #else
+> #define BLE_BROADCASTER      0
+> #endif // (defined(CFG_BROADCASTER) || defined(CFG_PERIPHERAL) || defined(CFG_ALLROLES))
+167,168c168,180
+< /// Maximum number of simultaneous BLE activities (scan, connection, advertising, initiating)
+< #define BLE_ACTIVITY_MAX        (BLE_CONNECTION_MAX)
+---
+> /// Observer
+> #if (defined(CFG_OBSERVER) || defined(CFG_CENTRAL) || defined(CFG_ALLROLES))
+> #define BLE_OBSERVER      1
+> #else
+> #define BLE_OBSERVER      0
+> #endif // (defined(CFG_OBSERVER) || defined(CFG_CENTRAL) || defined(CFG_ALLROLES))
+> 
+> /// Central
+> #if (defined(CFG_CENTRAL) || defined(CFG_ALLROLES))
+> #define BLE_CENTRAL      1
+> #else
+> #define BLE_CENTRAL      0
+> #endif // (defined(CFG_CENTRAL) || defined(CFG_ALLROLES))
+170,174c182,184
+< /// Maximum number of audio connections
+< #if defined(CFG_AUDIO)
+< #if (BLE_CENTRAL || BLE_PERIPHERAL)
+< #define BLE_AUDIO      (1)
+< #define BLE_AUDIO_CONNECT_MAX    (CFG_AUDIO_CON)
+---
+> /// Peripheral
+> #if (defined(CFG_PERIPHERAL) || defined(CFG_ALLROLES))
+> #define BLE_PERIPHERAL      1
+176,177c186,200
+< #define BLE_AUDIO      (0)
+< #endif /*(BLE_CENTRAL || BLE_PERIPHERAL)*/
+---
+> #define BLE_PERIPHERAL      0
+> #endif // (defined(CFG_PERIPHERAL) || defined(CFG_ALLROLES))
+> 
+> #if ((BLE_BROADCASTER+BLE_OBSERVER+BLE_PERIPHERAL+BLE_CENTRAL) == 0)
+>     #error "No application role defined"
+> #endif // ((BLE_BROADCASTER+BLE_OBSERVER+BLE_PERIPHERAL+BLE_CENTRAL) == 0)
+> 
+> /// Maximum number of devices in RAL
+> #define BLE_RAL_MAX          (8)//(CFG_RAL)
+> 
+> #define BLE_ADV_DATA_MAX    (BES_BLE_ADV_DATA_MAX)
+> 
+> #ifdef __BT_RAMRUN__
+> /// Maximum number of simultaneous BLE activities (scan, connection, advertising, initiating)
+> #define BLE_ACTIVITY_MAX          11
+179,180c202,204
+< #define BLE_AUDIO      (0)
+< #endif /*defined(CFG_AUDIO)*/
+---
+> /// Maximum number of simultaneous BLE activities (scan, connection, advertising, initiating)
+> #define BLE_ACTIVITY_MAX          (BES_BLE_ACTIVITY_MAX)
+> #endif
+183c207
+< #define BLE_ADV_REPORTS_MAX             1
+---
+> #define BLE_ADV_REPORTS_MAX              (1)
+185,207c209,214
+< /// Define Number of AUDIO TX/RX buffers per voice channel
+< #if (BLE_AUDIO)
+<     #if defined(CFG_AUDIO_AOAHI)
+<         // 3 buffers per connection using audio over AHI TL
+<         #define BLE_NB_INPUT_BUFF_PER_VC          (3)
+<         #define BLE_NB_OUTPUT_BUFF_PER_VC         (3)
+<     #else // defined(CFG_AUDIO_AOAHI)
+<         // 2 buffers if a codec is available
+<         #define BLE_NB_INPUT_BUFF_PER_VC          (2)
+<         #define BLE_NB_OUTPUT_BUFF_PER_VC         (2)
+<     #endif // defined(CFG_AUDIO_AOAHI)
+<     // add one more buffer for fake reception and fake transmit
+<     #define BLE_TX_AUDIO_BUFFER_CNT   ((BLE_AUDIO_CONNECT_MAX * BLE_NB_INPUT_BUFF_PER_VC)  + 1)
+<     #define BLE_RX_AUDIO_BUFFER_CNT   ((BLE_AUDIO_CONNECT_MAX * BLE_NB_OUTPUT_BUFF_PER_VC) + 1)
+< #endif // (BLE_AUDIO)
+< 
+< #define CFG_DEPRECATED_API
+< /// Support of Legacy Air Operations
+< #if defined(CFG_DEPRECATED_API)
+< #define BLE_DEPRECATED_API      (1)
+< #else //defined(CFG_DEPRECATED_API)
+< #define BLE_DEPRECATED_API      (0)
+< #endif //defined(CFG_DEPRECATED_API)
+---
+> #if (BLE_EMB_PRESENT)
+> /// Maximum number of ADV reports in the HCI queue to Host
+> #define BLE_MAX_NB_ADV_REP_FRAG       (4 * HCI_TL_SUPPORT)
+> /// Maximum number of IQ reports in the HCI queue to Host
+> #define BLE_MAX_NB_IQ_REP             (4 * HCI_TL_SUPPORT)
+> #endif // (BLE_EMB_PRESENT)
+209a217,409
+> /******************************************************************************************/
+> /* --------------------------   LE Power Control                 -------------------------*/
+> /******************************************************************************************/
+> 
+> #if defined(CFG_LE_PWR_CTRL)
+>     #define BLE_PWR_CTRL                (1)
+> #else // !defined(CFG_LE_PWR_CTRL)
+>     #define BLE_PWR_CTRL                (0)
+> #endif // defined(CFG_LE_PWR_CTRL)
+> 
+> /******************************************************************************************/
+> /* --------------------------   Direction finding (AoA/AoD)      -------------------------*/
+> /******************************************************************************************/
+> 
+> #if defined(CFG_CON_CTE_REQ)
+>     #define BLE_CON_CTE_REQ                (1)
+> #else // defined(CFG_CON_CTE_REQ)
+>     #define BLE_CON_CTE_REQ                (0)
+> #endif // defined(CFG_CON_CTE_REQ)
+> 
+> #if defined(CFG_CON_CTE_RSP)
+>     #define BLE_CON_CTE_RSP                (1)
+> #else // defined(CFG_CON_CTE_RSP)
+>     #define BLE_CON_CTE_RSP                (0)
+> #endif // defined(CFG_CON_CTE_RSP)
+> 
+> #if defined(CFG_CONLESS_CTE_TX)
+>     #define BLE_CONLESS_CTE_TX             (1)
+> #else // defined(CFG_CONLESS_CTE_TX)
+>     #define BLE_CONLESS_CTE_TX             (0)
+> #endif // defined(CFG_CONLESS_CTE_TX)
+> 
+> #if defined(CFG_CONLESS_CTE_RX)
+>     #define BLE_CONLESS_CTE_RX             (1)
+> #else // defined(CFG_CONLESS_CTE_RX)
+>     #define BLE_CONLESS_CTE_RX             (0)
+> #endif // defined(CFG_CONLESS_CTE_RX)
+> 
+> #if defined(CFG_AOD)
+>     #define BLE_AOD                        (1)
+> #else // defined(CFG_AOD)
+>     #define BLE_AOD                        (0)
+> #endif // defined(CFG_AOD)
+> 
+> #if defined(CFG_AOA)
+>     #define BLE_AOA                        (1)
+> #else // defined(CFG_AOA)
+>     #define BLE_AOA                        (0)
+> #endif // defined(CFG_AOA)
+> 
+> /******************************************************************************************/
+> /* --------------------------   ISOCHRONOUS CONFIGURATION        -------------------------*/
+> /******************************************************************************************/
+> 
+> // check if isochronous is enabled or not
+> #if  (defined(CFG_ISO_CON) && (CFG_ISO_CON > 0) && (defined(CFG_ISO_MODE_0) || defined(CFG_CIS) || defined(CFG_BIS)))
+>     #define BLE_ISO_PRESENT                (1)
+> #else // !(defined(CFG_ISO_CON) && (CFG_ISO_CON > 0))
+>     #define BLE_ISO_PRESENT                (0)
+> #endif // (defined(CFG_ISO_CON) && (CFG_ISO_CON > 0))
+> 
+> //  *** Definition of supported isochronous mode ***
+> 
+> // Isochronous Mode 0 - Proprietary mode
+> #if  (BLE_ISO_PRESENT && defined(CFG_ISO_MODE_0))
+>     #define BLE_ISO_MODE_0                (BLE_CENTRAL | BLE_PERIPHERAL)
+>     #define BLE_ISO_MODE_0_PROFILE        (BLE_ISO_MODE_0 & BLE_HOST_PRESENT)
+>     #if defined(CFG_ISO_MODE_0_RSA)
+>     #define BLE_ISO_MODE_0_RSA            (BLE_ISO_MODE_0_PROFILE)
+>     #else
+>     #define BLE_ISO_MODE_0_RSA            (0)
+>     #endif // defined(CFG_ISO_MODE_0_RSA)
+>     #if defined(CFG_ISO_MODE_0_DEVICE)
+>     #define BLE_ISO_MODE_0_DEVICE         (BLE_ISO_MODE_0_PROFILE)
+>     #else
+>     #define BLE_ISO_MODE_0_DEVICE         (0)
+>     #endif // defined(CFG_ISO_MODE_0_RSA)
+> #else
+>     #define BLE_ISO_MODE_0                (0)
+>     #define BLE_ISO_MODE_0_PROFILE        (0)
+>     #define BLE_ISO_MODE_0_RSA            (0)
+>     #define BLE_ISO_MODE_0_DEVICE         (0)
+> #endif // (BLE_ISO_PRESENT && defined(CFG_AUDIO))
+> 
+> // Connected Isochronous Stream
+> #if  (BLE_ISO_PRESENT && defined(CFG_CIS))
+> #define BLE_CIS                           (BLE_CENTRAL | BLE_PERIPHERAL)
+> #else
+> #define BLE_CIS                           (0)
+> #endif // (BLE_ISO_PRESENT && defined(CFG_CIS))
+> 
+> // Broadcast Isochronous Stream
+> #if  (BLE_ISO_PRESENT && defined(CFG_BIS))
+> #define BLE_BIS                           (BLE_BROADCASTER | BLE_OBSERVER)
+> #else
+> #define BLE_BIS                           (0)
+> #endif // (BLE_ISO_PRESENT && defined(CFG_BIS))
+> 
+> // sanity check for ISO presence
+> #if !(BLE_ISO_MODE_0 | BLE_BIS | BLE_CIS)
+> #undef  BLE_ISO_PRESENT
+> #define BLE_ISO_PRESENT                   (0)
+> #endif // !(BLE_ISO_MODE_0 | BLE_BIS | BLE_CIS)
+> 
+> #if (BLE_ISO_PRESENT)
+>     /// Maximum number of ISO channel / streams
+>     #define BLE_ISO_CHANNEL_MAX      (CFG_ISO_CON)
+>     #define BLE_ISO_GROUP_MAX        (CFG_ISO_CON)
+> 
+>     /// Maximum number of octets that can be received/transmitted over Isochronous channels
+>     #define BLE_MAX_ISO_OCTETS  (251) // number of octets
+> 
+>     /// Define number of ISO TX/RX buffers per isochronous channel
+>     #define BLE_NB_ISO_BUFF_PER_CHAN            (10)
+> 
+>     /// Define number of ISO descriptors per isochronous channel
+>     /// Must be equal to max(BLE_NB_ISODESC_PER_BIS_CHAN, BLE_NB_RX_ISODESC_PER_CIS_CHAN + BLE_NB_TX_ISODESC_PER_CIS_CHAN)
+>     #define BLE_NB_ISODESC_PER_CHAN             (4)
+> 
+>     /// Number of ISO Descriptors - one descriptor required for update sub-event: 1 per stream
+>     #define BLE_ISO_DESC_NB                     ((BLE_ISO_CHANNEL_MAX * (BLE_NB_ISODESC_PER_CHAN)) + BLE_ISO_GROUP_MAX)
+>     /// Number of ISO buffers
+>     #define BLE_ISO_BUF_NB                         (BLE_ISO_CHANNEL_MAX * BLE_NB_ISO_BUFF_PER_CHAN)
+> 
+>     #if (BLE_CIS)
+>     /// Define number of ISO TX/RX descriptors and buffers per CIS channel
+>     #define BLE_NB_RXTX_ISO_DESC_BUF_PER_CIS_CHAN  (2)
+>     #endif // (BLE_CIS)
+> 
+>     #if (BLE_BIS)
+>     /// Define number of ISO RX or TX descriptors per BIS channel
+>     #define BLE_NB_ISODESC_PER_BIS_CHAN            (4)
+>     #endif // (BLE_BIS)
+> 
+>     #if (BLE_CIS | BLE_BIS)
+>         /// Number of hopping sequence per channel
+>         #define BLE_ISO_HOP_SEQ_PER_CHAN   (2)
+>         #define BLE_ISO_HOP_SEQ_SIZE       (0x20) // Depends on max number of sub-event supported
+> 
+>         /// Number of RX ISO buffers (add one more buffer for fake reception/transmit)
+>         #define BLE_ISO_HOP_SEQ_NB         (BLE_ISO_CHANNEL_MAX * BLE_ISO_HOP_SEQ_PER_CHAN)
+>     #endif // (BLE_CIS | BLE_BIS)
+> #endif // (BLE_ISO_PRESENT)
+> 
+> 
+> /// Check status of Isochronous Data path drivers
+> 
+> /// Proprietary ISO over HCI
+> #if defined(CFG_ISOOHCI)
+>     #define BLE_ISOOHCI                  (BLE_ISO_PRESENT)
+> #else
+>     #define BLE_ISOOHCI                  (0)
+> #endif
+> 
+> /// Internal ISO generator for validation purpose
+> #if defined(CFG_ISOGEN)
+>     #define BLE_ISOGEN                   (BLE_ISO_PRESENT)
+> #else
+>     #define BLE_ISOGEN                   (0)
+> #endif
+> 
+> /// Platform PCM
+> #if defined(CFG_PCM)
+>     #define BLE_ISO_PCM                  (BLE_ISO_PRESENT)
+> #else // !defined(CFG_PCM)
+>     #define BLE_ISO_PCM                  (0)
+> #endif // defined(CFG_PCM)
+> 
+> /******************************************************************************************/
+> /* --------------------------   BUFFER SETUP       --------------------------------------*/
+> /******************************************************************************************/
+> 
+> /// Buffer management - used only by host for the moment
+> #if (BLE_HOST_PRESENT)
+> #define CO_BUF_PRESENT         1
+> 
+> /// Size and number of big buffers available by default
+> #define CO_BUF_BIG_SIZE        (GAP_LE_MTU_MAX)
+> #define CO_BUF_BIG_NB          (2)
+> #define CO_BUF_BIG_POOL_SIZE   ((CO_ALIGN4_HI(sizeof(co_buf_t) + CO_BUF_BIG_SIZE)) * CO_BUF_BIG_NB)
+> 
+> 
+> /// Size and number of small buffers available by default
+> #define CO_BUF_SMALL_SIZE      (128)
+> #if(BLE_EMB_PRESENT)
+> #define CO_BUF_SMALL_NB        (BLE_ACL_BUF_NB_TX)
+> #else // !(BLE_EMB_PRESENT)
+> #define CO_BUF_SMALL_NB        (12)
+> #endif //(BLE_EMB_PRESENT)
+> #define CO_BUF_SMALL_POOL_SIZE ((CO_ALIGN4_HI(sizeof(co_buf_t) + CO_BUF_SMALL_SIZE)) * CO_BUF_SMALL_NB)
+> #else
+> #define CO_BUF_PRESENT         0
+> #endif //BLE_HOST_PRESENT
+221a422,431
+> /******************************************************************************************/
+> /* --------------------------   GPIO SETUP        -------------------------------------*/
+> /******************************************************************************************/
+> 
+> /// Display controller enable/disable
+> #if defined(CFG_GPIO)
+> #define GPIO_SUPPORT      1
+> #else
+> #define GPIO_SUPPORT      0
+> #endif //CFG_GPIO
+232c442
+< #endif //CFG_DISPLAY
+---
+> #endif //CFG_RTC
+245a456,477
+> /* --------------------------   AUDIO SYNC SETUP        ----------------------------------*/
+> /******************************************************************************************/
+> 
+> /// Audio Sync enable/disable
+> #if defined(CFG_AUDIO_SYNC)
+> #define AUDIO_SYNC_SUPPORT      1
+> #else
+> #define AUDIO_SYNC_SUPPORT      0
+> #endif //CFG_AUDIO_SYNC
+> 
+> /******************************************************************************************/
+> /* --------------------------      GAIA SETUP        -------------------------------------*/
+> /******************************************************************************************/
+> 
+> /// GAIA enable/disable
+> #if defined(CFG_GAIA)
+> #define GAIA_SUPPORT      1
+> #else
+> #define GAIA_SUPPORT      0
+> #endif //CFG_GAIA
+> 
+> /******************************************************************************************/
+262c494
+< #define HZ32000                                     0
+---
+> #define HZ32000                                     (GAIA_SUPPORT)
+271a504,533
+> /* --------------------------   BASEBAND SETUP       -------------------------------------*/
+> /******************************************************************************************/
+> 
+> /// Default programming delay, margin for programming the baseband in advance of each activity (in half-slots)
+> #define IP_PROG_DELAY_DFT  (3)
+> 
+> /**
+>  * Prefetch time (in us)
+>  *  - Radio power up: 60us (worst case)
+>  *  - EM fetch: 30us (worst case at 26Mhz)
+>  *  - HW logic: 10us (worst case at 26Mhz)
+>  */
+> #define IP_PREFETCH_TIME_US       (100)
+> 
+> /**
+>  * Prefetch Abort time (in us)
+>  *
+>  * - EM fetch:
+>  *    - HW CS Update is 18 access
+>  *    - HW Tx Desc Update is 1 access
+>  *    - HW Rx Desc Update is 5 access
+>  *        => EM update at 26MHz Tx, Rx and CS is (18+1+5)*0.04*4 = 4us
+>  * - HW logic: 10us (worst case)
+>  * - Radio power down: 26 us for Ripple
+>  *
+>  * Prefetch abort time = prefetch time + 4 + 10 + 26
+>  */
+> #define IP_PREFETCHABORT_TIME_US  (140)
+> 
+> /******************************************************************************************/
+287,288c549,560
+< #define BLE_PHY_CODED_SUPPORT                       0
+< #else
+---
+> #define BLE_PHY_CODED_SUPPORT                       1
+> #define BLE_STABLE_MOD_IDX_TX_SUPPORT               0
+> #define BLE_STABLE_MOD_IDX_RX_SUPPORT               0
+> #define BLE_PWR_CLASS_1_SUPPORT                     0
+> #elif defined(CFG_RF_BTIPT)
+> #define BLE_PHY_1MBPS_SUPPORT                       1
+> #define BLE_PHY_2MBPS_SUPPORT                       1
+> #define BLE_PHY_CODED_SUPPORT                       1
+> #define BLE_STABLE_MOD_IDX_TX_SUPPORT               0
+> #define BLE_STABLE_MOD_IDX_RX_SUPPORT               0
+> #define BLE_PWR_CLASS_1_SUPPORT                     0
+> #elif defined(CFG_RF_CALYPSO)
+291a564,580
+> #define BLE_STABLE_MOD_IDX_TX_SUPPORT               0
+> #define BLE_STABLE_MOD_IDX_RX_SUPPORT               0
+> #define BLE_PWR_CLASS_1_SUPPORT                     0
+> #elif defined(CFG_RF_EXTRC)
+> #define BLE_PHY_1MBPS_SUPPORT                       1
+> #define BLE_PHY_2MBPS_SUPPORT                       1
+> #define BLE_PHY_CODED_SUPPORT                       1
+> #define BLE_STABLE_MOD_IDX_TX_SUPPORT               0
+> #define BLE_STABLE_MOD_IDX_RX_SUPPORT               0
+> #define BLE_PWR_CLASS_1_SUPPORT                     0
+> #else // RIPPLE
+> #define BLE_PHY_1MBPS_SUPPORT                       1
+> #define BLE_PHY_2MBPS_SUPPORT                       0
+> #define BLE_PHY_CODED_SUPPORT                       1
+> #define BLE_STABLE_MOD_IDX_TX_SUPPORT               0
+> #define BLE_STABLE_MOD_IDX_RX_SUPPORT               0
+> #define BLE_PWR_CLASS_1_SUPPORT                     0
+315a605
+> 
+317c607
+< /* -------------------------   DM ARBITRATION SETUP      ---------------------------------*/
+---
+> /* ------------------------   RSSI & POWER CONTROL   -------------------------------------*/
+320,325c610,616
+< #if BT_DUAL_MODE
+< /**
+<  * Dual mode arbitration margin (in us)
+<  *
+<  * BREDRMARGIN/BLEMARGIN corresponding to a timing value that allows the RF to power-down properly before any other
+<  * activity. This is radio dependent.
+---
+> #if BLE_PWR_CTRL
+> 
+> /// RSSI averaging weight (2^N)
+> /*
+>  * Calculate an RSSI average based on a weighted history of RSSI values (RW proprietary method):
+>  * A weight of 2 (2^2 = 4) provides a weighted averaging at 25%, 18.5%, 14%, 10.5%, 8%, 6%, 4.5%, 3.3%, 2.5%...
+>  * A weight of 3 (2^3 = 8) provides a weighted averaging at 12.5%, 10.9%, 9.6%, 8.3%, 7.3%, 6.4%, 5.6%, 4.9%, 4.3%...
+327,328c618,631
+< #define DM_ARB_MARGIN      40
+< #endif //BT_DUAL_MODE
+---
+> #define RW_RSSI_AV_WEIGHT 2
+> 
+> /// RSSI APR target within golden receive window
+> #define RW_RSSI_APR_TARGET           (10) // 10 dBm threshold
+> 
+> #endif // BLE_PWR_CTRL
+> 
+> /******************************************************************************************/
+> /* -----------------------   SLOT AVAILABILITY MASKS   -----------------------------------*/
+> /******************************************************************************************/
+> 
+> /// Maximum support peer SAM map size
+> #define RW_MAX_PEER_SAM_MAP_SLOTS      (256)
+> #define RW_PEER_SAM_MAP_MAX_LEN      (RW_MAX_PEER_SAM_MAP_SLOTS/4) // 2-bit field per slot
+385,388c688,704
+< /// Modem back to back setup
+< #define MODEM2MODEM                          0
+< /// Special clock testing
+< #define CLK_WRAPPING                         0
+---
+> /// Scheduling Planner unit test (HCI debug commands to test scheduling planner functions)
+> #define SCH_PLAN_UT                 (1)
+> 
+> /// BLE I&Q sample Generator control interface
+> #define BLE_IQ_GEN                  (RW_DEBUG && (BLE_CON_CTE_REQ | BLE_CONLESS_CTE_RX))
+> 
+> 
+> /******************************************************************************************/
+> /* --------------------------      VS SETUP         --------------------------------------*/
+> /******************************************************************************************/
+> 
+> /// Read piconnect clock
+> #if defined (CFG_BT_READ_PICONET_CLOCK)
+> #define BT_READ_PICONET_CLOCK   1
+> #else
+> #define BT_READ_PICONET_CLOCK   0
+> #endif //defined (CFG_BT_READ_PICONET_CLOCK)
+407,412d722
+< /// Bluetooth technologies version
+< #define RW_BT40_VERSION                      (6)
+< #define RW_BT41_VERSION                      (7)
+< #define RW_BT42_VERSION                      (8)
+< #define RW_BT50_VERSION                      (9)
+< 
+417d726
+< #if 0
+425d733
+< #endif
+431,434d738
+< #if defined(CFG_AUDIO_AM0)
+< #include "rwam0_config.h"     // Audio Mode 0 configuration
+< #endif // defined(CFG_AUDIO_AM0)
+< 
+436c740
+< //#include "rwapp_config.h"     // Audio Mode 0 configuration
+---
+> #include "rwapp_config.h"     // Application configuration
+441,442d744
+< 
+< 
+451d752
+< 
+456a758
+> /*@TRACE*/
+459d760
+<     KE_EVENT_KE_MESSAGE      ,
+460a762,781
+> 
+>     #if DISPLAY_SUPPORT
+>     KE_EVENT_DISPLAY,
+>     #endif //DISPLAY_SUPPORT
+> 
+>     #if RTC_SUPPORT
+>     KE_EVENT_RTC_1S_TICK,
+>     #endif //RTC_SUPPORT
+> 
+>     #if BLE_ISO_MODE_0_RSA
+>     KE_EVENT_RSA_SIGN,
+>     #endif //BLE_ISO_MODE_0_RSA
+> 
+>     /// ECDH background event
+>     KE_EVENT_ECC_MULTIPLICATION,
+> 
+>     #if BT_EMB_PRESENT
+>     KE_EVENT_P192_PUB_KEY_GEN,
+>     #endif // BT_EMB_PRESENT
+> 
+465,467c786,787
+<     #if (AHI_TL_SUPPORT)
+<     KE_EVENT_AHI_TX_DONE     ,
+<     #endif //(AHI_TL_SUPPORT)
+---
+>     /// Delayed job handler
+>     KE_EVENT_DJOB,
+469,473c789,818
+<     #if (BLE_HOST_PRESENT)
+<     #if (BLE_L2CC)
+<     KE_EVENT_L2CAP_TX        ,
+<     #endif //(BLE_L2CC)
+<     #endif// (BLE_HOST_PRESENT)
+---
+>     /// Message handling
+>     KE_EVENT_KE_MESSAGE,
+> 
+>     #if (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+>     /// Handle AES result
+>     KE_EVENT_AES_END,
+>     #endif // (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+> 
+>     #if H4TL_SUPPORT
+>     KE_EVENT_H4TL_TX,
+>     #if (BLE_EMB_PRESENT || BT_EMB_PRESENT)
+>     KE_EVENT_H4TL_CMD_HDR_RX,
+>     KE_EVENT_H4TL_CMD_PLD_RX,
+>     #endif //(BLE_EMB_PRESENT || BT_EMB_PRESENT)
+>     #if (((BLE_EMB_PRESENT || BLE_HOST_PRESENT) && (BLE_CENTRAL || BLE_PERIPHERAL)) || BT_EMB_PRESENT)
+>     KE_EVENT_H4TL_ACL_HDR_RX,
+>     #endif //(((BLE_EMB_PRESENT || BLE_HOST_PRESENT) && (BLE_CENTRAL || BLE_PERIPHERAL)) || BT_EMB_PRESENT)
+>     #endif //H4TL_SUPPORT
+> 
+>     #if BT_EMB_PRESENT
+>     KE_EVENT_BT_PSCAN_PROC,
+>     #endif //BT_EMB_PRESENT
+> 
+>     /// Timer handler
+>     KE_EVENT_TIMER,
+> 
+>     #if (BLE_ISOOHCI)
+>     KE_EVENT_ISOOHCI_IN_DEFER,
+>     KE_EVENT_ISOOHCI_OUT_DEFER,
+>     #endif //(BLE_ISOOHCI)
+478a824
+> /*@TRACE*/
+480a827,850
+>     #if (BT_EMB_PRESENT)
+>     // BT Controller Tasks
+>     TASK_LM,
+>     TASK_LC,
+>     TASK_LB,
+>     #endif // (BT_EMB_PRESENT)
+> 
+>     #if (BLE_EMB_PRESENT)
+>     // Link Layer Tasks
+>     TASK_LLM,
+>     TASK_LLC,
+>     #if (BLE_ISO_PRESENT)
+>     TASK_LLI,
+>     #endif // (BLE_ISO_PRESENT)
+>     #endif // (BLE_EMB_PRESENT)
+> 
+> #if ((BLE_EMB_PRESENT) || (BT_EMB_PRESENT))
+>     TASK_DBG,
+> #endif // ((BLE_EMB_PRESENT) || (BT_EMB_PRESENT))
+> 
+> #if (DISPLAY_SUPPORT)
+>     TASK_DISPLAY,
+> #endif // (DISPLAY_SUPPORT)
+> 
+486,489c856,860
+<     TASK_L2CC,    // L2CAP Controller Task
+<     TASK_GATTM,   // Generic Attribute Profile Manager Task
+<     TASK_GATTC,   // Generic Attribute Profile Controller Task
+<     TASK_GAPM,    // Generic Access Profile Manager, 4
+---
+>     TASK_L2CAP,   // L2CAP Task
+>     #if (BLE_HL_MSG_API)
+>     TASK_GATT,    // Generic Attribute Profile
+>     #endif // (BLE_HL_MSG_API)
+>     TASK_GAPM,    // Generic Access Profile Manager
+491a863
+>     #if (BLE_HL_MSG_API)
+494,497c866
+< 
+<     #ifdef BLE_AUDIO_AM0_TASK
+<     TASK_AM0,     // BLE Audio Mode 0 Task
+<     #endif // BLE_AUDIO_AM0_TASK
+---
+>     #endif // (BLE_HL_MSG_API)
+503a873,876
+>     #if (BLE_GAF_PRESENT)
+>     TASK_GAF,
+>     #endif //(BLE_GAF_PRESENT)
+> 
+505c878
+<     TASK_MAX = 0xFE,
+---
+>     TASK_MAX,
+511c884,885
+< enum
+---
+> /*@TRACE*/
+> enum KE_MEM_HEAP
+544a919
+> 
+553a929,933
+> #if (BT_EMB_PRESENT || BLE_EMB_PRESENT)
+> #define ECC_HEAP_NON_RET_SIZE_   (328*2) // Could only have 2 ECC computations simultaneously
+> #else // (BT_EMB_PRESENT || BLE_EMB_PRESENT)
+> #define ECC_HEAP_NON_RET_SIZE_   (0)
+> #endif // (BT_EMB_PRESENT || BLE_EMB_PRESENT)
+560,562d939
+< /// Number of link in kernel environment
+< #define KE_NB_LINK_IN_HEAP_ENV   4
+< 
+565,567c942,944
+<                                      ( BLE_HEAP_ENV_SIZE_      + \
+<                                        BLEHL_HEAP_ENV_SIZE_ )    \
+<                                      * KE_NB_LINK_IN_HEAP_ENV )
+---
+>                                      BLE_HEAP_ENV_SIZE_      + \
+>                                      BLEHL_HEAP_ENV_SIZE_       )
+> 
+570c947
+< #define RWIP_HEAP_DB_SIZE         (  BLEHL_HEAP_DB_SIZE  )
+---
+> #define RWIP_HEAP_DB_SIZE          (  BLEHL_HEAP_DB_SIZE_  )
+572,577c949,962
+< /// Size of non retention heap - 512 bytes per ble link plus 4096 bytes for data throughput should be sufficient and should be tuned
+< #if (BLE_EMB_PRESENT || BLE_HOST_PRESENT)
+< #define RWIP_HEAP_NON_RET_SIZE    (( 512 * BLE_CONNECTION_MAX ) + 4096)
+< #else
+< #define RWIP_HEAP_NON_RET_SIZE    ( 1024 )
+< #endif
+---
+> /**
+>  * Size of non-retention heap
+>  *
+>  * This heap can be used to split the RAM into 2 parts:
+>  *    - an always-on part that can handle a certain number of links
+>  *    - a secondary memory that could be powered-off when not used, and retained only when used
+>  *
+>  * With such mechanism, the previous heaps need to be reduced so that they can contain all required data
+>  * in a light scenario (few connections, few profiles). Then the non-retention heap is sized in order to
+>  * cover the worst case scenario (max connections, max profiles, etc ...)
+>  *
+>  * The current size show what is already known as not needing to be retained during deep sleep.
+>  */
+> #define RWIP_HEAP_NON_RET_SIZE    ( ECC_HEAP_NON_RET_SIZE_ )
+585a971,981
+> /// Bit field definitions for channel assessment enable parameter
+> enum param_ch_ass_en
+> {
+>     /// Indicate channel assessment enabled for BLE
+>     CH_ASS_EN_BLE_POS           = 0,
+>     CH_ASS_EN_BLE_BIT           = (0x1),
+>     /// Indicate channel assessment enabled for BT
+>     CH_ASS_EN_BT_POS            = 1,
+>     CH_ASS_EN_BT_BIT            = (0x2),
+> };
+> 
+594c990
+<     /// Radio Drift
+---
+>     /// Low Power Clock Drift
+596c992
+<     /// Radio Jitter
+---
+>     /// Low Power Clock Jitter
+598,601c994,995
+<     /// Radio Class
+<     PARAM_ID_RADIO_CLASS                = 0x09,
+<     /// Bluejay specific Settings
+<     PARAM_ID_BJ_TXCNTL1                 = 0x0A,
+---
+>     /// Active Clock Drift
+>     PARAM_ID_ACTCLK_DRIFT               = 0x09,
+618,626c1012,1030
+<     /// Errata adopted check
+<     PARAM_ID_ERRATA_ADOPTED             = 0x15,
+<     /// CQDDR Tags
+<     PARAM_ID_BASIC_THRESHOLD            = 0x16,
+<     PARAM_ID_EDR_THRESHOLD              = 0x17,
+<     PARAM_ID_BASIC_ALGORITHM            = 0x18,
+<     PARAM_ID_EDR_ALGORITHM              = 0x19,
+<     PARAM_ID_BASIC_PACKET_LUT           = 0x2A,
+<     PARAM_ID_EDR_PACKET_LUT             = 0x2B,
+---
+> 
+>     /// Activity Move Configuration (enables/disables activity move for BLE connections and BT (e)SCO links)
+>     PARAM_ID_ACTIVITY_MOVE_CONFIG       = 0x15,
+> 
+>     /// Enable/disable scanning for extended advertising PDUs
+>     PARAM_ID_SCAN_EXT_ADV               = 0x16,
+> 
+>     /// Duration of the schedule reservation for long activities such as scan, inquiry, page, HDC advertising
+>     PARAM_ID_SCHED_SCAN_DUR             = 0x17,
+> 
+>     /// Programming delay, margin for programming the baseband in advance of each activity (in half-slots)
+>     PARAM_ID_PROG_DELAY                 = 0x18,
+> 
+>     /// Enable/disable channel assessment for BT and/or BLE
+>     PARAM_ID_CH_ASS_EN                  = 0x19,
+> 
+>     /// Default MD bit used by slave when sending a data packet on a BLE connection
+>     PARAM_ID_DFT_SLAVE_MD               = 0x20,
+> 
+632a1037,1038
+>     /// Tracer configuration
+>     PARAM_ID_TRACER_CONFIG              = 0x2F,
+637a1044
+>     PARAM_ID_DIAG_DM_HW                 = 0x33,
+639a1047,1049
+>     /// IDC selection (for audio demo)
+>     PARAM_ID_IDCSEL_PLF                 = 0x37,
+> 
+645,661c1055,1058
+<     /// BLE Channel Assessment tags
+<     PARAM_ID_BLE_CA_TIMER_DUR           = 0x40,
+<     PARAM_ID_BLE_CRA_TIMER_CNT          = 0x41,
+<     PARAM_ID_BLE_CA_MIN_THR             = 0x42,
+<     PARAM_ID_BLE_CA_MAX_THR             = 0x43,
+<     PARAM_ID_BLE_CA_NOISE_THR           = 0x44,
+< 
+<     /// AFH algorithm tags
+<     PARAM_ID_AFH_REASS_NBCH             = 0x51,
+<     PARAM_ID_AFH_WINLGTH                = 0x52,
+<     PARAM_ID_AFH_RSSIMIN                = 0x53,
+<     PARAM_ID_AFH_PERTHRESBAD            = 0x54,
+<     PARAM_ID_AFH_REASS_INT              = 0x55,
+<     PARAM_ID_AFH_NMIN                   = 0x56,
+<     PARAM_ID_AFH_MAXADAPT               = 0x57,
+<     PARAM_ID_AFH_THSMIN                 = 0x58,
+< 
+---
+>     /// RF BTIPT
+>     PARAM_ID_RF_BTIPT_VERSION          = 0x3E,
+>     PARAM_ID_RF_BTIPT_XO_SETTING       = 0x3F,
+>     PARAM_ID_RF_BTIPT_GAIN_SETTING     = 0x40,
+678a1076,1078
+>     /// LE Coded PHY 500 Kbps selection
+>     PARAM_ID_LE_CODED_PHY_500           = 0x85,
+> 
+696,701c1096,1097
+<      /// Radio Class
+<      PARAM_LEN_RADIO_CLASS                = 1,
+<      /// Bluejay specific Settings
+<      PARAM_LEN_BJ_TXCNTL1                 = 4,
+< 
+< 
+---
+>      /// Active clock drift
+>      PARAM_LEN_ACTCLK_DRIFT               = 1,
+718,726c1114,1132
+<      /// Errata adopted check
+<      PARAM_LEN_ERRATA_ADOPTED             = 1,
+<      /// CQDDR Tags
+<      PARAM_LEN_BASIC_THRESHOLD            = 70,
+<      PARAM_LEN_EDR_THRESHOLD              = 70,
+<      PARAM_LEN_BASIC_ALGORITHM            = 21,
+<      PARAM_LEN_EDR_ALGORITHM              = 21,
+<      PARAM_LEN_BASIC_PACKET_LUT           = 16,
+<      PARAM_LEN_EDR_PACKET_LUT             = 16,
+---
+> 
+>      /// Activity Move Configuration
+>      PARAM_LEN_ACTIVITY_MOVE_CONFIG       = 1,
+> 
+>      /// Enable/disable scanning for extended advertising PDUs
+>      PARAM_LEN_SCAN_EXT_ADV               = 1,
+> 
+>      /// Duration of the schedule reservation for long activities such as scan, inquiry, page, HDC advertising
+>      PARAM_LEN_SCHED_SCAN_DUR             = 2,
+> 
+>      /// Programming delay, margin for programming the baseband in advance of each activity (in half-slots)
+>      PARAM_LEN_PROG_DELAY                 = 1,
+> 
+>      /// Enable/disable channel assessment for BT and/or BLE
+>      PARAM_LEN_CH_ASS_EN                  = 1,
+> 
+>      /// Default MD bit used by slave when sending a data packet on a BLE connection
+>      PARAM_LEN_DFT_SLAVE_MD               = 1,
+> 
+730a1137,1139
+>      /// Tracer configuration
+>      PARAM_LEN_TRACER_CONFIG              = 4,
+> 
+734a1144
+>      PARAM_LEN_DIAG_DM_HW                 = 4,
+735a1146,1149
+> 
+>      /// IDC selection (for audio demo)
+>      PARAM_LEN_IDCSEL_PLF                 = 4,
+> 
+738a1153,1156
+>      /// RF BTIPT
+>      PARAM_LEN_RF_BTIPT_VERSION          = 1,
+>      PARAM_LEN_RF_BTIPT_XO_SETTING       = 1,
+>      PARAM_LEN_RF_BTIPT_GAIN_SETTING     = 2,
+740,754d1157
+<      PARAM_LEN_BLE_CA_TIMER_DUR           = 2,
+<      PARAM_LEN_BLE_CRA_TIMER_CNT          = 1,
+<      PARAM_LEN_BLE_CA_MIN_THR             = 1,
+<      PARAM_LEN_BLE_CA_MAX_THR             = 1,
+<      PARAM_LEN_BLE_CA_NOISE_THR           = 1,
+< 
+<      /// AFH algorithm tags
+<      PARAM_LEN_AFH_REASS_NBCH             = 1,
+<      PARAM_LEN_AFH_WINLGTH                = 1,
+<      PARAM_LEN_AFH_RSSIMIN                = 1,
+<      PARAM_LEN_AFH_PERTHRESBAD            = 1,
+<      PARAM_LEN_AFH_REASS_INT              = 1,
+<      PARAM_LEN_AFH_NMIN                   = 1,
+<      PARAM_LEN_AFH_MAXADAPT               = 1,
+<      PARAM_LEN_AFH_THSMIN                 = 1,
+762a1166,1168
+> 
+>      /// LE Coded PHY 500 Kbps selection
+>      PARAM_LEN_LE_CODED_PHY_500           = 1,
+795,807c1201,1206
+< ///Allows Tx operation in the current frame.
+< #define RWIP_MWS_TXEN           0
+< ///Prevent from any Tx operation in the current frame.
+< #define RWIP_MWS_TXDIS          1
+< /// MWS transmit disable position
+< #define RWIP_MWSTXDSB_POS       3
+< 
+< ///Allows Rx operation in the current frame.
+< #define RWIP_MWS_RXEN           0
+< ///Prevent from any Rx operation in the current frame.
+< #define RWIP_MWS_RXDIS          1
+< /// MWS transmit disable position
+< #define RWIP_MWSRXDSB_POS       4
+---
+> /// SAM disabled
+> #define RWIP_SAM_DIS            0
+> /// SAM enabled
+> #define RWIP_SAM_EN             1
+> /// SAM enable position
+> #define RWIP_SAMEN_POS          3
+889a1289,1292
+>     /// Default priority for auxillary scan/init (no_asap) rx events
+>     RWIP_PRIO_AUX_RX_IDX,
+>     /// Default priority for periodic adv rx events
+>     RWIP_PRIO_PER_ADV_RX_DFT_IDX,
+892,895c1295,1298
+<     /// Default priority for master connect events
+<     RWIP_PRIO_MCONNECT_IDX,
+<     /// Default priority for slave connect events
+<     RWIP_PRIO_SCONNECT_IDX,
+---
+>     /// LE connection events default priority
+>     RWIP_PRIO_CONNECT_DFT_IDX,
+>     /// LE connection events priority with activity
+>     RWIP_PRIO_CONNECT_ACT_IDX,
+899a1303,1306
+>     /// Default priority for aux advertising events
+>     RWIP_PRIO_ADV_AUX_IDX,
+>     /// Default priority for periodic advertising events
+>     RWIP_PRIO_PER_ADV_IDX,
+901a1309,1322
+>     #if (BLE_CIS)
+>     /// Default priority for master CIS connect events
+>     RWIP_PRIO_M_CIS_IDX,
+>     /// Default priority for slave CIS connect events
+>     RWIP_PRIO_S_CIS_IDX,
+>     #endif // (BLE_CIS)
+>     #if (BLE_BIS)
+>     /// Default priority for master BIS events
+>     RWIP_PRIO_M_BIS_IDX,
+>     /// Default priority for slave BIS events
+>     RWIP_PRIO_S_BIS_IDX,
+>     /// Priority for Scanning activity
+>     RWIP_PRIO_BIS_SCAN_IDX,
+>     #endif // (BLE_BIS)
+910c1331
+<     RWIP_PRIO_ACL_DFT               = 5,
+---
+>     RWIP_PRIO_ACL_DFT               = 40,
+912c1333
+<     RWIP_PRIO_ACL_ACT               = 10,
+---
+>     RWIP_PRIO_ACL_ACT               = 80,
+914c1335
+<     RWIP_PRIO_ACL_RSW               = 20,
+---
+>     RWIP_PRIO_ACL_RSW               = 160,
+916c1337
+<     RWIP_PRIO_ACL_SNIFF_DFT         = 15,
+---
+>     RWIP_PRIO_ACL_SNIFF_DFT         = 120,
+918c1339
+<     RWIP_PRIO_ACL_SNIFF_TRANS       = 10,
+---
+>     RWIP_PRIO_ACL_SNIFF_TRANS       = 80,
+921c1342
+<     RWIP_PRIO_SCO_DFT               = 18,
+---
+>     RWIP_PRIO_SCO_DFT               = 144,
+924c1345
+<     RWIP_PRIO_BCST_DFT              = 5,
+---
+>     RWIP_PRIO_BCST_DFT              = 40,
+926c1347
+<     RWIP_PRIO_BCST_ACT              = 10,
+---
+>     RWIP_PRIO_BCST_ACT              = 80,
+928c1349
+<     RWIP_PRIO_CSB_RX_DFT            = 10,
+---
+>     RWIP_PRIO_CSB_RX_DFT            = 80,
+930c1351
+<     RWIP_PRIO_CSB_TX_DFT            = 10,
+---
+>     RWIP_PRIO_CSB_TX_DFT            = 80,
+932c1353
+<     RWIP_PRIO_INQ_DFT               = 5,
+---
+>     RWIP_PRIO_INQ_DFT               = 40,
+934c1355
+<     RWIP_PRIO_ISCAN_DFT             = 5,
+---
+>     RWIP_PRIO_ISCAN_DFT             = 40,
+936c1357
+<     RWIP_PRIO_PAGE_DFT              = 8,
+---
+>     RWIP_PRIO_PAGE_DFT              = 64,
+938c1359
+<     RWIP_PRIO_PAGE_1ST_PKT          = 20,
+---
+>     RWIP_PRIO_PAGE_1ST_PKT          = 160,
+940c1361
+<     RWIP_PRIO_PCA_DFT               = 20,
+---
+>     RWIP_PRIO_PCA_DFT               = 160,
+942c1363
+<     RWIP_PRIO_PSCAN_DFT             = 8,
+---
+>     RWIP_PRIO_PSCAN_DFT             = 64,
+944c1365
+<     RWIP_PRIO_PSCAN_1ST_PKT         = 20,
+---
+>     RWIP_PRIO_PSCAN_1ST_PKT         = 160,
+946c1367
+<     RWIP_PRIO_SSCAN_DFT             = 10,
+---
+>     RWIP_PRIO_SSCAN_DFT             = 80,
+948c1369
+<     RWIP_PRIO_STRAIN_DFT            = 10,
+---
+>     RWIP_PRIO_STRAIN_DFT            = 80,
+952c1373,1377
+<     RWIP_PRIO_SCAN_DFT              = 5,
+---
+>     RWIP_PRIO_SCAN_DFT              = 40,
+>     /// Default priority for auxillary scan/init (no_asap) rx events
+>     RWIP_PRIO_AUX_RX_DFT            = 96,
+>     /// Default priority for periodic adv rx events
+>     RWIP_PRIO_PER_ADV_RX_DFT        = 128,
+954,958c1379,1383
+<     RWIP_PRIO_INIT_DFT              = 10,
+<     /// Default priority for master connect events
+<     RWIP_PRIO_MCONNECT_DFT          = 15,
+<     /// Default priority for slave connect events
+<     RWIP_PRIO_SCONNECT_DFT          = 15,
+---
+>     RWIP_PRIO_INIT_DFT              = 80,
+>     /// LE connection events default priority
+>     RWIP_PRIO_CONNECT_DFT           = 112,
+>     /// LE connection events priority with activity
+>     RWIP_PRIO_CONNECT_ACT           = 128,
+960c1385
+<     RWIP_PRIO_ADV_DFT               = 5,
+---
+>     RWIP_PRIO_ADV_DFT               = 40,
+962c1387,1391
+<     RWIP_PRIO_ADV_HDC_DFT           = 10,
+---
+>     RWIP_PRIO_ADV_HDC_DFT           = 80,
+>     /// Default priority for aux advertising events
+>     RWIP_PRIO_ADV_AUX_DFT           = 96,
+>     /// Default priority for periodic advertising events
+>     RWIP_PRIO_PER_ADV_DFT           = 80,
+964c1393,1407
+<     RWIP_PRIO_RPA_RENEW_DFT         = 10,
+---
+>     RWIP_PRIO_RPA_RENEW_DFT         = 80,
+>     #if (BLE_CIS)
+>     /// Default priority for Master CIS Connect
+>     RWIP_PRIO_M_CIS_DFT             = 160,
+>     /// Default priority for Slave CIS Connect
+>     RWIP_PRIO_S_CIS_DFT             = 160,
+>     #endif // (BLE_CIS)
+>     #if (BLE_BIS)
+>     /// Default priority for Master BIS
+>     RWIP_PRIO_M_BIS_DFT             = 160,
+>     /// Default priority for Slave BIS
+>     RWIP_PRIO_S_BIS_DFT             = 160,
+>     /// Default priority for Scanning activity
+>     RWIP_PRIO_BIS_SCAN_DFT          = 32,
+>     #endif // (BLE_BIS)
+967c1410
+<     RWIP_PRIO_MAX                   = 31,
+---
+>     RWIP_PRIO_MAX                   = 255,
+974c1417
+<     RWIP_INCR_ACL_DFT               = 1,
+---
+>     RWIP_INCR_ACL_DFT               = 8,
+976c1419
+<     RWIP_INCR_ACL_ACT               = 1,
+---
+>     RWIP_INCR_ACL_ACT               = 8,
+978c1421
+<     RWIP_INCR_ACL_RSW               = 1,
+---
+>     RWIP_INCR_ACL_RSW               = 8,
+980c1423
+<     RWIP_INCR_ACL_SNIFF_DFT         = 1,
+---
+>     RWIP_INCR_ACL_SNIFF_DFT         = 8,
+982c1425
+<     RWIP_INCR_ACL_SNIFF_TRANS       = 1,
+---
+>     RWIP_INCR_ACL_SNIFF_TRANS       = 8,
+985c1428
+<     RWIP_INCR_SCO_DFT               = 1,
+---
+>     RWIP_INCR_SCO_DFT               = 8,
+988c1431
+<     RWIP_INCR_BCST_DFT              = 1,
+---
+>     RWIP_INCR_BCST_DFT              = 8,
+990c1433
+<     RWIP_INCR_BCST_ACT              = 1,
+---
+>     RWIP_INCR_BCST_ACT              = 8,
+992c1435
+<     RWIP_INCR_CSB_RX_DFT            = 1,
+---
+>     RWIP_INCR_CSB_RX_DFT            = 8,
+994c1437
+<     RWIP_INCR_CSB_TX_DFT            = 1,
+---
+>     RWIP_INCR_CSB_TX_DFT            = 8,
+996c1439
+<     RWIP_INCR_INQ_DFT               = 1,
+---
+>     RWIP_INCR_INQ_DFT               = 8,
+998c1441
+<     RWIP_INCR_ISCAN_DFT             = 1,
+---
+>     RWIP_INCR_ISCAN_DFT             = 8,
+1000c1443
+<     RWIP_INCR_PAGE_DFT              = 1,
+---
+>     RWIP_INCR_PAGE_DFT              = 8,
+1002c1445
+<     RWIP_INCR_PAGE_1ST_PKT          = 2,
+---
+>     RWIP_INCR_PAGE_1ST_PKT          = 12,
+1004c1447
+<     RWIP_INCR_PCA_DFT               = 1,
+---
+>     RWIP_INCR_PCA_DFT               = 8,
+1006c1449
+<     RWIP_INCR_PSCAN_DFT             = 1,
+---
+>     RWIP_INCR_PSCAN_DFT             = 8,
+1008c1451
+<     RWIP_INCR_PSCAN_1ST_PKT         = 1,
+---
+>     RWIP_INCR_PSCAN_1ST_PKT         = 8,
+1010c1453
+<     RWIP_INCR_SSCAN_DFT             = 1,
+---
+>     RWIP_INCR_SSCAN_DFT             = 8,
+1012c1455
+<     RWIP_INCR_STRAIN_DFT            = 1,
+---
+>     RWIP_INCR_STRAIN_DFT            = 8,
+1016c1459,1463
+<     RWIP_INCR_SCAN_DFT              = 1,
+---
+>     RWIP_INCR_SCAN_DFT              = 8,
+>     /// Default increment for auxillary scan/init (no_asap) rx events
+>     RWIP_INCR_AUX_RX_DFT            = 8,
+>     /// Default increment for periodic adv rx events
+>     RWIP_INCR_PER_ADV_RX_DFT        = 8,
+1018,1022c1465,1469
+<     RWIP_INCR_INIT_DFT              = 1,
+<     /// Default increment for master connect events
+<     RWIP_INCR_MCONNECT_DFT          = 1,
+<     /// Default increment for slave connect events
+<     RWIP_INCR_SCONNECT_DFT          = 1,
+---
+>     RWIP_INCR_INIT_DFT              = 8,
+>     /// LE connection events default increment
+>     RWIP_INCR_CONNECT_DFT           = 8,
+>     /// LE connection events increment with activity
+>     RWIP_INCR_CONNECT_ACT           = 8,
+1024c1471
+<     RWIP_INCR_ADV_DFT               = 1,
+---
+>     RWIP_INCR_ADV_DFT               = 8,
+1026c1473,1477
+<     RWIP_INCR_ADV_HDC_PRIO_DFT      = 1,
+---
+>     RWIP_INCR_ADV_HDC_PRIO_DFT      = 8,
+>     /// Default increment for aux advertising events
+>     RWIP_INCR_ADV_AUX_DFT           = 8,
+>     /// Default increment for periodic advertising events
+>     RWIP_INCR_PER_ADV_DFT           = 8,
+1028c1479,1493
+<     RWIP_INCR_RPA_RENEW_DFT         = 1,
+---
+>     RWIP_INCR_RPA_RENEW_DFT         = 8,
+>     #if (BLE_CIS)
+>     /// Default priority for Master CIS Connect
+>     RWIP_INCR_M_CIS_DFT             = 8,
+>     /// Default priority for Slave CIS Connect
+>     RWIP_INCR_S_CIS_DFT             = 8,
+>     #endif // (BLE_CIS)
+>     #if (BLE_BIS)
+>     /// Default priority for Master BIS
+>     RWIP_INCR_M_BIS_DFT             = 8,
+>     /// Default priority for Slave BIS
+>     RWIP_INCR_S_BIS_DFT             = 8,
+>     /// Default priority increment for Scanning procedure
+>     RWIP_INCR_BIS_SCAN_DFT          = 8,
+>     #endif // (BLE_BIS)

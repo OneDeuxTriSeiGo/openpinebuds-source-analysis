@@ -1,0 +1,787 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/common/api/co_lmp.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/common/api/co_lmp.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+22,119c36,37
+< //LMP Opcodes
+< #define LMP_NAME_REQ_OPCODE                1
+< #define LMP_NAME_RES_OPCODE                2
+< #define LMP_ACCEPTED_OPCODE                3
+< #define LMP_NOT_ACCEPTED_OPCODE            4
+< #define LMP_CLK_OFF_REQ_OPCODE             5
+< #define LMP_CLK_OFF_RES_OPCODE             6
+< #define LMP_DETACH_OPCODE                  7
+< #define LMP_INRAND_OPCODE                  8
+< #define LMP_COMBKEY_OPCODE                 9
+< #define LMP_UNITKEY_OPCODE                10
+< #define LMP_AURAND_OPCODE                 11
+< #define LMP_SRES_OPCODE                   12
+< #define LMP_TEMPRAND_OPCODE               13
+< #define LMP_TEMPKEY_OPCODE                14
+< #define LMP_ENC_MODE_REQ_OPCODE           15
+< #define LMP_ENC_KEY_SIZE_REQ_OPCODE       16
+< #define LMP_START_ENC_REQ_OPCODE          17
+< #define LMP_STOP_ENC_REQ_OPCODE           18
+< #define LMP_SWITCH_REQ_OPCODE             19
+< #define LMP_HOLD_OPCODE                   20
+< #define LMP_HOLD_REQ_OPCODE               21
+< #define LMP_SNIFF_REQ_OPCODE              23
+< #define LMP_UNSNIFF_REQ_OPCODE            24
+< #define LMP_PARK_REQ_OPCODE               25
+< #define LMP_SET_BSWIN_OPCODE              27
+< #define LMP_MODIF_BEACON_OPCODE           28
+< #define LMP_UNPARK_BD_REQ_OPCODE          29
+< #define LMP_UNPARK_PM_REQ_OPCODE          30
+< #define LMP_INCR_PWR_REQ_OPCODE           31
+< #define LMP_DECR_PWR_REQ_OPCODE           32
+< #define LMP_MAX_PWR_OPCODE                33
+< #define LMP_MIN_PWR_OPCODE                34
+< #define LMP_AUTO_RATE_OPCODE              35
+< #define LMP_PREF_RATE_OPCODE              36
+< #define LMP_VER_REQ_OPCODE                37
+< #define LMP_VER_RES_OPCODE                38
+< #define LMP_FEATS_REQ_OPCODE              39
+< #define LMP_FEATS_RES_OPCODE              40
+< #define LMP_QOS_OPCODE                    41
+< #define LMP_QOS_REQ_OPCODE                42
+< #define LMP_SCO_LINK_REQ_OPCODE           43
+< #define LMP_RMV_SCO_LINK_REQ_OPCODE       44
+< #define LMP_MAX_SLOT_OPCODE               45
+< #define LMP_MAX_SLOT_REQ_OPCODE           46
+< #define LMP_TIMING_ACCU_REQ_OPCODE        47
+< #define LMP_TIMING_ACCU_RES_OPCODE        48
+< #define LMP_SETUP_CMP_OPCODE              49
+< #define LMP_USE_SEMI_PERM_KEY_OPCODE      50
+< #define LMP_HOST_CON_REQ_OPCODE           51
+< #define LMP_SLOT_OFF_OPCODE               52
+< #define LMP_PAGE_MODE_REQ_OPCODE          53
+< #define LMP_PAGE_SCAN_MODE_REQ_OPCODE     54
+< #define LMP_SUPV_TO_OPCODE                55
+< #define LMP_TEST_ACTIVATE_OPCODE          56
+< #define LMP_TEST_CTRL_OPCODE              57
+< #define LMP_ENC_KEY_SIZE_MASK_REQ_OPCODE  58
+< #define LMP_ENC_KEY_SIZE_MASK_RES_OPCODE  59
+< #define LMP_SET_AFH_OPCODE                60
+< #define LMP_ENCAPS_HDR_OPCODE             61
+< #define LMP_ENCAPS_PAYL_OPCODE            62
+< #define LMP_SP_CFM_OPCODE                 63
+< #define LMP_SP_NB_OPCODE                  64
+< #define LMP_DHKEY_CHK_OPCODE              65
+< #define LMP_PAUSE_ENC_AES_REQ_OPCODE      66
+< 
+< #define LMP_ESC1_OPCODE                   124
+< #define LMP_ESC2_OPCODE                   125
+< #define LMP_ESC3_OPCODE                   126
+< #define LMP_ESC4_OPCODE                   127
+< 
+< ///LMP Escape 4 Extended Opcodes
+< #define LMP_ACCEPTED_EXT_EXTOPCODE         1
+< #define LMP_NOT_ACCEPTED_EXT_EXTOPCODE     2
+< #define LMP_FEATS_REQ_EXT_EXTOPCODE        3
+< #define LMP_FEATS_RES_EXT_EXTOPCODE        4
+< #define LMP_CLK_ADJ_EXTOPCODE              5
+< #define LMP_CLK_ADJ_ACK_EXTOPCODE          6
+< #define LMP_CLK_ADJ_REQ_EXTOPCODE          7
+< #define LMP_PKT_TYPE_TBL_REQ_EXTOPCODE    11
+< #define LMP_ESCO_LINK_REQ_EXTOPCODE       12
+< #define LMP_RMV_ESCO_LINK_REQ_EXTOPCODE   13
+< #define LMP_CH_CLASS_REQ_EXTOPCODE        16
+< #define LMP_CH_CLASS_EXTOPCODE            17
+< #define LMP_SSR_REQ_EXTOPCODE             21
+< #define LMP_SSR_RES_EXTOPCODE             22
+< #define LMP_PAUSE_ENC_REQ_EXTOPCODE       23
+< #define LMP_RESUME_ENC_REQ_EXTOPCODE      24
+< #define LMP_IO_CAP_REQ_EXTOPCODE          25
+< #define LMP_IO_CAP_RES_EXTOPCODE          26
+< #define LMP_NUM_COMPARISON_FAIL_EXTOPCODE 27
+< #define LMP_PASSKEY_FAIL_EXTOPCODE        28
+< #define LMP_OOB_FAIL_EXTOPCODE            29
+< #define LMP_KEYPRESS_NOTIF_EXTOPCODE      30
+< #define LMP_PWR_CTRL_REQ_EXTOPCODE        31
+< #define LMP_PWR_CTRL_RES_EXTOPCODE        32
+< #define LMP_PING_REQ_EXTOPCODE            33
+< #define LMP_PING_RES_EXTOPCODE            34
+---
+> /// LMP Opcodes
+> /*@TRACE*/
+122,181c40,102
+< #define LMP_NAME_REQ_LEN                    2
+< #define LMP_NAME_RES_LEN                    17
+< #define LMP_ACCEPTED_LEN                    2
+< #define LMP_NOT_ACCEPTED_LEN                3
+< #define LMP_CLK_OFF_REQ_LEN                 1
+< #define LMP_CLK_OFF_RES_LEN                 3
+< #define LMP_DETACH_LEN                      2
+< #define LMP_INRAND_LEN                      17
+< #define LMP_COMBKEY_LEN                     17
+< #define LMP_UNITKEY_LEN                     17
+< #define LMP_AURAND_LEN                      17
+< #define LMP_SRES_LEN                        5
+< #define LMP_TEMPRAND_LEN                    17
+< #define LMP_TEMPKEY_LEN                     17
+< #define LMP_ENC_MODE_REQ_LEN                2
+< #define LMP_ENC_KEY_SIZE_REQ_LEN            2
+< #define LMP_START_ENC_REQ_LEN               17
+< #define LMP_STOP_ENC_REQ_LEN                1
+< #define LMP_SWITCH_REQ_LEN                  5
+< #define LMP_HOLD_LEN                        7
+< #define LMP_HOLD_REQ_LEN                    7
+< #define LMP_SNIFF_REQ_LEN                   10
+< #define LMP_UNSNIFF_REQ_LEN                 1
+< #define LMP_PARK_REQ_LEN                    17
+< #define LMP_INCR_PWR_REQ_LEN                2
+< #define LMP_DECR_PWR_REQ_LEN                2
+< #define LMP_MAX_PWR_LEN                     1
+< #define LMP_MIN_PWR_LEN                     1
+< #define LMP_AUTO_RATE_LEN                   1
+< #define LMP_PREF_RATE_LEN                   2
+< #define LMP_VER_REQ_LEN                     6
+< #define LMP_VER_RES_LEN                     6
+< #define LMP_FEATS_REQ_LEN                   9
+< #define LMP_FEATS_RES_LEN                   9
+< #define LMP_QOS_LEN                         4
+< #define LMP_QOS_REQ_LEN                     4
+< #define LMP_SCO_LINK_REQ_LEN                7
+< #define LMP_RMV_SCO_LINK_REQ_LEN            3
+< #define LMP_MAX_SLOT_LEN                    2
+< #define LMP_MAX_SLOT_REQ_LEN                2
+< #define LMP_TIMING_ACCU_REQ_LEN             1
+< #define LMP_TIMING_ACCU_RES_LEN             3
+< #define LMP_SETUP_CMP_LEN                   1
+< #define LMP_USE_SEMI_PERM_KEY_LEN           1
+< #define LMP_HOST_CON_REQ_LEN                1
+< #define LMP_SLOT_OFF_LEN                    9
+< #define LMP_PAGE_MODE_REQ_LEN               3
+< #define LMP_PAGE_SCAN_MODE_REQ_LEN          3
+< #define LMP_SUPV_TO_LEN                     3
+< #define LMP_TEST_ACTIVATE_LEN               1
+< #define LMP_TEST_CTRL_LEN                   10
+< #define LMP_ENC_KEY_SIZE_MASK_REQ_LEN       1
+< #define LMP_ENC_KEY_SIZE_MASK_RES_LEN       3
+< #define LMP_SET_AFH_LEN                     16
+< #define LMP_ENCAPS_HDR_LEN                  4
+< #define LMP_ENCAPS_PAYL_LEN                 17
+< #define LMP_SP_CFM_LEN                      17
+< #define LMP_SP_NB_LEN                       17
+< #define LMP_DHKEY_CHK_LEN                   17
+< #define LMP_PAUSE_ENC_AES_REQ_LEN           17
+---
+> enum co_lmp_pdu_length
+> {
+>     LMP_NAME_REQ_LEN              = 2 ,
+>     LMP_NAME_RES_LEN              = 17,
+>     LMP_ACCEPTED_LEN              = 2 ,
+>     LMP_NOT_ACCEPTED_LEN          = 3 ,
+>     LMP_CLK_OFF_REQ_LEN           = 1 ,
+>     LMP_CLK_OFF_RES_LEN           = 3 ,
+>     LMP_DETACH_LEN                = 2 ,
+>     LMP_INRAND_LEN                = 17,
+>     LMP_COMBKEY_LEN               = 17,
+>     LMP_UNITKEY_LEN               = 17,
+>     LMP_AURAND_LEN                = 17,
+>     LMP_SRES_LEN                  = 5 ,
+>     LMP_TEMPRAND_LEN              = 17,
+>     LMP_TEMPKEY_LEN               = 17,
+>     LMP_ENC_MODE_REQ_LEN          = 2 ,
+>     LMP_ENC_KEY_SIZE_REQ_LEN      = 2 ,
+>     LMP_START_ENC_REQ_LEN         = 17,
+>     LMP_STOP_ENC_REQ_LEN          = 1 ,
+>     LMP_SWITCH_REQ_LEN            = 5 ,
+>     LMP_HOLD_LEN                  = 7 ,
+>     LMP_HOLD_REQ_LEN              = 7 ,
+>     LMP_SNIFF_REQ_LEN             = 10,
+>     LMP_UNSNIFF_REQ_LEN           = 1 ,
+>     LMP_PARK_REQ_LEN              = 17,
+>     LMP_INCR_PWR_REQ_LEN          = 2 ,
+>     LMP_DECR_PWR_REQ_LEN          = 2 ,
+>     LMP_MAX_PWR_LEN               = 1 ,
+>     LMP_MIN_PWR_LEN               = 1 ,
+>     LMP_AUTO_RATE_LEN             = 1 ,
+>     LMP_PREF_RATE_LEN             = 2 ,
+>     LMP_VER_REQ_LEN               = 6 ,
+>     LMP_VER_RES_LEN               = 6 ,
+>     LMP_FEATS_REQ_LEN             = 9 ,
+>     LMP_FEATS_RES_LEN             = 9 ,
+>     LMP_QOS_LEN                   = 4 ,
+>     LMP_QOS_REQ_LEN               = 4 ,
+>     LMP_SCO_LINK_REQ_LEN          = 7 ,
+>     LMP_RMV_SCO_LINK_REQ_LEN      = 3 ,
+>     LMP_MAX_SLOT_LEN              = 2 ,
+>     LMP_MAX_SLOT_REQ_LEN          = 2 ,
+>     LMP_TIMING_ACCU_REQ_LEN       = 1 ,
+>     LMP_TIMING_ACCU_RES_LEN       = 3 ,
+>     LMP_SETUP_CMP_LEN             = 1 ,
+>     LMP_USE_SEMI_PERM_KEY_LEN     = 1 ,
+>     LMP_HOST_CON_REQ_LEN          = 1 ,
+>     LMP_SLOT_OFF_LEN              = 9 ,
+>     LMP_PAGE_MODE_REQ_LEN         = 3 ,
+>     LMP_PAGE_SCAN_MODE_REQ_LEN    = 3 ,
+>     LMP_SUPV_TO_LEN               = 3 ,
+>     LMP_TEST_ACTIVATE_LEN         = 1 ,
+>     LMP_TEST_CTRL_LEN             = 10,
+>     LMP_ENC_KEY_SIZE_MASK_REQ_LEN = 1 ,
+>     LMP_ENC_KEY_SIZE_MASK_RES_LEN = 3 ,
+>     LMP_SET_AFH_LEN               = 16,
+>     LMP_ENCAPS_HDR_LEN            = 4 ,
+>     LMP_ENCAPS_PAYL_LEN           = 17,
+>     LMP_SP_CFM_LEN                = 17,
+>     LMP_SP_NB_LEN                 = 17,
+>     LMP_DHKEY_CHK_LEN             = 17,
+>     LMP_PAUSE_ENC_AES_REQ_LEN     = 17,
+> };
+184,209c105,136
+< #define LMP_ACCEPTED_EXT_LEN                4
+< #define LMP_NOT_ACCEPTED_EXT_LEN            5
+< #define LMP_FEATS_REQ_EXT_LEN               12
+< #define LMP_FEATS_RES_EXT_LEN               12
+< #define LMP_CLK_ADJ_LEN                     15
+< #define LMP_CLK_ADJ_ACK_LEN                 3
+< #define LMP_CLK_ADJ_REQ_LEN                 6
+< #define LMP_PKT_TYPE_TBL_REQ_LEN            3
+< #define LMP_ESCO_LINK_REQ_LEN               16
+< #define LMP_RMV_ESCO_LINK_REQ_LEN           4
+< #define LMP_CH_CLASS_REQ_LEN                7
+< #define LMP_CH_CLASS_LEN                    12
+< #define LMP_SSR_REQ_LEN                     9
+< #define LMP_SSR_RES_LEN                     9
+< #define LMP_PAUSE_ENC_REQ_LEN               2
+< #define LMP_RESUME_ENC_REQ_LEN              2
+< #define LMP_IO_CAP_REQ_LEN                  5
+< #define LMP_IO_CAP_RES_LEN                  5
+< #define LMP_NUM_COMPARISON_FAIL_LEN         2
+< #define LMP_PASSKEY_FAIL_LEN                2
+< #define LMP_OOB_FAIL_LEN                    2
+< #define LMP_KEYPRESS_NOTIF_LEN              3
+< #define LMP_PWR_CTRL_REQ_LEN                3
+< #define LMP_PWR_CTRL_RES_LEN                3
+< #define LMP_PING_REQ_LEN                    2
+< #define LMP_PING_RES_LEN                    2
+---
+> enum co_lmp_ext_pdu_length
+> {
+>     LMP_ACCEPTED_EXT_LEN        = 4 ,
+>     LMP_NOT_ACCEPTED_EXT_LEN    = 5 ,
+>     LMP_FEATS_REQ_EXT_LEN       = 12,
+>     LMP_FEATS_RES_EXT_LEN       = 12,
+>     LMP_CLK_ADJ_LEN             = 15,
+>     LMP_CLK_ADJ_ACK_LEN         = 3 ,
+>     LMP_CLK_ADJ_REQ_LEN         = 6 ,
+>     LMP_PKT_TYPE_TBL_REQ_LEN    = 3 ,
+>     LMP_ESCO_LINK_REQ_LEN       = 16,
+>     LMP_RMV_ESCO_LINK_REQ_LEN   = 4 ,
+>     LMP_CH_CLASS_REQ_LEN        = 7 ,
+>     LMP_CH_CLASS_LEN            = 12,
+>     LMP_SSR_REQ_LEN             = 9 ,
+>     LMP_SSR_RES_LEN             = 9 ,
+>     LMP_PAUSE_ENC_REQ_LEN       = 2 ,
+>     LMP_RESUME_ENC_REQ_LEN      = 2 ,
+>     LMP_IO_CAP_REQ_LEN          = 5 ,
+>     LMP_IO_CAP_RES_LEN          = 5 ,
+>     LMP_NUM_COMPARISON_FAIL_LEN = 2 ,
+>     LMP_PASSKEY_FAIL_LEN        = 2 ,
+>     LMP_OOB_FAIL_LEN            = 2 ,
+>     LMP_KEYPRESS_NOTIF_LEN      = 3 ,
+>     LMP_PWR_CTRL_REQ_LEN        = 3 ,
+>     LMP_PWR_CTRL_RES_LEN        = 3 ,
+>     LMP_PING_REQ_LEN            = 2 ,
+>     LMP_PING_RES_LEN            = 2 ,
+>     LMP_SAM_SET_TYPE0_LEN       = 17,
+>     LMP_SAM_DEFINE_MAP_LEN      = 17,
+>     LMP_SAN_SWITCH_LEN          = 9,
+> };
+213a141,150
+> /**
+>  * Opcode and TrID in the first byte
+>  *
+>  *   7    6     5    4    3    2    1    0
+>  * +----+----+----+----+----+----+----+----+
+>  * |              opcode              | Tid|
+>  * +----+----+----+----+----+----+----+----+
+>  */
+> enum lmp_opcode_trid
+> {
+215,216c152,153
+< #define LMP_TR_ID_POS        0
+< #define LMP_TR_ID_MASK       0x01
+---
+>     LMP_TR_ID_POS       = 0,
+>     LMP_TR_ID_BIT       = 0x01,
+218,219c155,157
+< #define LMP_OPCODE_POS       1
+< #define LMP_OPCODE_MASK      0xFE
+---
+>     LMP_OPCODE_LSB      = 1,
+>     LMP_OPCODE_MASK     = 0xFE,
+> };
+221c159
+< #define LMP_OPCODE(opcode, tr_id) (((opcode << LMP_OPCODE_POS) & LMP_OPCODE_MASK) | ((tr_id << LMP_TR_ID_POS) & LMP_TR_ID_MASK))
+---
+> #define LMP_OPCODE(opcode, tr_id) (((opcode << LMP_OPCODE_LSB) & LMP_OPCODE_MASK) | ((tr_id << LMP_TR_ID_POS) & LMP_TR_ID_BIT))
+227a166,168
+> /*@TRACE
+>  * @NO_PAD
+> */
+236a178,180
+> /*@TRACE
+>  * @NO_PAD
+> */
+249a194,196
+> /*@TRACE
+>  * @NO_PAD
+> */
+258a206,208
+> /*@TRACE
+>  * @NO_PAD
+> */
+269a220,222
+> /*@TRACE
+>  * @NO_PAD
+> */
+276a230,232
+> /*@TRACE
+>  * @NO_PAD
+> */
+285a242,244
+> /*@TRACE
+>  * @NO_PAD
+> */
+294a254,256
+> /*@TRACE
+>  * @NO_PAD
+> */
+303a266,268
+> /*@TRACE
+>  * @NO_PAD
+> */
+312a278,280
+> /*@TRACE
+>  * @NO_PAD
+> */
+321a290,292
+> /*@TRACE
+>  * @NO_PAD
+> */
+330a302,304
+> /*@TRACE
+>  * @NO_PAD
+> */
+339a314,316
+> /*@TRACE
+>  * @NO_PAD
+> */
+348a326,328
+> /*@TRACE
+>  * @NO_PAD
+> */
+357a338,340
+> /*@TRACE
+>  * @NO_PAD
+> */
+366a350,352
+> /*@TRACE
+>  * @NO_PAD
+> */
+375a362,364
+> /*@TRACE
+>  * @NO_PAD
+> */
+384a374,376
+> /*@TRACE
+>  * @NO_PAD
+> */
+391a384,386
+> /*@TRACE
+>  * @NO_PAD
+> */
+400a396,398
+> /*@TRACE
+>  * @NO_PAD
+> */
+405c403
+<     ///Timing Control Flags
+---
+>     /// Timing Control Flags (bit 1: initialization method 1 or 2)
+407c405
+<     ///Dsniff
+---
+>     /// Offset (in slots)
+409c407
+<     ///Tsniff
+---
+>     /// Interval (in slots)
+411c409
+<     ///Sniff attempt
+---
+>     /// Attempts (number of receive slots) (in slots)
+413c411
+<     ///Sniff Timeout
+---
+>     /// Timeout (number of receive slots) (in slots)
+417a416,418
+> /*@TRACE
+>  * @NO_PAD
+> */
+424a426,428
+> /*@TRACE
+>  * @NO_PAD
+> */
+433a438,440
+> /*@TRACE
+>  * @NO_PAD
+> */
+442a450,452
+> /*@TRACE
+>  * @NO_PAD
+> */
+449a460,462
+> /*@TRACE
+>  * @NO_PAD
+> */
+456a470,472
+> /*@TRACE
+>  * @NO_PAD
+> */
+463a480,482
+> /*@TRACE
+>  * @NO_PAD
+> */
+472a492,494
+> /*@TRACE
+>  * @NO_PAD
+> */
+485a508,510
+> /*@TRACE
+>  * @NO_PAD
+> */
+498a524,526
+> /*@TRACE
+>  * @NO_PAD
+> */
+507a536,538
+> /*@TRACE
+>  * @NO_PAD
+> */
+516a548,550
+> /*@TRACE
+>  * @NO_PAD
+> */
+528a563,565
+> /*@TRACE
+>  * @NO_PAD
+> */
+539a577,579
+> /*@TRACE
+>  * @NO_PAD
+> */
+558a599,601
+> /*@TRACE
+>  * @NO_PAD
+> */
+569a613,615
+> /*@TRACE
+>  * @NO_PAD
+> */
+579a626,628
+> /*@TRACE
+>  * @NO_PAD
+> */
+588a638,640
+> /*@TRACE
+>  * @NO_PAD
+> */
+595a648,650
+> /*@TRACE
+>  * @NO_PAD
+> */
+600c655
+<     ///Drift
+---
+>     ///Drift (in ppm)
+602c657
+<     ///Jitter
+---
+>     ///Jitter (in us)
+606a662,664
+> /*@TRACE
+>  * @NO_PAD
+> */
+613a672,674
+> /*@TRACE
+>  * @NO_PAD
+> */
+620a682,684
+> /*@TRACE
+>  * @NO_PAD
+> */
+627a692,694
+> /*@TRACE
+>  * @NO_PAD
+> */
+638a706,708
+> /*@TRACE
+>  * @NO_PAD
+> */
+649a720,722
+> /*@TRACE
+>  * @NO_PAD
+> */
+660a734,736
+> /*@TRACE
+>  * @NO_PAD
+> */
+665c741
+<     ///Supervision Timeout
+---
+>     /// Supervision Timeout (in slots, 0 means infinite timeout)
+669a746,748
+> /*@TRACE
+>  * @NO_PAD
+> */
+676a756,758
+> /*@TRACE
+>  * @NO_PAD
+> */
+699a782,784
+> /*@TRACE
+>  * @NO_PAD
+> */
+706a792,794
+> /*@TRACE
+>  * @NO_PAD
+> */
+715a804,806
+> /*@TRACE
+>  * @NO_PAD
+> */
+728a820,822
+> /*@TRACE
+>  * @NO_PAD
+> */
+741a836,838
+> /*@TRACE
+>  * @NO_PAD
+> */
+750a848,850
+> /*@TRACE
+>  * @NO_PAD
+> */
+759a860,862
+> /*@TRACE
+>  * @NO_PAD
+> */
+768a872,874
+> /*@TRACE
+>  * @NO_PAD
+> */
+777a884,886
+> /*@TRACE
+>  * @NO_PAD
+> */
+790a900,902
+> /*@TRACE
+>  * @NO_PAD
+> */
+803a916,918
+> /*@TRACE
+>  * @NO_PAD
+> */
+818a934,936
+> /*@TRACE
+>  * @NO_PAD
+> */
+833a952,954
+> /*@TRACE
+>  * @NO_PAD
+> */
+848a970,972
+> /*@TRACE
+>  * @NO_PAD
+> */
+869a994,996
+> /*@TRACE
+>  * @NO_PAD
+> */
+880a1008,1010
+> /*@TRACE
+>  * @NO_PAD
+> */
+895a1026,1028
+> /*@TRACE
+>  * @NO_PAD
+> */
+905a1039,1085
+> ///LMP_SAM_define_map PDU structure
+> struct lmp_sam_define_map
+> {
+>     ///Opcode (including transaction ID)
+>     uint8_t opcode;
+>     ///Extended opcode
+>     uint8_t ext_opcode;
+>     ///SAM Index
+>     uint8_t index;
+>     ///Tsam-sm
+>     uint8_t t_sam_sm;
+>     ///Nsam-sm
+>     uint8_t n_sam_sm;
+>     ///SAM Submaps
+>     struct sam_submaps submaps;
+> };
+> 
+> ///LMP_SAM_set_type0 PDU structure
+> struct lmp_sam_set_type0
+> {
+>     ///Opcode (including transaction ID)
+>     uint8_t opcode;
+>     ///Extended opcode
+>     uint8_t ext_opcode;
+>     ///Update mode
+>     uint8_t update_mode;
+>     ///SAM Type0 submap
+>     struct sam_type0_submap submap;
+> };
+> 
+> ///LMP_SAM_switch PDU structure
+> struct lmp_sam_switch
+> {
+>     ///Opcode (including transaction ID)
+>     uint8_t opcode;
+>     ///Extended opcode
+>     uint8_t ext_opcode;
+>     ///SAM Index
+>     uint8_t index;
+>     ///timing control flags
+>     uint8_t flags;
+>     ///Dsam
+>     uint8_t d_sam;
+>     ///SAM instant
+>     uint32_t instant;
+> };
+> 
+906a1087,1089
+> /*@TRACE
+>  * @NO_PAD
+> */
+936c1119
+<     uint8_t  negt_st;
+---
+>     uint8_t  nego_state;
+939a1123,1125
+> /*@TRACE
+>  * @NO_PAD
+> */
+952a1139,1141
+> /*@TRACE
+>  * @NO_PAD
+> */
+967a1157,1159
+> /*@TRACE
+>  * @NO_PAD
+> */
+978a1171,1173
+> /*@TRACE
+>  * @NO_PAD
+> */
+985c1180
+<     ///Maximum sniff sub-rate
+---
+>     /// Maximum sniff sub-rate (in number of sniff events)
+987c1182
+<     ///Minimum sniff mode timeout
+---
+>     /// Minimum sniff mode timeout (in slots)
+989,990c1184,1185
+<     ///Sniff sub-rating instant
+<     uint32_t inst;
+---
+>     /// Sniff sub-rating instant (in slots, master clock value)
+>     uint32_t instant;
+993a1189,1191
+> /*@TRACE
+>  * @NO_PAD
+> */
+1000c1198
+<     ///Maximum sniff sub-rate
+---
+>     /// Maximum sniff sub-rate (in number of sniff events)
+1002c1200
+<     ///Minimum sniff mode timeout
+---
+>     /// Minimum sniff mode timeout (in slots)
+1004,1005c1202,1203
+<     ///Sniff sub-rating instant
+<     uint32_t inst;
+---
+>     /// Sniff sub-rating instant (in slots, master clock value)
+>     uint32_t instant;
+1008a1207,1209
+> /*@TRACE
+>  * @NO_PAD
+> */
+1017a1219,1221
+> /*@TRACE
+>  * @NO_PAD
+> */
+1026a1231,1233
+> /*@TRACE
+>  * @NO_PAD
+> */
+1042a1250,1252
+> /*@TRACE
+>  * @NO_PAD
+> */
+1057a1268,1270
+> /*@TRACE
+>  * @NO_PAD
+> */
+1066a1280,1282
+> /*@TRACE
+>  * @NO_PAD
+> */
+1075a1292,1294
+> /*@TRACE
+>  * @NO_PAD
+> */
+1084a1304,1306
+> /*@TRACE
+>  * @NO_PAD
+> */
+1095a1318,1320
+> /*@TRACE
+>  * @NO_PAD
+> */
+1107a1333,1335
+> /*@TRACE
+>  * @NO_PAD
+> */
+1118a1347,1349
+> /*@TRACE
+>  * @NO_PAD
+> */
+1127a1359,1361
+> /*@TRACE
+>  * @NO_PAD
+> */
+1137c1371
+< union lmp_pdu_data
+---
+> union lmp_pdu
+1202a1437,1439
+>     struct lmp_sam_define_map          sam_define_map        ;
+>     struct lmp_sam_set_type0           sam_set_type0         ;
+>     struct lmp_sam_switch              sam_switch            ;

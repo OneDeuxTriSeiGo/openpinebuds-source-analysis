@@ -1,0 +1,151 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/reg_norflaship_v2.h
+remote: https://raw.githubusercontent.com/dawmlight/device_bestechnic/63ade68296297f19742d8d5f98353c4376e516cb/bes2600w/sdk_liteos/bsp/platform/hal/reg_norflaship_v2.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 bestechnic (Shanghai) Technologies CO., LIMITED.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+42c41
+<     __IO uint32_t RESERVED_03C;
+---
+>     __IO uint32_t REG_03C;
+44c43,44
+<     __IO uint32_t RESERVED_044[3];
+---
+>     __IO uint32_t REG_044;
+>     __IO uint32_t RESERVED_048[2];
+91a92,99
+> #if (CHIP_FLASH_CTRL_VER >= 5)
+>     __IO uint32_t REG_154;
+>     __IO uint32_t REG_158;
+>     __IO uint32_t REG_15C;
+>     __IO uint32_t REG_160;
+>     __IO uint32_t REG_164;
+>     __IO uint32_t REG_168;
+> #endif
+186,187c194,195
+< #define REG_014_HOLDPIN                     (1 << 1)
+< #define REG_014_WPROPIN                     (1 << 0)
+---
+> #define REG_014_WPROPIN                     (1 << 1)
+> #define REG_014_HOLDPIN                     (1 << 0)
+246,247c254,255
+< #define REG_030_RES_SHIFT                   2
+< #define REG_030_RES_MASK                    (0x3FFFFFFF << REG_030_RES_SHIFT)
+---
+> #define REG_030_RES_SHIFT                   8
+> #define REG_030_RES_MASK                    (0xFFFFFF << REG_030_RES_SHIFT)
+249,251c257,259
+< #define REG_030_ADDR_25_24_SHIFT            0
+< #define REG_030_ADDR_25_24_MASK             (0x3 << REG_030_ADDR_25_24_SHIFT)
+< #define REG_030_ADDR_25_24(n)               BITFIELD_VAL(REG_030_ADDR_25_24, n)
+---
+> #define REG_030_ADDR_31_24_SHIFT            0
+> #define REG_030_ADDR_31_24_MASK             (0xFF << REG_030_ADDR_31_24_SHIFT)
+> #define REG_030_ADDR_31_24(n)               BITFIELD_VAL(REG_030_ADDR_31_24, n)
+262a271
+> #if (CHIP_FLASH_CTRL_VER <= 3)
+265a275,281
+> #else
+> #define REG_034_SPI_IORES_SHIFT             10
+> #define REG_034_SPI_IORES_MASK              (0x3F << REG_034_SPI_IORES_SHIFT)
+> #define REG_034_SPI_IORES(n)                BITFIELD_VAL(REG_034_SPI_IORES, n)
+> #define REG_034_MEM_READ_CONT_EN            (1 << 9)
+> #define REG_034_MEM_READ_BUS_LOCK           (1 << 8)
+> #endif
+286a303,308
+> #if (CHIP_FLASH_CTRL_VER >= 4)
+> // REG_03C
+> #define REG_03C_MEM_READ_IN_HOLD            (1 << 1)
+> #define REG_03C_MEM_READ_BUS_IDLE           (1 << 0)
+> #endif
+> 
+289,297c311,326
+< #define REG_40_RES_31_6_SHIFT               6
+< #define REG_40_RES_31_6_MASK                (0x3FFFFFF << REG_40_RES_31_6_SHIFT)
+< #define REG_40_RES_31_6(n)                  BITFIELD_VAL(REG_40_RES_31_6, n)
+< #define REG_40_SPH                          (1 << 5)
+< #define REG_40_RES_4                        (1 << 4)
+< #define REG_40_DQS_MODE                     (1 << 3)
+< #define REG_40_DTR_MODE                     (1 << 2)
+< #define REG_40_OPI_MODE                     (1 << 1)
+< #define REG_40_QPI_MODE                     (1 << 0)
+---
+> #define REG_040_RES_31_6_SHIFT              6
+> #define REG_040_RES_31_6_MASK               (0x3FFFFFF << REG_040_RES_31_6_SHIFT)
+> #define REG_040_RES_31_6(n)                 BITFIELD_VAL(REG_040_RES_31_6, n)
+> #define REG_040_SPH                         (1 << 5)
+> #define REG_040_RES_4                       (1 << 4)
+> #define REG_040_DQS_MODE                    (1 << 3)
+> #define REG_040_DTR_MODE                    (1 << 2)
+> #define REG_040_OPI_MODE                    (1 << 1)
+> #define REG_040_QPI_MODE                    (1 << 0)
+> #endif
+> 
+> #if (CHIP_FLASH_CTRL_VER >= 5)
+> // REG_044
+> #define REG_044_NAND_ADDR_BYTE_NUM_SHIFT    2
+> #define REG_044_NAND_ADDR_BYTE_NUM_MASK     (0x3 << REG_044_NAND_ADDR_BYTE_NUM_SHIFT)
+> #define REG_044_NAND_ADDR_BYTE_NUM(n)       BITFIELD_VAL(REG_044_NAND_ADDR_BYTE_NUM, n)
+428a458,489
+> #endif
+> 
+> #if (CHIP_FLASH_CTRL_VER >= 5)
+> // REG_154
+> #define REG_154_DUMMY_N_RC1_SHIFT           0
+> #define REG_154_DUMMY_N_RC1_MASK            (0x1F << REG_154_DUMMY_N_RC1_SHIFT)
+> #define REG_154_DUMMY_N_RC1(n)              BITFIELD_VAL(REG_154_DUMMY_N_RC1, n)
+> 
+> // REG_158
+> #define REG_158_DUMMY_N_RC2_SHIFT           0
+> #define REG_158_DUMMY_N_RC2_MASK            (0x1F << REG_158_DUMMY_N_RC2_SHIFT)
+> #define REG_158_DUMMY_N_RC2(n)              BITFIELD_VAL(REG_158_DUMMY_N_RC2, n)
+> 
+> // REG_15C
+> #define REG_15C_DUMMY_N_RC4_SHIFT           0
+> #define REG_15C_DUMMY_N_RC4_MASK            (0x1F << REG_15C_DUMMY_N_RC4_SHIFT)
+> #define REG_15C_DUMMY_N_RC4(n)              BITFIELD_VAL(REG_15C_DUMMY_N_RC4, n)
+> 
+> // REG_160
+> #define REG_160_DUMMY_N_RCDIO_SHIFT         0
+> #define REG_160_DUMMY_N_RCDIO_MASK          (0x1F << REG_160_DUMMY_N_RCDIO_SHIFT)
+> #define REG_160_DUMMY_N_RCDIO(n)            BITFIELD_VAL(REG_160_DUMMY_N_RCDIO, n)
+> 
+> // REG_164
+> #define REG_164_DUMMY_N_RCQIO_SHIFT         0
+> #define REG_164_DUMMY_N_RCQIO_MASK          (0x1F << REG_164_DUMMY_N_RCQIO_SHIFT)
+> #define REG_164_DUMMY_N_RCQIO(n)            BITFIELD_VAL(REG_164_DUMMY_N_RCQIO, n)
+> 
+> // REG_168
+> #define REG_168_DUMMY_N_OTHERS_SHIFT        0
+> #define REG_168_DUMMY_N_OTHERS_MASK         (0x1F << REG_168_DUMMY_N_OTHERS_SHIFT)
+> #define REG_168_DUMMY_N_OTHERS(n)           BITFIELD_VAL(REG_168_DUMMY_N_OTHERS, n)

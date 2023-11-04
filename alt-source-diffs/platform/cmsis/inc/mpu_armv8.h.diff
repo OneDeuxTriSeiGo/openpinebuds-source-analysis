@@ -1,0 +1,61 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/cmsis/inc/mpu_armv8.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/cmsis/inc/mpu_armv8.h
+diff -sw local remote
+---
+
+4,5c4,5
+<  * @version  V5.1.0
+<  * @date     08. March 2019
+---
+>  * @version  V5.1.2
+>  * @date     10. February 2020
+8c8
+<  * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+---
+>  * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+47c47
+<   (((NT & 1U) << 3U) | ((WB & 1U) << 2U) | ((RA & 1U) << 1U) | (WA & 1U))
+---
+>   ((((NT) & 1U) << 3U) | (((WB) & 1U) << 2U) | (((RA) & 1U) << 1U) | ((WA) & 1U))
+65c65
+< #define ARM_MPU_ATTR(O, I) (((O & 0xFU) << 4U) | (((O & 0xFU) != 0U) ? (I & 0xFU) : ((I & 0x3U) << 2U)))
+---
+> #define ARM_MPU_ATTR(O, I) ((((O) & 0xFU) << 4U) | ((((O) & 0xFU) != 0U) ? ((I) & 0xFU) : (((I) & 0x3U) << 2U)))
+80c80
+< #define ARM_MPU_AP_(RO, NP) (((RO & 1U) << 1U) | (NP & 1U))
+---
+> #define ARM_MPU_AP_(RO, NP) ((((RO) & 1U) << 1U) | ((NP) & 1U))
+90,91c90,91
+<   ((BASE & MPU_RBAR_BASE_Msk) | \
+<   ((SH << MPU_RBAR_SH_Pos) & MPU_RBAR_SH_Msk) | \
+---
+>   (((BASE) & MPU_RBAR_BASE_Msk) | \
+>   (((SH) << MPU_RBAR_SH_Pos) & MPU_RBAR_SH_Msk) | \
+93c93
+<   ((XN << MPU_RBAR_XN_Pos) & MPU_RBAR_XN_Msk))
+---
+>   (((XN) << MPU_RBAR_XN_Pos) & MPU_RBAR_XN_Msk))
+100,101c100,101
+<   ((LIMIT & MPU_RLAR_LIMIT_Msk) | \
+<   ((IDX << MPU_RLAR_AttrIndx_Pos) & MPU_RLAR_AttrIndx_Msk) | \
+---
+>   (((LIMIT) & MPU_RLAR_LIMIT_Msk) | \
+>   (((IDX) << MPU_RLAR_AttrIndx_Pos) & MPU_RLAR_AttrIndx_Msk) | \
+112,114c112,114
+<   ((LIMIT & MPU_RLAR_LIMIT_Msk) | \
+<   ((PXN << MPU_RLAR_PXN_Pos) & MPU_RLAR_PXN_Msk) | \
+<   ((IDX << MPU_RLAR_AttrIndx_Pos) & MPU_RLAR_AttrIndx_Msk) | \
+---
+>   (((LIMIT) & MPU_RLAR_LIMIT_Msk) | \
+>   (((PXN) << MPU_RLAR_PXN_Pos) & MPU_RLAR_PXN_Msk) | \
+>   (((IDX) << MPU_RLAR_AttrIndx_Pos) & MPU_RLAR_AttrIndx_Msk) | \
+131a132
+>   __DMB();
+148a150,151
+>   __DSB();
+>   __ISB();
+156a160
+>   __DMB();
+173a178,179
+>   __DSB();
+>   __ISB();

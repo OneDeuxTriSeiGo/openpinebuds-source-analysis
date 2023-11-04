@@ -1,0 +1,639 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/hl/inc/prf_utils.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/ip/ble/hl/inc/prf_utils.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+7c21
+<  * @ingroup PROFILE
+---
+>  * @ingroup Profile
+22,23c36
+< #if (BLE_SERVER_PRF || BLE_CLIENT_PRF)
+< #include "ke_msg.h"
+---
+> #if(BLE_PROFILES)
+25c38
+< #include "gattc_task.h"
+---
+> #include "gatt.h"
+27,28c40
+< #include "gapc_task.h"
+< #include "attm.h"
+---
+> #include "gapc_msg.h"
+30c42,46
+< #endif /* (BLE_SERVER_PRF || BLE_CLIENT_PRF) */
+---
+> #include "ke_task.h"
+> 
+> #if ((BLE_OT_CLIENT) || (BLE_OT_SERVER))
+> #include "otp.h"
+> #endif //((BLE_OT_CLIENT) || (BLE_OT_SERVER))
+45,46c61,76
+< #define PRF_ENV_GET(prf_id, type) \
+<         ((struct type ## _env_tag *)prf_env_get((TASK_ID_##prf_id)))
+---
+> #define PRF_ENV_T(type)           type##_env_t
+> #define PRF_ENV_TAG(type)         struct type##_env_tag
+> #define PRF_ENV_GET(prf_id, type) ((type##_env_t *)prf_env_get((PRF_ID_##prf_id)))
+> 
+> /// macro used to retrieve source task for profile
+> #define PRF_SRC_TASK(prf_id) prf_src_task_get(PRF_ID_##prf_id)
+> /// macro used to retrieve destination task for profile
+> #define PRF_DST_TASK(prf_id) prf_dst_task_get(PRF_ID_##prf_id)
+> 
+> 
+> // 16 bits attributes in a 128 bits array
+> #define ATT_16_TO_128_ARRAY(uuid) { (uuid) & 0xFF, (uuid >> 8) & 0xFF, 0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
+> //
+> #define ATT_128_PRIMARY_SERVICE     ATT_16_TO_128_ARRAY(GATT_DECL_PRIMARY_SERVICE)
+> #define ATT_128_CHARACTERISTIC      ATT_16_TO_128_ARRAY(GATT_DECL_CHARACTERISTIC)
+> #define ATT_128_CLIENT_CHAR_CFG     ATT_16_TO_128_ARRAY(GATT_DESC_CLIENT_CHAR_CFG)
+47a78,81
+> /*
+>  * DEFINES
+>  ****************************************************************************************
+>  */
+48a83,90
+> /// Profile destruction reason
+> enum prf_destroy_reason
+> {
+>     /// Profile removed due to a system reset
+>     PRF_DESTROY_RESET  = 0x00,
+>     /// Profile removed due to an application request
+>     PRF_DESTROY_REMOVE = 0x01,
+> };
+49a92,95
+> /*
+>  * TYPE DEFINITIONS
+>  ****************************************************************************************
+>  */
+50a97
+> typedef struct prf_task_cbs prf_task_cbs_t;
+52,53c99,144
+< /*
+<  * FUNCTION DECLARATIONS
+---
+> /// Profile Header Data
+> typedef struct prf_hdr
+> {
+>     /// Callback API - meaning specific to the profile
+>     const void*             p_cb;
+> } prf_hdr_t;
+> 
+> 
+> /// Profile environment variable definition to dynamically allocate a Task.
+> typedef struct prf_data
+> {
+>     /// pointer to the allocated memory used by profile during runtime.
+>     prf_hdr_t*            p_env;
+>     #if (BLE_HL_MSG_API)
+>     /// Profile Task description
+>     ke_task_desc_t        desc;
+>     /// Profile Task Number
+>     uint8_t               prf_task;
+>     /// Application Task Number
+>     uint8_t               app_task;
+>     #endif // (BLE_HL_MSG_API)
+>     /// API Identifier (@see enum TASK_API_ID)
+>     uint8_t               api_id;
+>     /// Profile Identifier (@see enum prf_id)
+>     uint8_t               prf_id;
+> } prf_data_t;
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Initialization of the Profile module.
+>  * This function performs all the initializations of the Profile module.
+>  *  - Creation of database (if it's a service)
+>  *  - Allocation of profile required memory
+>  *  - Initialization of task descriptor to register application
+>  *      - Task State array
+>  *      - Number of tasks
+>  *      - Default task handler
+>  *
+>  * @param[out]    p_env        Collector or Service allocated environment data.
+>  * @param[in|out] p_start_hdl  Service start handle (0 - dynamically allocated), only applies for services.
+>  * @param[in]     sec_lvl      Security level (@see enum gatt_svc_info_bf)
+>  * @param[in]     user_prio    GATT User priority
+>  * @param[in]     p_param      Configuration parameters of profile collector or service (32 bits aligned)
+>  * @param[in]     p_cb         Callback structure that handles event from profile
+>  *
+>  * @return status code to know if profile initialization succeed or not.
+55a147,148
+> typedef uint16_t (*prf_init_cb) (prf_data_t* p_env, uint16_t* p_start_hdl, uint8_t sec_lvl, uint8_t user_prio,
+>                                    const void* p_params, const void* p_cb);
+57d149
+< #if (BLE_BATT_SERVER)
+60c152,159
+<  * @brief Pack Characteristic Presentation Format descriptor value
+---
+>  * @brief Destruction of the profile module - due to a reset or profile remove.
+>  *
+>  * This function clean-up allocated memory.
+>  *
+>  * @param[in|out]    p_env        Collector or Service allocated environment data.
+>  * @param[in]        reason       Destroy reason (@see enum prf_destroy_reason)
+>  *
+>  * @return status of the destruction, if fails, profile considered not removed.
+63,64c162
+< void prf_pack_char_pres_fmt(uint8_t *packed_val, const struct prf_char_pres_fmt* char_pres_fmt);
+< #endif // (BLE_BATT_SERVER)
+---
+> typedef uint16_t (*prf_destroy_cb) (prf_data_t* p_env, uint8_t reason);
+66d163
+< #if (BLE_BATT_CLIENT)
+69c166,170
+<  * @brief Unpack Characteristic Presentation Format descriptor value
+---
+>  * @brief Handles Connection creation
+>  *
+>  * @param[in|out]    env          Collector or Service allocated environment data.
+>  * @param[in]        conidx       Connection index
+>  * @param[in]        p_con_param  Pointer to connection parameters information
+72,73c173
+< void prf_unpack_char_pres_fmt(const uint8_t *packed_val, struct prf_char_pres_fmt* char_pres_fmt);
+< #endif // (BLE_BATT_CLIENT)
+---
+> typedef void    (*prf_con_create_cb) (prf_data_t* p_env, uint8_t conidx, const gap_con_param_t* p_con_param);
+75d174
+< #if (BLE_CLIENT_PRF)
+78c177
+<  * @brief Request  peer device to read an attribute
+---
+>  * @brief Handles Disconnection
+80c179,188
+<  * @param[in] prf_env Pointer to profile information
+---
+>  * @param[in|out]    env        Collector or Service allocated environment data.
+>  * @param[in]        conidx     Connection index
+>  * @param[in]        reason     Detach reason
+>  ****************************************************************************************
+>  */
+> typedef void    (*prf_con_cleanup_cb) (prf_data_t* p_env, uint8_t conidx, uint16_t reason);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Indicates update of connection parameters
+82,84c190,220
+<  * @param conidx   Connection index
+<  * @param shdl     Search Start Handle
+<  * @param ehdl     Search End Handle
+---
+>  * @param[in|out]    env          Collector or Service allocated environment data.
+>  * @param[in]        conidx       Connection index
+>  * @param[in]        p_con_param  Pointer to new connection parameters information
+>  ****************************************************************************************
+>  */
+> typedef void    (*prf_con_upd_cb) (prf_data_t* p_env, uint8_t conidx, const gap_con_param_t* p_con_param);
+> 
+> /// Profile task callbacks.
+> typedef struct prf_task_cbs
+> {
+>     /// Initialization callback
+>     prf_init_cb        cb_init;
+>     /// Destroy profile callback
+>     prf_destroy_cb     cb_destroy;
+>     /// Connection callback
+>     prf_con_create_cb  cb_con_create;
+>     /// Disconnection callback
+>     prf_con_cleanup_cb cb_con_cleanup;
+>     /// Connection parameter updated
+>     prf_con_upd_cb     cb_con_upd;
+> } prf_task_cbs_t;
+> 
+> 
+> /*
+>  * FUNCTION DECLARATIONS
+>  ****************************************************************************************
+>  */
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Retrieve environment variable allocated for a profile
+86c222
+<  * @param valhdl   Value Handle
+---
+>  * @param[in] prf_id        Profile Identifier (@see enum rwprf_id)
+88c224
+<  * @note: if attribute is invalid, nothing is registered
+---
+>  * @return Environment variable allocated for a profile
+91,92c227,233
+< void prf_read_char_send(prf_env_t *prf_env, uint8_t conidx,
+<                         uint16_t shdl, uint16_t ehdl, uint16_t valhdl);
+---
+> #ifdef __cplusplus
+> extern "C" {
+> #endif
+> prf_hdr_t* prf_env_get(uint8_t prf_id);
+> #ifdef __cplusplus
+> }
+> #endif
+93a235
+> #if (BLE_HL_MSG_API)
+97c239
+<  * @brief register attribute handle in GATT
+---
+>  * @brief Retrieve source profile task number value
+99c241
+<  * @param[in] prf_env Pointer to profile information
+---
+>  * @param[in] prf_id     Profile Identifier (@see enum rwprf_id)
+101,104c243
+<  * @param conidx   Connection index
+<  * @param svc   Service to register
+<  *
+<  * @note: if attribute is invalid, nothing is registered
+---
+>  * @return Source profile task number value
+107c246
+< void prf_register_atthdl2gatt(prf_env_t *prf_env, uint8_t conidx, struct prf_svc *svc);
+---
+> ke_task_id_t prf_src_task_get(uint8_t prf_id);
+111,113c250
+<  * @brief Unregister attribute handle in GATT
+<  *
+<  * @param[in] prf_env Pointer to profile information
+---
+>  * @brief Retrieve destination application task number value
+115,116c252
+<  * @param conidx   Connection index
+<  * @param svc   Service to register
+---
+>  * @param[in] prf_id     Profile Identifier (@see enum rwprf_id)
+118c254
+<  * @note: if attribute is invalid, nothing is registered
+---
+>  * @return Destination application task number value
+121c257
+< void prf_unregister_atthdl2gatt(prf_env_t *prf_env, uint8_t conidx, struct prf_svc *svc);
+---
+> ke_task_id_t prf_dst_task_get(uint8_t prf_id);
+125c261,262
+<  * @brief Request service discovery on peer device.
+---
+>  * @brief Retrieve Task Identifier from Task number
+>  * (automatically update index of task in returned task id)
+127,129c264,274
+<  * This request will be used to retrieve start and end handles of the service.
+<  *
+<  * @param[in] prf_env Pointer to profile information
+---
+>  * @param[in]  task Task number
+>  * @return Profile API Identifier (@see enum TASK_API_ID)
+>  ****************************************************************************************
+>  */
+> uint8_t prf_get_api_id_from_task_num(uint8_t task);
+> uint8_t prf_get_id_from_task(uint8_t task);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Retrieve Task Number from Task Identifier
+>  * (automatically update index of task in returned task id)
+131,132c276,277
+<  * @param conidx   Connection index
+<  * @param uuid     Service UUID
+---
+>  * @param[in] api_id Profile API Identifier (@see enum TASK_API_ID)
+>  * @return Task Number
+135c280,283
+< void prf_disc_svc_send(prf_env_t *prf_env,uint8_t conidx,  uint16_t uuid);
+---
+> uint8_t prf_get_task_num_from_api_id(uint8_t api_id);
+> uint8_t prf_get_task_from_id(uint8_t api_id);
+> #endif // (BLE_HL_MSG_API)
+> 
+136a285,303
+> #if (BLE_BATT_SERVER)
+> /**
+>  ****************************************************************************************
+>  * @brief Pack Characteristic Presentation Format descriptor value
+>  ****************************************************************************************
+>  */
+> void prf_pack_char_pres_fmt(co_buf_t* p_buf, const prf_char_pres_fmt_t* char_pres_fmt);
+> #endif // (BLE_BATT_SERVER)
+> 
+> #if (BLE_BATT_CLIENT)
+> /**
+>  ****************************************************************************************
+>  * @brief Unpack Characteristic Presentation Format descriptor value
+>  ****************************************************************************************
+>  */
+> void prf_unpack_char_pres_fmt(co_buf_t* p_buf, prf_char_pres_fmt_t* char_pres_fmt);
+> #endif // (BLE_BATT_CLIENT)
+> 
+> #if (BLE_CLIENT_PRF)
+144d310
+<  * @param[in] prf_env Pointer to profile information
+146,147c312,315
+<  * @param[in] handle Peer handle to modify
+<  * @param[in] value  New Peer handle value
+---
+>  * @param[in] user_lid      GATT Client User Local Identifier
+>  * @param[in] dummy         Dummy parameter returned in procedure completion
+>  * @param[in] write_type    GATT Write Type (@see gatt_write_type)
+>  * @param[in] hdl           Peer handle to modify
+148a317,319
+>  * @param[in] p_data        Pointer to data value
+>  *
+>  * @return Execution status (@see enum hl_err)
+151,152c322,324
+< void prf_gatt_write(prf_env_t *prf_env, uint8_t conidx,
+<                     uint16_t handle, uint8_t* value, uint16_t length, uint8_t operation);
+---
+> uint16_t prf_gatt_write(uint8_t conidx, uint8_t user_lid, uint16_t dummy, uint8_t write_type,
+>                         uint16_t hdl, uint16_t length, const uint8_t* p_data);
+> 
+156c328
+<  * @brief Modify peer client configuration descriptor using GATT
+---
+>  * @brief Check service characteristic validity
+158c330
+<  * It will request write modification of peer client configuration descriptor handle
+---
+>  * For each characteristic in service it verifies handles.
+160c332
+<  * @param[in] prf_env Pointer to profile information
+---
+>  * If some handles are not present, it checks if they shall be present or they are optional.
+162,163c334,336
+<  * @param[in] conidx   Connection index
+<  * @param[in] handle Peer client configuration descriptor handle to modify
+---
+>  * @param nb_chars      Number of Characteristics in the service
+>  * @param p_chars       Characteristics values (char handles, val handles, properties)
+>  * @param p_chars_req   Characteristics requirements.
+165c338
+<  * @param[in] ntf_ind_cfg  Indication/Notification configuration
+---
+>  * @return Execution status (@see enum hl_err)
+168,169c341,343
+< void prf_gatt_write_ntf_ind(prf_env_t *prf_env, uint8_t conidx, uint16_t handle,
+<         uint16_t ntf_ind_cfg);
+---
+> uint16_t prf_check_svc_char_validity(uint8_t nb_chars, const prf_char_t* p_chars,
+>                                      const prf_char_def_t* p_chars_req);
+> 
+170a345
+> #if (BLE_PRF_PROPRIETARY_SVC_SUPPORT)
+173c348
+<  * @brief Check service characteristic validity
+---
+>  * @brief Check 128-bit service characteristic validity
+180,181c355,356
+<  * @param chars      Characteristics values (char handles, val handles, properties)
+<  * @param chars_req  Characteristics requirements.
+---
+>  * @param p_chars      Characteristics values (char handles, val handles, properties)
+>  * @param p_chars_req  Characteristics requirements.
+183c358
+<  * @return 0x1 if service is valid, 0x00 else.
+---
+>  * @return Execution status (@see enum hl_err)
+186,188c361,364
+< uint8_t prf_check_svc_char_validity(uint8_t nb_chars,
+<                                     const struct prf_char_inf* chars,
+<                                     const struct prf_char_def* chars_req);
+---
+> 
+> uint16_t prf_check_svc128_char_validity(uint8_t nb_chars, const prf_char_t* p_chars,
+>                                         const prf_char128_def_t* p_chars_req);
+> #endif // (BLE_PRF_PROPRIETARY_SVC_SUPPORT)
+199,201c375,377
+<  * @param descs_size Number of Characteristic descriptors in the service
+<  * @param descs      Characteristic descriptors values (handles)
+<  * @param descs_req  Characteristics descriptors requirements.
+---
+>  * @param nb_descs       Number of Characteristic descriptors in the service
+>  * @param p_descs        Characteristic descriptors values (handles)
+>  * @param p_descs_req    Characteristics descriptors requirements.
+203c379
+<  * @return 0x1 if service is valid, 0x00 else.
+---
+>  * @return Execution status (@see enum hl_err)
+206,209c382,383
+< uint8_t prf_check_svc_char_desc_validity(uint8_t descs_size,
+<                                         const struct prf_char_desc_inf* descs,
+<                                         const struct prf_char_desc_def* descs_req,
+<                                         const struct prf_char_inf* chars);
+---
+> uint16_t prf_check_svc_desc_validity(uint8_t nb_descs, const prf_desc_t* p_descs,
+>                                      const prf_desc_def_t* p_descs_req, const prf_char_t* p_chars);
+213c387,394
+<  * @brief Extract information of the service according to the service description
+---
+>  * @brief Check service validity (both characteristics and descriptors)
+>  *
+>  * @param nb_chars      Number of Characteristics in the service
+>  * @param p_chars       Characteristics values (char handles, val handles, properties)
+>  * @param p_chars_req   Characteristics requirements.
+>  * @param nb_descs      Number of Characteristic descriptors in the service
+>  * @param p_descs       Characteristic descriptors values (handles)
+>  * @param p_descs_req   Characteristics descriptors requirements.
+215,221c396
+<  * @param param            Service information
+<  * @param nb_chars         Length of provided arrays (chars and chars_req)
+<  * @param chars_req        Characteristics requirements
+<  * @param chars            Characteristics
+<  * @param nb_descs         Length of provided arrays (descs and descs_req)
+<  * @param descs_req        Descriptors requirements
+<  * @param descs            Descriptors
+---
+>  * @return Execution status (@see enum hl_err)
+224,226c399,402
+< void prf_extract_svc_info(const struct gattc_sdp_svc_ind* param,
+<         uint8_t nb_chars, const struct prf_char_def* chars_req, struct prf_char_inf* chars,
+<         uint8_t nb_descs, const struct prf_char_desc_def* descs_req, struct prf_char_desc_inf* descs);
+---
+> uint16_t prf_check_svc_validity(uint8_t nb_chars,
+>                                 const prf_char_t* p_chars, const prf_char_def_t* p_chars_req,
+>                                 uint8_t nb_descs,
+>                                 const prf_desc_t* p_descs, const prf_desc_def_t* p_descs_req);
+228c404,442
+< #endif //(BLE_CLIENT_PRF)
+---
+> #if (BLE_PRF_PROPRIETARY_SVC_SUPPORT)
+> /**
+>  ****************************************************************************************
+>  * @brief Check service validity (both characteristics and descriptors)
+>  *
+>  * @param nb_chars      Number of Characteristics in the service
+>  * @param p_chars       Characteristics values (char handles, val handles, properties)
+>  * @param p_chars_req   Characteristics requirements.
+>  * @param nb_descs      Number of Characteristic descriptors in the service
+>  * @param p_descs       Characteristic descriptors values (handles)
+>  * @param p_descs_req   Characteristics descriptors requirements.
+>  *
+>  * @return Execution status (@see enum hl_err)
+>  ****************************************************************************************
+>  */
+> uint16_t prf_check_svc128_validity(uint8_t nb_chars,
+>                                    const prf_char_t* p_chars, const prf_char128_def_t* p_chars_req,
+>                                    uint8_t nb_descs,
+>                                    const prf_desc_t* p_descs, const prf_desc_def_t* p_descs_req);
+> #endif // (BLE_PRF_PROPRIETARY_SVC_SUPPORT)
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Extract information of the service according to the service description
+>  *
+>  * @param[in]     first_hdl    First handle value of following list
+>  * @param[in]     nb_att       Number of attributes
+>  * @param[in]     p_atts       Pointer to attribute information present in a service
+>  * @param[in]     nb_chars     Length of provided arrays (chars and chars_req)
+>  * @param[in]     p_chars_req    Characteristics requirements
+>  * @param[in|out] p_chars            Characteristics
+>  * @param[in]     nb_descs         Length of provided arrays (descs and descs_req)
+>  * @param[in]     p_descs_req        Descriptors requirements
+>  * @param[in|out] p_descs            Descriptors
+>  ****************************************************************************************
+>  */
+> void prf_extract_svc_info(uint16_t first_hdl, uint8_t nb_att, const gatt_svc_att_t* p_atts,
+>                           uint8_t nb_chars, const prf_char_def_t* p_chars_req, prf_char_t* p_chars,
+>                           uint8_t nb_descs, const prf_desc_def_t* p_descs_req, prf_desc_t* p_descs);
+231c445
+< #if (BLE_CLIENT_PRF || BLE_TIP_SERVER || BLE_AN_SERVER || BLE_PAS_SERVER)
+---
+> #if (BLE_PRF_PROPRIETARY_SVC_SUPPORT)
+235c449
+<  * @brief The function is used to send information about peer attribute value
+---
+>  * @brief Extract information of the service 128-Bits according to the service description
+237,241c451,459
+<  * @param[in] prf_env       Pointer to the profile environment variable
+<  * @param[in] conidx        Connection index
+<  * @param[in] msg_id        Profile message ID to trigger
+<  * @param[in] status        Response status code
+<  * @param[in] read_ind      GATT read message indication
+---
+>  * @param[in]     first_hdl    First handle value of following list
+>  * @param[in]     nb_att       Number of attributes
+>  * @param[in]     p_atts       Pointer to attribute information present in a service / UUIDs in array shall be in 128-bit format
+>  * @param[in]     nb_chars     Length of provided arrays (chars and chars_req)
+>  * @param[in]     p_chars_req    Characteristics requirements
+>  * @param[in|out] p_chars            Characteristics
+>  * @param[in]     nb_descs         Length of provided arrays (descs and descs_req)
+>  * @param[in]     p_descs_req        Descriptors requirements
+>  * @param[in|out] p_descs            Descriptors
+244,245c462,466
+< void prf_client_att_info_rsp(prf_env_t *prf_env, uint8_t conidx, uint16_t msg_id,
+<                              uint8_t status, struct gattc_read_ind const* read_ind);
+---
+> void prf_extract_svc128_info(uint16_t first_hdl, uint8_t nb_att, const gatt_svc_att_t* p_atts,
+>                              uint8_t nb_chars, const prf_char128_def_t* p_chars_req, prf_char_t* p_chars,
+>                              uint8_t nb_descs, const prf_desc_def_t* p_descs_req, prf_desc_t* p_descs);
+> #endif // (BLE_PRF_PROPRIETARY_SVC_SUPPORT)
+> #endif //(BLE_CLIENT_PRF)
+247d467
+< #endif //(BLE_CLIENT_PRF || BLE_TIP_SERVER || BLE_AN_SERVER || BLE_PAS_SERVER)
+254,255c474,482
+<  * @param[out] packed_date packed date time
+<  * @param[in] date_time structure date time
+---
+>  * @param[in] p_buf       Pointer to the output buffer
+>  * @param[in] p_date_time Pointer to structure date time
+>  ****************************************************************************************
+>  */
+> void prf_pack_date_time(co_buf_t*p_buf, const prf_date_time_t* p_date_time);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Pack date value
+257c484,485
+<  * @return size of packed value
+---
+>  * @param[in] p_buf       Pointer to the output buffer
+>  * @param[in] p_date Pointer to structure date
+260c488,489
+< uint8_t prf_pack_date_time(uint8_t *packed_date, const struct prf_date_time* date_time);
+---
+> void prf_pack_date(co_buf_t*p_buf, const prf_date_t* p_date);
+> 
+266,267c495,536
+<  * @param[in] packed_date packed date time
+<  * @param[out] date_time structure date time
+---
+>  * @param[in]  p_buf       Pointer to input buffer
+>  * @param[out] p_date_time Pointer to structure date time
+>  ****************************************************************************************
+>  */
+> void prf_unpack_date_time(co_buf_t* p_buf, prf_date_time_t* p_date_time);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Unpack date  value
+>  *
+>  * @param[in]  p_buf       Pointer to input buffer
+>  * @param[out] p_date      Pointer to structure date
+>  ****************************************************************************************
+>  */
+> void prf_unpack_date(co_buf_t* p_buf, prf_date_t* p_date);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Allocate a buffer that will be provided to GATT for transmission of an ATT
+>  * message
+>  *
+>  * @param[in] pp_buf    Pointer at which allocated buffer is returned
+>  * @param[in] data_len  Buffer data length
+>  *
+>  * @return Allocation status
+>  ****************************************************************************************
+>  */
+> uint8_t prf_buf_alloc(co_buf_t** pp_buf, uint16_t data_len);
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief TODO [LT]
+>  ****************************************************************************************
+>  */
+> uint32_t prf_evt_get_con_bf(uint8_t* p_cli_cfg_bf, uint8_t char_type);
+> 
+> #if ((BLE_OT_CLIENT) || (BLE_OT_SERVER))
+> /**
+>  ****************************************************************************************
+>  * @brief Check the validity of an Object ID
+>  *
+>  * @param[in] p_object_id       Pointer to Object ID
+269c538
+<  * @return size of packed value
+---
+>  * @return True if valid and false if invalid
+272c541,542
+< uint8_t prf_unpack_date_time(uint8_t *packed_date, struct prf_date_time* date_time);
+---
+> bool prf_is_object_id_valid(const ot_object_id_t* p_object_id);
+> #endif // ((BLE_OT_CLIENT) || (BLE_OT_SERVER))
+274a545,560
+> 
+> #if ((BLE_CGM_SERVER || BLE_CGM_CLIENT))
+> /**
+>  ****************************************************************************************
+>  * @brief Calculate E2E-CRC according to the profile specification
+>  *
+>  * @param[in] p_buf Pointer to buffer that contains CRC data
+>  *
+>  * @return E2E-CRC according to the specification.
+>  ****************************************************************************************
+>  */
+> uint16_t prf_e2e_crc(co_buf_t* p_buf);
+> 
+> #endif /* ((BLE_CGM_SERVER || BLE_CGM_CLIENT)) */
+> 
+> #endif // (BLE_PROFILES)

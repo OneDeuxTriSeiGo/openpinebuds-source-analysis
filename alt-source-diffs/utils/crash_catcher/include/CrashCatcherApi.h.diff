@@ -1,0 +1,6 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/utils/crash_catcher/include/CrashCatcherApi.h
+remote: https://raw.githubusercontent.com/alibaba/AliOS-Things/0550010985bcf0fa9070fe094b34b9156776be9a/hardware/chip/haas1000/drivers/utils/crash_catcher/include/CrashCatcherApi.h
+diff -sw local remote
+---
+
+Files local and remote are identical

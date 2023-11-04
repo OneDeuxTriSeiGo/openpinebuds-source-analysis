@@ -1,0 +1,53 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/ble_ip/compiler.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/common/api/compiler.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+11c25,29
+< /// define the BLE IRQ handler attribute for this compiler
+---
+> 
+> /// define the interrupt handler attribute for this compiler
+> #define __IRQ
+> 
+> /// define the BT IRQ handler attribute for this compiler
+17,18c35,36
+< /// define size of an empty array (used to declare structure with an array size not defined)
+< #define __ARRAY_EMPTY 1
+---
+> /// define the interrupt handler attribute for this compiler
+> #define __FIQ
+20,30c38,39
+< /// Function returns struct in registers (4 in rvds, var with gnuarm).
+< /// With Gnuarm, feature depends on command line options and
+< /// impacts ALL functions returning 2-words max structs
+< /// (check -freg-struct-return and -mabi=xxx)
+< #define __VIR
+< 
+< /// function has no side effect and return depends only on arguments
+< #define __PURE __attribute__((const))
+< 
+< /// Align instantiated lvalue or struct member on 4 bytes
+< #define __ALIGN4 __attribute__((aligned(4)))
+---
+> /// define size of an empty array (used to declare structure with an array size not defined)
+> #define __ARRAY_EMPTY
+33c42
+< #define __MODULE__ __BASE_FILE__
+---
+> #define __MODULE__ __BASENAME_FILE__

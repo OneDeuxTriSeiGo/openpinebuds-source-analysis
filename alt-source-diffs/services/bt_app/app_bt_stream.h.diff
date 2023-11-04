@@ -1,0 +1,176 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/bt_app/app_bt_stream.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/bt_app/app_bt_stream.h
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+26a26,33
+> #if defined(PLAYBACK_FORCE_48K)
+> #if defined(__3M_PACK__)
+> #define BT_AUDIO_BUFF_SBC_SIZE (1024*2*2*2)
+> #else
+> #define BT_AUDIO_BUFF_SBC_44P1K_SIZE (1024*2*2*2)
+> #define BT_AUDIO_BUFF_SBC_48K_SIZE (1024*2*2*2)
+> #endif
+> #else
+32a40
+> #endif
+37a46,54
+> #ifdef A2DP_LC3_ON
+> #define LC3_AUDIO_96K_BUFF_SIZE        (96*10*1*2*2*2)
+> #define LC3_AUDIO_BUFF_SIZE            (48*10*1*2*2*2)
+> #endif
+> 
+> #if defined(CHIP_BEST2003)
+> #define BT_AUDIO_CACHE_2_UNCACHE(addr) \
+>     addr
+> #else
+39a57
+> #endif
+70c88
+< #if defined(APP_LINEIN_A2DP_SOURCE)||defined(__APP_A2DP_SOURCE__)||(APP_I2S_A2DP_SOURCE)
+---
+> #ifdef BT_SOURCE
+72a91
+> #define APP_A2DP_SOURCE_USB_AUDIO           (1 << 13)
+74,78c93,94
+< 
+< 
+< // input streams
+< #ifdef VOICE_DATAPATH
+< #define APP_BT_STREAM_VOICEPATH             (1 << APP_BT_STREAM_BORDER_BIT_OFFSET)
+---
+> #ifdef AUDIO_PCM_PLAYER
+> #define APP_PLAY_PCM_PLAYER                 (1 << 12)
+81,82c97,100
+< #ifdef __AI_VOICE__
+< #define APP_BT_STREAM_AI_VOICE             (1 << (APP_BT_STREAM_BORDER_BIT_OFFSET+1))
+---
+> #if BLE_AUDIO_ENABLED
+> #define  APP_PLAY_BIS_LINEIN_AUDIO          (1 << 10)
+> #define  APP_PLAY_BIS_BT_AUDIO              (1 << 11)
+> #define  APP_PLAY_BIS_SINK_AUDIO            (1 << 13)
+84,86c102,110
+< 
+< #ifdef __THIRDPARTY
+< #define APP_BT_STREAM_THIRDPARTY_VOICE        (1 << (APP_BT_STREAM_BORDER_BIT_OFFSET+2))
+---
+> #ifdef AUDIO_BESAUD
+> #define APP_PLAY_BESAUD_AUDIO               (1 << 12)
+> #endif
+> #ifdef MP3_HOST
+> #define APP_PLAY_MP3_AUDIO               (1 << 13)
+> #endif
+> // input streams
+> #ifdef __AI_VOICE__
+> #define APP_BT_STREAM_AI_VOICE             (1 << APP_BT_STREAM_BORDER_BIT_OFFSET)
+90a115,117
+> #if defined(AUDIO_PROMPT_USE_DAC2_ENABLED)
+> #define APP_BT_OUTPUT_STREAM_INDEX(player)  ((player) & ((1 << APP_BT_STREAM_BORDER_BIT_OFFSET) - 1) & (~APP_PLAY_BACK_AUDIO))
+> #else
+91a119
+> #endif
+118a147
+>     uint8_t device_id;
+120a150,179
+> #if defined(TX_RX_PCM_MASK)
+> struct PCM_DATA_FLAG_T {
+>     //
+>     uint32_t curr_time;
+>     //sample2+3 [9:0]
+>     uint8_t toggle;
+>     //0: sco_frm_isr 1: sco_sket_isr
+>     uint8_t flag;
+>     //frame counter 0~0xffff
+>     uint16_t counter;
+> };
+> #elif defined(PCM_FAST_MODE) && defined(PCM_PRIVATE_DATA_FLAG)
+> struct PCM_DATA_FLAG_T {
+>     //sample1 d0220ca0[7:0]
+>     uint8_t undef;
+>     //sample2+3 [9:0]
+>     uint16_t bitcnt;
+>     //sample2+3 [15:13]
+>     uint8_t softbit_flag;
+>     //sample4+5+6+7
+>     uint32_t btclk;
+>     //sample8+9+10+11 d0220c9c[31:0]
+>     uint32_t reserved;
+>     //head_offset
+>     uint8_t offset;
+> };
+> #endif
+> 
+> const char *audio_op_to_str(enum APP_BT_SETTING_T op);
+> 
+122a182,183
+> bool bt_a2dp_is_run(void);
+> 
+139c200,202
+< void app_bt_stream_volumeup(void);
+---
+> void  app_bt_stream_bt_volumeup(void);
+> 
+> void  app_bt_stream_bt_volumedown(void);
+141c204,206
+< void app_bt_stream_volumedown(void);
+---
+> uint8_t  app_bt_stream_local_volumeup(void);
+> 
+> uint8_t  app_bt_stream_local_volumedown(void);
+176a242,244
+> bool bt_sco_codec_is_cvsd(void);
+> bool bt_sco_codec_is_msbc(void);
+> 
+186a255,256
+> typedef uint8_t (*APP_STREAM_GET_A2DP_PARAM_CALLBACK)(uint8_t);
+> 
+205,209d274
+< 
+< struct APP_RESAMPLE_T *app_capture_resample_14k7_to_16k(enum AUD_CHANNEL_NUM_T chans,
+<         APP_RESAMPLE_ITER_CALLBACK cb, uint32_t iter_len,
+<         float ratio_step, uint8_t* ptrBuf, uint32_t bufSize);
+<         
+231,233d295
+< #ifdef BONE_SENSOR_TDM
+< void bt_sco_get_tdm_buffer(uint8_t **buf, uint32_t *len);
+< #endif
+236a299,306
+> 
+> int app_bt_stream_register_a2dp_param_callback(APP_STREAM_GET_A2DP_PARAM_CALLBACK callback);
+> 
+> void app_bt_stream_volume_edge_check(void);
+> 
+> bool bt_media_cur_is_besaud_stream_media(void);
+> 
+> bool app_if_need_fix_target_rxbit(void);

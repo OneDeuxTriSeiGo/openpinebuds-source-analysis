@@ -1,0 +1,90 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/common/api/co_list.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/common/api/co_list.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+31,37d44
+< ///list type
+< enum
+< {
+<     POOL_LINKED_LIST    = 0x00,
+<     RING_LINKED_LIST,
+<     LINK_TYPE_END
+< };
+39a47
+> /*@TRACE*/
+45a54,56
+> /// simplify type name of list element header
+> typedef struct co_list_hdr co_list_hdr_t;
+> 
+63a75,83
+> /// simplify type name of list
+> typedef struct co_list co_list_t;
+> 
+> /*
+>  * MACROS
+>  ****************************************************************************************
+>  */
+> /// pop a specific element from the list
+> #define CO_LIST_POP_ELT(list, elt) co_list_extract(&(list), &(elt->hdr));
+80c100
+<  * @brief Initialize a pool to default values, and initialize the relative free list.
+---
+>  * @brief Construct a list of free elements representing a pool
+84,88c104,105
+<  * @param elmt_size      Size of one element of the pool
+<  * @param elmt_cnt       Nb of elements available in the pool
+<  * @param default_value  Pointer to the default value of each element (may be NULL)
+<  * @param list_type      Determine if the it is a ring list or not
+<  *
+---
+>  * @param elmt_size      Size of one element of the pool (in bytes)
+>  * @param elmt_cnt       Number of elements available in the pool
+94,96c111
+<                        uint32_t elmt_cnt,
+<                        void *default_value,
+<                        uint8_t list_type);
+---
+>                        uint32_t elmt_cnt);
+251c266
+< __STATIC __INLINE bool co_list_is_empty(const struct co_list *const list)
+---
+> __INLINE bool co_list_is_empty(const struct co_list *const list)
+267c282
+< __STATIC __INLINE struct co_list_hdr *co_list_pick(const struct co_list *const list)
+---
+> __INLINE struct co_list_hdr *co_list_pick(const struct co_list *const list)
+271a287,300
+> /**
+>  ****************************************************************************************
+>  * @brief Pick last element from the list without removing it.
+>  *
+>  * @param list           Pointer to the list structure.
+>  *
+>  * @return Last element address. Returns NULL pointer if the list is empty.
+>  ****************************************************************************************
+>  */
+> __INLINE struct co_list_hdr *co_list_tail(const struct co_list *const list)
+> {
+>     return(list->last);
+> }
+> 
+282c311
+< __STATIC __INLINE struct co_list_hdr *co_list_next(const struct co_list_hdr *const list_hdr)
+---
+> __INLINE struct co_list_hdr *co_list_next(const struct co_list_hdr *const list_hdr)

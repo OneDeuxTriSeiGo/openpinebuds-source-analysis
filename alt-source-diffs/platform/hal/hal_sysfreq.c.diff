@@ -1,0 +1,239 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/platform/hal/hal_sysfreq.c
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/c0502a1345f2f5b7ffc7f38b5374be0fcb42a487/bes2600/liteos_m/sdk/bsp/platform/hal/hal_sysfreq.c
+diff -sw local remote
+---
+
+1c1,5
+< /***************************************************************************
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+3,4c7
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+6,15c9,14
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+<  *
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+<  *
+<  ****************************************************************************/
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+18a18
+> #include "hal_timer.h"
+21c21,28
+< #ifndef ROM_BUILD
+---
+> 
+> #if !(defined(ROM_BUILD) || defined(CHIP_SUBSYS_SENS) || \
+>         (defined(CHIP_SUBSYS_BTH) && !defined(BTH_AS_MAIN_MCU)) || \
+>         defined(ARM_CMSE))
+> #define PMU_CTRL_ENABLE
+> #endif
+> 
+> #ifdef PMU_CTRL_ENABLE
+31c38,43
+< static enum HAL_CMU_FREQ_T BOOT_DATA_LOC min_sysfreq = HAL_CMU_FREQ_26M;
+---
+> static enum HAL_CMU_FREQ_T BOOT_DATA_LOC min_sysfreq = HAL_CMU_FREQ_32K;
+> 
+> #ifdef SYSFREQ_STATS
+> static uint32_t BOOT_BSS_LOC last_check_time;
+> static uint32_t BOOT_BSS_LOC sysfreq_intvl[HAL_SYSFREQ_USER_QTY][2];
+> #endif
+32a45,47
+> #ifdef SYSFREQ_STATS
+> BOOT_TEXT_SRAM_LOC
+> #endif
+35c50,53
+<     return freq > min_sysfreq ? freq : min_sysfreq;
+---
+>     if (freq == HAL_CMU_FREQ_32K) {
+>         freq = HAL_CMU_FREQ_26M;
+>     }
+>     return (freq > min_sysfreq) ? freq : min_sysfreq;
+57c75,77
+<     enum HAL_CMU_FREQ_T cur_sys_freq;
+---
+>     enum HAL_CMU_FREQ_T cur_freq;
+>     enum HAL_CMU_FREQ_T real_freq;
+>     enum HAL_CMU_FREQ_T real_cur_freq;
+69c89
+<     cur_sys_freq = hal_sysfreq_get();
+---
+>     cur_freq = hal_sysfreq_get();
+73c93
+<     if (freq == cur_sys_freq) {
+---
+>     if (freq == cur_freq) {
+75c95
+<     } else if (freq > cur_sys_freq) {
+---
+>     } else if (freq > cur_freq) {
+77,79c97,103
+<         freq = hal_sysfreq_revise_freq(freq);
+< #ifndef ROM_BUILD
+<         pmu_sys_freq_config(freq);
+---
+>         real_freq = hal_sysfreq_revise_freq(freq);
+>         real_cur_freq = hal_sysfreq_revise_freq(cur_freq);
+>         // It is possible that revised freq <= revised cur_freq (e.g., when cur_freq=32K)
+>         if (real_freq != real_cur_freq) {
+> #ifdef PMU_CTRL_ENABLE
+>             pmu_sys_freq_config(real_freq);
+> #endif
+82c106
+<         hal_cmu_low_freq_mode_disable(hal_sysfreq_revise_freq(cur_sys_freq), freq);
+---
+>             hal_cmu_low_freq_mode_disable(real_cur_freq, real_freq);
+83a108,116
+>             hal_cmu_sys_set_freq(real_freq);
+>         }
+> #ifdef SYSFREQ_STATS
+>         if (real_freq != real_cur_freq || cur_freq == HAL_CMU_FREQ_32K) {
+>             uint32_t idx = (cur_freq == HAL_CMU_FREQ_32K) ? cur_freq : real_cur_freq;
+>             uint32_t cur_time = hal_sys_timer_get();
+>             sysfreq_intvl[idx][0] += cur_time - last_check_time;
+>             last_check_time = cur_time;
+>         }
+85,86c118
+<         hal_cmu_sys_set_freq(freq);
+<     } else /* if (freq < cur_sys_freq) */ {
+---
+>     } else /* if (freq < cur_freq) */ {
+99,102c131,136
+<             if (freq != cur_sys_freq) {
+<                 freq = hal_sysfreq_revise_freq(freq);
+<                 hal_cmu_sys_set_freq(freq);
+< #ifndef ROM_BUILD
+---
+>             if (freq != cur_freq) {
+>                 real_freq = hal_sysfreq_revise_freq(freq);
+>                 real_cur_freq = hal_sysfreq_revise_freq(cur_freq);
+>                 // It is possible that revised freq >= revised cur_freq (e.g., when freq=32K)
+>                 if (real_freq != real_cur_freq) {
+>                     hal_cmu_sys_set_freq(real_freq);
+105c139
+<                 hal_cmu_low_freq_mode_enable(hal_sysfreq_revise_freq(cur_sys_freq), freq);
+---
+>                     hal_cmu_low_freq_mode_enable(real_cur_freq, real_freq);
+107c141,150
+<                 pmu_sys_freq_config(freq);
+---
+> #ifdef PMU_CTRL_ENABLE
+>                     pmu_sys_freq_config(real_freq);
+> #endif
+>                 }
+> #ifdef SYSFREQ_STATS
+>                 if (real_freq != real_cur_freq || freq == HAL_CMU_FREQ_32K) {
+>                     uint32_t cur_time = hal_sys_timer_get();
+>                     sysfreq_intvl[real_cur_freq][0] += cur_time - last_check_time;
+>                     last_check_time = cur_time;
+>                 }
+149c192
+< void hal_sysfreq_print(void)
+---
+> void hal_sysfreq_print_user_freq(void)
+152a196
+>     TRACE(0, "SYSFREQ USER FREQ:");
+155c199,213
+<             TRACE(2,"*** SYSFREQ user=%d freq=%d", i, sysfreq_per_user[i]);
+---
+>             TRACE(TR_ATTR_NO_TS,"\t[%2u] f=%2u", i, sysfreq_per_user[i]);
+>         }
+>     }
+>     TRACE(TR_ATTR_NO_TS,"\ttop_user=%2u", top_user);
+> }
+> 
+> #ifdef SYSFREQ_STATS
+> SRAM_TEXT_LOC
+> static uint32_t hal_sysfreq_get_freq_stats_index(void)
+> {
+>     enum HAL_CMU_FREQ_T cur_freq;
+>     uint32_t idx;
+> 
+>     if (top_user >= HAL_SYSFREQ_USER_QTY) {
+>         return HAL_CMU_FREQ_26M;
+156a215,219
+>     cur_freq = sysfreq_per_user[top_user];
+>     if (cur_freq == HAL_CMU_FREQ_32K) {
+>         idx = cur_freq;
+>     } else {
+>         idx = hal_sysfreq_revise_freq(cur_freq);
+158c221,222
+<     TRACE(1,"*** SYSFREQ top_user=%d", top_user);
+---
+> 
+>     return idx;
+159a224,279
+> 
+> SRAM_TEXT_LOC
+> void hal_sysfreq_add_freq_time(int idle, uint32_t cur_time)
+> {
+>     uint32_t idx;
+> 
+>     idx = hal_sysfreq_get_freq_stats_index();
+>     sysfreq_intvl[idx][idle ? 1 : 0] += cur_time - last_check_time;
+>     last_check_time = cur_time;
+> }
+> 
+> void hal_sysfreq_print_freq_stats(void)
+> {
+>     uint32_t total_intvl;
+>     uint32_t lock;
+>     uint32_t idx;
+>     uint32_t cur_time;
+>     uint32_t i;
+>     uint32_t ratio[2];
+> 
+>     total_intvl = 0;
+> 
+>     lock = int_lock();
+> 
+>     idx = hal_sysfreq_get_freq_stats_index();
+>     cur_time = hal_sys_timer_get();
+>     sysfreq_intvl[idx][0] += cur_time - last_check_time;
+> 
+>     for (i = 0; i < ARRAY_SIZE(sysfreq_intvl); i++) {
+>         total_intvl += sysfreq_intvl[i][0] + sysfreq_intvl[i][1];
+>     }
+> 
+>     TRACE(0, "SYSFREQ FREQ STATS:");
+> 
+>     if (total_intvl) {
+>         for (i = 0; i < ARRAY_SIZE(sysfreq_intvl); i++) {
+>             if (sysfreq_intvl[i][0] || sysfreq_intvl[i][1]) {
+>                 ratio[0] = sysfreq_intvl[i][0] * 100 / total_intvl;
+>                 ratio[1] = sysfreq_intvl[i][1] * 100 / total_intvl;
+>                 TRACE(TR_ATTR_NO_TS, "\t[%2u]: B=(%5u ms %2u%%) I=(%5u ms %2u%%)", i,
+>                     TICKS_TO_MS(sysfreq_intvl[i][0]), ratio[0],
+>                     TICKS_TO_MS(sysfreq_intvl[i][1]), ratio[1]);
+>             }
+>         }
+>     }
+> 
+>     // Reset intervals
+>     for (i = 0; i < ARRAY_SIZE(sysfreq_intvl); i++) {
+>         sysfreq_intvl[i][0] = 0;
+>         sysfreq_intvl[i][1] = 0;
+>     }
+>     last_check_time = cur_time;
+> 
+>     int_unlock(lock);
+> }
+> #endif

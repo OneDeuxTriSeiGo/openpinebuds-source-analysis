@@ -1,0 +1,167 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/ble_stack/common/api/co_endian.h
+remote: https://raw.githubusercontent.com/OneDeuxTriSeiGo/device_soc_bestechnic/521459d7e674ad3cf4d70b0faa3cb2cacd90f7b0/bes2600w/sdk_liteos/bsp/services/ble_stack_v2/modules/common/api/co_endian.h
+diff -sw local remote
+---
+
+0a1,14
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+>  *
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+>  *
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+31a46,68
+>  * @brief Swap bytes of an array of bytes
+>  * .
+>  * The swap is done in every case. Should not be called directly.
+>  *
+>  * @param[in] p_val_out The output value.
+>  * @param[in] p_val_in  The input value.
+>  *
+>  * @param[in] len       number of bytes to swap
+>  ****************************************************************************************
+>  */
+> static __INLINE void co_bswap(uint8_t* p_val_out, const uint8_t* p_val_in, uint16_t len)
+> {
+>     while (len > 0)
+>     {
+>         len--;
+>         *p_val_out = p_val_in[len];
+>         p_val_out++;
+>     }
+> }
+> /// @} CO_ENDIAN
+> 
+> /**
+>  ****************************************************************************************
+38c75
+< __STATIC __INLINE uint32_t co_bswap32(uint32_t val32)
+---
+> static __INLINE uint32_t co_bswap32(uint32_t val32)
+44a82,94
+>  * @brief Swap bytes of a 24 bits value.
+>  * The swap is done in every case. Should not be called directly.
+>  * @param[in] val24 The 24 bits value to swap.
+>  * @return The 24 bit swapped value.
+>  ****************************************************************************************
+>  */
+> static __INLINE uint32_t co_bswap24(uint32_t val24)
+> {
+>     return ((val24<<16)&0xFF0000) | ((val24)&0xFF00) | ((val24>>16)&0xFF);
+> }
+> 
+> /**
+>  ****************************************************************************************
+51c101
+< __STATIC __INLINE uint16_t co_bswap16(uint16_t val16)
+---
+> static __INLINE uint16_t co_bswap16(uint16_t val16)
+92c142
+< __STATIC __INLINE uint32_t co_htonl(uint32_t hostlong)
+---
+> static __INLINE uint32_t co_htonl(uint32_t hostlong)
+102a153,170
+>  * @brief Convert host to network long 24-bit value.
+>  *
+>  * @param[in] val24    24-bit value to convert.
+>  *
+>  * @return The converted 24-but value.
+>  ****************************************************************************************
+>  */
+> static __INLINE uint32_t co_hton24(uint32_t host24)
+> {
+>     #if (!CPU_LE)
+>         return host24;
+>     #else
+>         return co_bswap24(host24);
+>     #endif // CPU_LE
+> }
+> 
+> /**
+>  ****************************************************************************************
+110c178
+< __STATIC __INLINE uint16_t co_htons(uint16_t hostshort)
+---
+> static __INLINE uint16_t co_htons(uint16_t hostshort)
+128c196
+< __STATIC __INLINE uint32_t co_ntohl(uint32_t netlong)
+---
+> static __INLINE uint32_t co_ntohl(uint32_t netlong)
+134a203,216
+>  * @brief Convert network to host 24-bit value.
+>  *
+>  * @param[in] val24 24-bit to convert.
+>  *
+>  * @return The converted 24-bit value.
+>  ****************************************************************************************
+>  */
+> static __INLINE uint32_t co_ntoh24(uint32_t val24)
+> {
+>     return co_hton24(val24);
+> }
+> 
+> /**
+>  ****************************************************************************************
+142c224
+< __STATIC __INLINE uint16_t co_ntohs(uint16_t netshort)
+---
+> static __INLINE uint16_t co_ntohs(uint16_t netshort)
+167a250,268
+> 
+> /**
+>  ****************************************************************************************
+>  * @brief Convert Bluetooth to host 24-bit value.
+>  *
+>  * @param[in] val24 24-bit to convert.
+>  *
+>  * @return The converted 24-bit value.
+>  ****************************************************************************************
+>  */
+> static __INLINE uint32_t co_htob24(uint32_t val24)
+> {
+>     #if (CPU_LE)
+>         return val24;
+>     #else
+>         return co_hton24(val24);
+>     #endif // CPU_LE
+> }
+> 
+177c278
+< __STATIC __INLINE uint32_t co_htobl(uint32_t hostlong)
+---
+> static __INLINE uint32_t co_htobl(uint32_t hostlong)
+195c296
+< __STATIC __INLINE uint16_t co_htobs(uint16_t hostshort)
+---
+> static __INLINE uint16_t co_htobs(uint16_t hostshort)
+206a308,321
+>  * @brief Convert Bluetooth to host 24-bit value.
+>  *
+>  * @param[in] val24 24-bit to convert.
+>  *
+>  * @return The converted 24-bit value.
+>  ****************************************************************************************
+>  */
+> static __INLINE uint32_t co_btoh24(uint32_t val24)
+> {
+>     return co_htob24(val24);
+> }
+> 
+> /**
+>  ****************************************************************************************
+214c329
+< __STATIC __INLINE uint32_t co_btohl(uint32_t btlong)
+---
+> static __INLINE uint32_t co_btohl(uint32_t btlong)
+229c344
+< __STATIC __INLINE uint16_t co_btohs(uint16_t btshort)
+---
+> static __INLINE uint16_t co_btohs(uint16_t btshort)

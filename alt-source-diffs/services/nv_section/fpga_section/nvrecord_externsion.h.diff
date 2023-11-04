@@ -1,0 +1,99 @@
+local: https://raw.githubusercontent.com/pine64/OpenPineBuds/533d01aee617f24dfe9cda124fbb20b6efbe2f73/services/nv_section/fpga_section/nvrecord_externsion.h
+remote: https://raw.githubusercontent.com/alibaba/AliOS-Things/a99f20706f9c666903a12a205edce13263b1fadb/hardware/chip/haas1000/drivers/services/nv_section/fpga_section/nvrecord_externsion.h
+diff -sw local remote
+---
+
+1,8c1,5
+< /***************************************************************************
+<  *
+<  * Copyright 2015-2019 BES.
+<  * All rights reserved. All unpublished rights reserved.
+<  *
+<  * No part of this work may be used or reproduced in any form or by any
+<  * means, or stored in a database or retrieval system, without prior written
+<  * permission of BES.
+---
+> /*
+>  * Copyright (c) 2021 Bestechnic (Shanghai) Co., Ltd. All rights reserved.
+>  * Licensed under the Apache License, Version 2.0 (the "License");
+>  * you may not use this file except in compliance with the License.
+>  * You may obtain a copy of the License at
+10,13c7
+<  * Use of this work is governed by a license granted by BES.
+<  * This work contains confidential and proprietary information of
+<  * BES. which is protected by copyright, trade secret,
+<  * trademark and other intellectual property rights.
+---
+>  *     http://www.apache.org/licenses/LICENSE-2.0
+15,16c9,15
+<  ****************************************************************************/
+< #ifdef NEW_NV_RECORD_ENABLED
+---
+>  * Unless required by applicable law or agreed to in writing, software
+>  * distributed under the License is distributed on an "AS IS" BASIS,
+>  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+>  * See the License for the specific language governing permissions and
+>  * limitations under the License.
+>  */
+> #ifdef NEW_NV_RECORD_ENALBED
+22d20
+< #include "btif_sys_config.h"
+101a100
+> #ifdef IS_MULTI_AI_ENABLED
+107a107
+> #endif
+116c116
+< 
+---
+> #if defined(__TENCENT_VOICE__)
+117a118,120
+> #endif
+> 
+> #ifdef IS_MULTI_AI_ENABLED
+119a123
+> #endif
+138,142d141
+< #ifdef BTIF_DIP_DEVICE
+<     uint16_t vend_id;
+<     uint16_t vend_id_source;
+<     uint16_t reserve;
+< #endif
+155c154
+< #if defined(OTA_ENABLED)
+---
+> #if defined(GSOUND_OTA_ENABLED)&&defined(VOICE_DATAPATH)
+157,160c156,159
+<     OTA_STATUS_NONE        = 0,
+<     OTA_STAGE_ONGOING = 1,
+<     OTA_STATUS_COMPLETE    = 2,
+<     OTA_STATUS_NUM,
+---
+>     GSOUND_OTA_STATUS_NONE        = 0,
+>     GSOUND_OTA_STATUS_IN_PROGRESS = 1,
+>     GSOUND_OTA_STATUS_COMPLETE    = 2,
+>     GSOUND_OTA_STATUS_NUM,
+220c219
+< #if defined(BISTO_ENABLED)
+---
+> #if defined(GSOUND_OTA_ENABLED) && defined(VOICE_DATAPATH)
+252c251
+< #if defined(BISTO_ENABLED)
+---
+> #if defined(GSOUND_OTA_ENABLED) && defined(VOICE_DATAPATH)
+266,274d264
+< typedef union {
+<     NV_EXTENSION_RECORD_T nv_record;
+<     /*
+<      * dummy data, just make sure the mirror buffer's size is
+<      * "NV_EXTENSION_MIRROR_RAM_SIZE"
+<      */
+<     uint8_t dummy_data[NV_EXTENSION_MIRROR_RAM_SIZE];
+< } NV_MIRROR_BUF_T;
+< 
+297,298d286
+< void nv_record_execute_async_flush(void);
+< 
+315c303
+< #endif  //#if defined(NEW_NV_RECORD_ENABLED)
+---
+> #endif  //#if defined(NEW_NV_RECORD_ENALBED)
