@@ -15,10 +15,6 @@ project to assist with relicensing the project among other things.
 
 * `Contributors Identification <contributors.rst>`_
 
-  - List: Not Started
-
-  - Logs: Not Started
-
 * `Symbol or Definition Usage, Deadcode Identification, and Reachability <symbols.rst>`_
 
   - Lists: Not Started
